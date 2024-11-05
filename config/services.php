@@ -38,7 +38,7 @@ return [
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
-        'redirect' => env('LOCAL', false) ? 'http://localhost:8000/auth/google/callback' : 'https://www.pachavellam.com/auth/google/callback',
+        'redirect' => env('APP_MODE', false) ? 'http://localhost:8000/auth/google/callback' : 'https://www.pachavellam.com/auth/google/callback',
     ],
 
 ];
