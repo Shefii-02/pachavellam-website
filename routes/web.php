@@ -132,7 +132,14 @@ Route::group(['prefix'=>'admin','as'=>'admin','middleware' => ['auth']], functio
         Route::get('/', 'admin\AdminController@general_dashboard');
         Route::get('cms', 'admin\AdminController@general_dashboard');
         Route::resource('role', RoleController::class);
+        
+        Route::get('logs', 'General\LogController@index')->name('logs.index');
+        Route::get('logs/destroy_all', 'General\LogController@destroy_all')->name('logs.destroy_all');
+        Route::get('logs/{id}', 'General\LogController@show')->name('logs.show');
+        Route::get('logs/{id}/destroy', 'General\LogController@destroy')->name('logs.delete');
 
+        
+        
         
         Route::get('users', 'General\UserController@users');
         Route::post('users', 'General\UserController@users_store');
