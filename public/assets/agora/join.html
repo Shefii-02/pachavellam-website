@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="style/main.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="style/join.css">
+    
+</head>
+<body>
+    <header id="nav__top">
+        
+        <div class="nav--list">
+            <a href="">
+                <h3 id="logo">
+                    <span>INDIGITAL </span>
+                </h3>
+            </a>
+        </div>
+        <div class="nav__links">
+            <a class="nav__link" id="create__room__btn" href="create.html">
+                Create Room
+            </a>
+            <a id="member__button"  href="create.html">
+                <object data="images/plus.svg" width="24" height="24"> </object>
+            </a>
+        </div>
+    </header>
+    <main id="join__container">
+       <div id="form__container">
+            <div id="form__conatiner__header">
+                <p>👋 Join Room</p>
+
+            </div>
+            <form id="lobby__form">
+                <div class="form__field__wrapper">
+                    <label>Your Name</label>
+                    <input type="text" name="name" placeholder="Enter your name..." required/>
+                </div>
+                <!-- <div class="form__field__wrapper">
+                    <label>Room Name</label>
+                    <input type="text" name="room" placeholder="Enter room name..." required/>
+                </div> -->
+                
+                <div class="form__field__wrapper">
+                    <label>Select Avatar</label>
+                    <div id="avatar__selection">
+                        <img src="images/1.png" class="avatar__option">
+                        <img src="images/2.png" class="avatar__option">
+                        <img src="images/3.png" class="avatar__option">
+                        <img src="images/4.jpg" class="avatar__option">
+                        <img src="images/5.png" class="avatar__option">
+                        <img src="images/6.jfif" class="avatar__option">
+                        <img src="images/7.jfif" class="avatar__option">
+                    </div>
+                </div>
+                <div class="form__field__wrapper">
+                    <input type="submit" name="submit" value="Join Room">
+                </div>  
+            </form>
+       </div>
+    </main>
+</body>
+<script src="script/agora-rtm-sdk-1.5.1.js"></script>
+<script src="script/join.js" type="module"></script>
+</html>

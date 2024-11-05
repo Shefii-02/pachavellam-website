@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IN DIGITAL COMMUNITY</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="style/main.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="style/join.css">
+    <style>
+        #rooms_container{
+            margin-top: 20px;
+            border: 1px solid #555;
+            border-radius: 9px;
+            height: 200px;
+        }
+        #rooms_container .room_item{
+
+            margin: 40px;
+
+
+        }
+        #rooms_container .room_item a{
+            color: beige;
+        }
+    </style>
+</head>
+<body>
+    <header id="nav__top">
+        
+        <div class="nav--list">
+            <a href="">
+                <h3 id="logo">
+                    <span>IN DIGITAL </span>
+                </h3>
+            </a>
+        </div>
+        <div class="nav__links">
+            <a class="nav__link" id="create__room__btn" href="create.html">
+                Create Room
+            </a>
+            <a id="member__button"  href="create.html">
+                <object data="images/plus.svg" width="24" height="24"> </object>
+            </a>
+        </div>
+    </header>
+    <main id="join__container">
+       <div id="form__container">
+            <div id="form__conatiner__header">
+                <p>👋 Join Community</p>
+                <div id="rooms_container">
+
+                </div>
+            </div>
+     
+       </div>
+    </main>
+</body>
+<script src="script/agora-rtm-sdk-1.5.1.js"></script>
+<script src="script/index.js" type="module"></script>
+</html>

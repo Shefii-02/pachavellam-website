@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="style/main.css">
+    <link rel="stylesheet" type="text/css" media="screen" href="style/room.css">
+    
+</head>
+<body>
+    <header id="nav__top">
+        
+        <div class="nav--list">
+            <a href="">
+                <h3 id="logo">
+                    <span>INDIGITAL</span>
+                </h3>
+            </a>
+        </div>
+        <div class="nav__links">
+            <a class="nav__link" id="create__room__btn" href="index.html">
+                Leave Room
+            </a>
+            <a id="member__button"  href="index.html">
+                <object data="images/plus.svg" width="24" height="24"> </object>
+            </a>
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="room__container">
+            <section id="member__container">
+                <div id="member__header">
+                    <p>Participants</p>
+                    <p id="member__count">0</p>
+                </div>
+                <div id="member__list">
+                    
+                </div>
+             </section>
+            <section id="messages__container">
+                
+                <div id="messages">
+                    
+                </div>
+                <form  id="message__form">
+                    <input type="text" placeholder="Type something..." required name="message" >
+                </form>
+            </section>
+        </div>
+    </main>
+</body>
+<script src="script/agora-rtm-sdk-1.5.1.js"></script>
+<script src="script/room.js" type="module"></script>
+</html>
