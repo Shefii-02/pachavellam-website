@@ -349,7 +349,7 @@ class HomeController extends Controller
     public function psc_syllabus(){
         $title = 'Psc Syllabus';
         $redirection = url('kpsc');
-        $syllabus_type = Syllabus::groupBy('type')->orderBy('created_at','desc')->get('type'); 
+        $syllabus_type = Syllabus::groupBy('type')->get('type'); 
         return view('kpsc.psc-syllabus',compact('syllabus_type','title','redirection'));
     }
 
