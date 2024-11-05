@@ -289,7 +289,7 @@ class HomeController extends Controller
     public function daily_ca_sub($year){
         $title = 'Daily Current Affairs-'.$year;
         $redirection = url('kpsc/psc-daily-current-affairs');
-        $daily_ca_month = CurrentAffairs::where('year',$year)->groupBy('month')->orderBy('created_at')->get('month');
+        $daily_ca_month = CurrentAffairs::where('year',$year)->groupBy('month')->get('month');
         $daily_ca_month = $daily_ca_month->map(function ($item) {
             $monthNumber = date('m', strtotime($item['month']));
             $item['month_number'] = $monthNumber;
