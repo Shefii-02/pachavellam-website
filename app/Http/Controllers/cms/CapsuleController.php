@@ -57,7 +57,7 @@ class CapsuleController extends Controller
         $caps->status = 1;
         $caps->save();
        
-        
+           
         if($request->type == 'Image'){
             $image = file_get_contents($request->image);
             $name = Str::random(40).'.png';
