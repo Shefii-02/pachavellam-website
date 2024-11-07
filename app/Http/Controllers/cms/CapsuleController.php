@@ -62,7 +62,7 @@ class CapsuleController extends Controller
             $image = file_get_contents($request->image);
             $name = 'Capsule-'.Str::random(40).'.png';
             Storage::put('/public/files/capsule/'.$name, $image);
-            $caps->image = '/capsule/'.$name; 
+            $caps->image = 'capsule/'.$name; 
             $caps->position = $caps->id;
 
         }
