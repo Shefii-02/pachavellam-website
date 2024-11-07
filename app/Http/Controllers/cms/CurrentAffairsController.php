@@ -107,7 +107,7 @@ class CurrentAffairsController extends Controller
         $name1 = Str::random(40).'.pdf';
         
         $image1 = file_get_contents($request->file('file'));
-        Storage::put('/public/files'.$name1, $image1);
+   
 
         $daily_ca = new CurrentAffairs;
         $daily_ca->year = $request->year; 
@@ -235,8 +235,8 @@ class CurrentAffairsController extends Controller
 
                 $name1 = Str::random(40).'.pdf';
                 $image1 = file_get_contents($request->file('file'));
-                Storage::put('/public/files'.$name1, $image1);
-                Storage::delete('/public/'.$daily_ca->file_name);
+
+                Storage::delete('/public/files/'.$daily_ca->file_name);
                 $daily_ca->file_name = $name1;
                 $daily_ca->save();
             }
@@ -267,7 +267,7 @@ class CurrentAffairsController extends Controller
     {
         //
         $bnr = $currentAffairs->where('id',$id)->first();
-        Storage::delete('/public/'.$bnr->file_name);
+        Storage::delete('/public/files/'.$bnr->file_name);
         $bnr->delete();
 
         

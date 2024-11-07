@@ -49,7 +49,7 @@ class SyllabusController extends Controller
         $name = Str::random(40).'.pdf';
         
         $image = file_get_contents($request->file('file'));
-        Storage::put('/public/files'.$name, $image);
+       
 
         $syllabus_new  =  new Syllabus;
         $syllabus_new->type= $request->type;
@@ -106,7 +106,7 @@ class SyllabusController extends Controller
     {
         //
         $bnr = $syllabus->where('id',$id)->first();
-        Storage::delete('/public/'.$bnr->file_name);
+        Storage::delete('/public/files/'.$bnr->file_name);
         $bnr->delete();
 
         

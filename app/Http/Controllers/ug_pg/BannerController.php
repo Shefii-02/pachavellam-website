@@ -56,7 +56,7 @@ class BannerController extends Controller
         $image = file_get_contents($request->image);
         $name = Str::random(40).'.png';
         
-        Storage::put('/public/files'.$name, $image);
+    
         			
         $banner = new Banner;
         $banner->image = $name;
@@ -155,9 +155,9 @@ class BannerController extends Controller
             $image  = file_get_contents($request->image);
             $name   = Str::random(40).'.png';
             
-            Storage::put('/public/files'.$name, $image);
+       
             
-            Storage::delete('/public/'.$banners->image);
+            Storage::delete('/public/files/'.$banners->image);
             $banners->image = $name;
             $banners->save();
         }
@@ -186,7 +186,7 @@ class BannerController extends Controller
         
         $bnr->delete();
 
-        Storage::delete('/public/'.$bnr->image);
+        Storage::delete('/public/files/'.$bnr->image);
         return redirect()->back()->with('message','Data Deleted Successfully');
 
     }

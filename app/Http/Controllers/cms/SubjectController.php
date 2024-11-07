@@ -27,7 +27,7 @@ class SubjectController extends Controller
         if($request->has('image')){
             $image = file_get_contents($request->image);
             $name = Str::random(40).'.png';
-            Storage::put('/public/files'.$name, $image);
+  
         }	
         
         
@@ -101,9 +101,9 @@ class SubjectController extends Controller
                 $image  = file_get_contents($request->image);
                 $name   = Str::random(40).'.png';
                 
-                Storage::put('/public/files'.$name, $image);
+             
                 
-                Storage::delete('/public/'.$subject->image);
+                Storage::delete('/public/files/'.$subject->image);
                 $subject->image = $name;
                 $subject->save();
             }
@@ -148,7 +148,7 @@ class SubjectController extends Controller
         if($request->has('image')){
             $image = file_get_contents($request->image);
             $name = Str::random(40).'.png';
-            Storage::put('/public/files'.$name, $image);
+ 
         }	
         
         
@@ -226,9 +226,9 @@ class SubjectController extends Controller
                 $image  = file_get_contents($request->image);
                 $name   = Str::random(40).'.png';
                 
-                Storage::put('/public/files'.$name, $image);
+              
                 
-                Storage::delete('/public/'.$subject->image);
+                Storage::delete('/public/files/'.$subject->image);
                 $subject->image = $name;
                 $subject->save();
             }

@@ -48,8 +48,7 @@ class SpecialTabController extends Controller
         $image = file_get_contents($request->image);
         $name = Str::random(40).'.png';
         
-        Storage::put('/public/files'.$name, $image);
-        			
+   
 
         $special_tab = new SpecialTab;
         $special_tab->image =  $name;
@@ -138,9 +137,9 @@ class SpecialTabController extends Controller
             $image  = file_get_contents($request->image);
             $name   = Str::random(40).'.png';
             
-            Storage::put('/public/files'.$name, $image);
+        
             
-            Storage::delete('/public/'.$special_tab->image);
+            Storage::delete('/public/files/'.$special_tab->image);
             $special_tab->image = $name;
             $special_tab->save();
         }
@@ -168,7 +167,7 @@ class SpecialTabController extends Controller
         
         $bnr->delete();
 
-        Storage::delete('/public/'.$bnr->image);
+        Storage::delete('/public/files/'.$bnr->image);
         return redirect()->route('adminkpsc.special-tab.index')->with('message','Data Deleted Successfully');
     }
 }

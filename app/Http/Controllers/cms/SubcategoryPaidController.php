@@ -53,7 +53,7 @@ class SubcategoryPaidController extends Controller
         $image = file_get_contents($request->image);
         $name = Str::random(40).'.png';
         
-        Storage::put('/public/files'.$name, $image);
+        
         	
         	
 
@@ -113,9 +113,9 @@ class SubcategoryPaidController extends Controller
          //     $image  = file_get_contents($request->image);
          //     $name   = Str::random(40).'.png';
              
-         //     Storage::put('/public/files'.$name, $image);
+         //     Storage::put('/public/files/'.$name, $image);
              
-         //     Storage::delete('/public/'.$category->image);
+         //     Storage::delete('/public/files/'.$category->image);
          //     $category->image = $name;
          //     $category->save();
          // }
@@ -142,7 +142,7 @@ class SubcategoryPaidController extends Controller
         //
         $bnr = $subcategoryPaid->where('id',$id)->first();
         
-        Storage::delete('/public/'.$bnr->image);
+        Storage::delete('/public/files/'.$bnr->image);
         $bnr->delete();
 
         return redirect()->route('kpsc/cms.paid_subcategory_class.index')->with('message','Data Deleted Successfully');

@@ -61,7 +61,7 @@ class CapsuleController extends Controller
         if($request->type == 'Image'){
             $image = file_get_contents($request->image);
             $name = Str::random(40).'.png';
-            Storage::put('/public/files'.$name, $image);
+    
             $caps->image = $name; 
             $caps->position = $caps->id;
 
@@ -118,7 +118,7 @@ class CapsuleController extends Controller
     {
         //
         $bnr = $capsule->where('id',$id)->first();
-        Storage::delete('/public/'.$bnr->image);
+        Storage::delete('/public/files/'.$bnr->image);
         $bnr->delete();
         CapsuleComment::where('cap_id',$id)->delete();
         CapsuleLike::where('cap_id',$id)->delete();
