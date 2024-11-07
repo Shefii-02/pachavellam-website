@@ -35,12 +35,17 @@ class ModelExamController extends Controller
         if($request->hasFile('qstn_file')){   
             $name1 = Str::random(40).'.pdf';
             $image1 = file_get_contents($request->file('qstn_file'));
-            Storage::put('/public/model-exam/'.$name1, $image1);
+         
+            Storage::put('/model-exam/'.$name1, $image1);
+           
+           
         }
         if($request->hasFile('ans_file')){
             $name2 = Str::random(40).'.pdf';
             $image2 = file_get_contents($request->file('ans_file'));
-            Storage::put('/public/model-exam/'.$name2, $image2);
+
+            Storage::disk('public')->put('/model-exam/'.$name2, $image2);
+
         }
       
             $new_one  = new DailyExam();
