@@ -64,7 +64,7 @@ class PscnewsController extends Controller
         $image = file_get_contents($request->image);
         $name = Str::random(40).'.png';
         
-
+        Storage::put('/public/files/'.$name, $image);
         //
         $psc_news               = new Pscnews;
         $psc_news->title        = $request->title;

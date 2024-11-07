@@ -53,7 +53,7 @@ class SubcategoryPaidController extends Controller
         $image = file_get_contents($request->image);
         $name = Str::random(40).'.png';
         
-        
+        Storage::put('/public/files/'.$name, $image);
         	
         	
 

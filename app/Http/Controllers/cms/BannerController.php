@@ -56,7 +56,7 @@ class BannerController extends Controller
         $image = file_get_contents($request->image);
         $name = Str::random(40).'.png';
         
-        
+        Storage::put('/public/files/'.$name, $image);
         			
         $banner = new Banner;
         $banner->image = $name;
@@ -153,7 +153,7 @@ class BannerController extends Controller
             $image  = file_get_contents($request->image);
             $name   = Str::random(40).'.png';
             
- 
+            Storage::put('/public/files/'.$name, $image);
             
             Storage::delete('/public/files/'.$banners->image);
             $banners->image = $name;

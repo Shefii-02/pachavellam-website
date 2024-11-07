@@ -52,12 +52,12 @@ class PrevQuestionController extends Controller
         
         if($request->hasFile('qstn_file')){
         $image1 = file_get_contents($request->file('qstn_file'));
-
+        Storage::put('/public/files/'.$name1, $image1);
         }
         if($request->hasFile('ans_file')){
         $name2 = Str::random(40).'.pdf';
         $image2 = file_get_contents($request->file('ans_file'));
-
+        Storage::put('/public/files/'.$name2, $image2);
         }
         $prevqstn = new PrevQuestion;
         $prevqstn->category = $request->category;
@@ -119,14 +119,14 @@ class PrevQuestionController extends Controller
              Storage::delete('/public/files/'.$prevqstn->qstn_paper);
             $name1 = Str::random(40).'.pdf';
             $image1 = file_get_contents($request->file('qstn_file'));
-    
+            Storage::put('/public/files/'.$name1, $image1);
             $prevqstn->qstn_paper = $name1;
         }
         if($request->hasFile('ans_file')){
             $name2 = Str::random(40).'.pdf';
             Storage::delete('/public/files/'.$prevqstn->ans_key);
             $image2 = file_get_contents($request->file('ans_file'));
-         
+            Storage::put('/public/files/'.$name2, $image2);
             $prevqstn->ans_key = $name2;
         }
 
