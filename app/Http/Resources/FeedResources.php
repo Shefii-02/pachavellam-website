@@ -30,7 +30,7 @@ class FeedResources extends JsonResource
 
         return [
             'id' => $this->id,
-            'image' => url(Storage::url($this->image)),
+            'image' => url(Storage::url('files/'.$this->image)),
             'type' => $this->type,
             'tag' => $this->tag,
             'position' => $this->position,

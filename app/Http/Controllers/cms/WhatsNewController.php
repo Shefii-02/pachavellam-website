@@ -50,7 +50,7 @@ class WhatsNewController extends Controller
         $image = file_get_contents($request->image);
         $name = Str::random(40).'.png';
         
-        Storage::put('/public/'.$name, $image);
+        Storage::put('/public/files'.$name, $image);
         			
 
         $whatsnews = new WhatsNew;
@@ -91,7 +91,7 @@ class WhatsNewController extends Controller
                         <div class="col-md-12">
                             <div class="text-center justify-content-center align-items-center p-4 p-sm-5 border border-2 border-dashed position-relative rounded-3">
                                 <!-- Image -->
-                                <img src="'.Storage::url($whats_new->image).'" id="uploaded-image" class="uploaded-image h-50px mb-2" alt="">
+                                <img src="'.Storage::url('files/'.$whats_new->image).'" id="uploaded-image" class="uploaded-image h-50px mb-2" alt="">
                                 <div>
                                     <label style="cursor:pointer;">
                                         <span> 
@@ -164,7 +164,7 @@ class WhatsNewController extends Controller
             $image  = file_get_contents($request->image);
             $name   = Str::random(40).'.png';
             
-            Storage::put('/public/'.$name, $image);
+            Storage::put('/public/files'.$name, $image);
             
             Storage::delete('/public/'.$whatsnews->image);
 

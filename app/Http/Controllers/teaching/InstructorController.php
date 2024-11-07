@@ -46,7 +46,7 @@ class InstructorController extends Controller
             $file = $request->file('file');
             $name1 = Str::random(40).'.'.$file->getClientOriginalExtension();
             $image1 = file_get_contents($file);
-            Storage::put('/public/ug-pg/material/'.$name1, $image1);
+            Storage::put('/public/filesug-pg/material/'.$name1, $image1);
             $add_new->content           = $name1;
         }
         
@@ -86,7 +86,7 @@ class InstructorController extends Controller
                 $file = $request->file('file');
                 $name1 = Str::random(40).'.'.$file->getClientOriginalExtension();
                 $image1 = file_get_contents($file);
-                Storage::put('/public/ug-pg/material/'.$name1, $image1);
+                Storage::put('/public/filesug-pg/material/'.$name1, $image1);
                 $add_new->content           = $name1;
             }
         }

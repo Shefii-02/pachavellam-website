@@ -133,7 +133,7 @@
               <!-- Single Hero Slide-->
            
                 <div  style="">
-                       <a href="{{$list->redirection}}" target="_new"><img  src="{{ Storage::url($list->image) }}" class="w-100 rounded-5">
+                       <a href="{{$list->redirection}}" target="_new"><img  src="{{ Storage::url('files/'.$list->image) }}" class="w-100 rounded-5">
                         </a>
                   <!-- Background Shape-->
                <a href="{{$list->redirection}}" target="_new" class="btn   w-100 rounded-end" >More Details</a>
@@ -164,7 +164,7 @@
           <div class="single-editorial-slide">
             <div class="card catagory-card border-0">
                 <a href="{{url('kpsc/news/'.$news->id)}}">
-                    <div class="news-bg" style="background:url('{{ Storage::url($news->image) }}'); background-size:     cover;background-repeat:   no-repeat;background-position: center center;    height:200px"></div>
+                    <div class="news-bg" style="background:url('{{ Storage::url('files/'.$news->image) }}'); background-size:     cover;background-repeat:   no-repeat;background-position: center center;    height:200px"></div>
              
               </a> <h6 class="text_limit m-2 text-center text-light news-text">{{$news->title}}</h6>
             </div>
@@ -403,7 +403,7 @@
                                       <div class="single-trending-post1 p-2">
                                           <div class="post-thumbnail1 text-center"> 
                                             <a class="post-title1" @if( $whatsnew_list->target == 1) target="_new" @endif style="color:{{$whatsnew_list->text_color}};font-size:1rem;" href="{{$whatsnew_list->redirection}}">  
-                                                <img src="{{ Storage::url($whatsnew_list->image) }}" alt="{{$whatsnew_list->title}}"  class="mt-3 w-25">
+                                                <img src="{{ Storage::url('files/'.$whatsnew_list->image) }}" alt="{{$whatsnew_list->title}}"  class="mt-3 w-25">
                                             </a>
                                           </div> 
                                           <div class="post-content1 p-3 text-center">
@@ -453,7 +453,7 @@
                         <div class="parent ">
                             
                                 <div class="child">
-                                  <img width="100%"  src="{{ Storage::url($list->image) }}">
+                                  <img width="100%"  src="{{ Storage::url('files/'.$list->image) }}">
                                 </div>
                                 <p class="text-child">{{$list->subject_title}}</p>
                            
@@ -477,7 +477,7 @@
             @foreach ($banner as $banner_list)
               <!-- Single Hero Slide-->
               <a href="{{$banner_list->redirection}}">
-                <div class="single-hero-slide" style="background-image: url('{{ Storage::url($banner_list->image) }}')">
+                <div class="single-hero-slide" style="background-image: url('{{ Storage::url('files/'.$banner_list->image) }}')">
                   <!-- Background Shape-->
                   <div class="background-shape">
                     <div class="circle2"></div>

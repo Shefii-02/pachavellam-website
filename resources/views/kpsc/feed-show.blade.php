@@ -343,7 +343,7 @@
                             @if($list->type == 'Image')
                             <div class="card-image instagram" >
                                  <i class="fa fa-heart"></i>
-                                <img src="{{ Storage::url($list->image) }}" alt="product-img" class="feed_like like-button"  data-id="{{$list->id}}">
+                                <img src="{{ Storage::url('files/'.$list->image) }}" alt="product-img" class="feed_like like-button"  data-id="{{$list->id}}">
                                
                             </div>
                             @else

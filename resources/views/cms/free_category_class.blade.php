@@ -96,7 +96,7 @@
                                     <div class="d-flex align-items-center">
                                         <!-- Image -->
                                         <div class="w-100px">
-                                            <img src="{{ Storage::url($list->image) }}" class="rounded" alt="">
+                                            <img src="{{ Storage::url('files/'.$list->image) }}" class="rounded" alt="">
                                         </div>
                                         
                                     </div>
@@ -117,7 +117,7 @@
                                 <!-- Table data -->
                                 <td>
                                     @can('Psc Free Class Category edit')
-                                    <a href="#" data-position="{{$list->position}}" data-category="{{$list->category_name}}"  data-image="{{ url(Storage::url($list->image)) }}"  data-id="{{$list->id}}" class="btn btn-sm btn-info me-1 reset-banner"><i class="bi bi-pencil me-1"></i>Reset</a>
+                                    <a href="#" data-position="{{$list->position}}" data-category="{{$list->category_name}}"  data-image="{{ url(Storage::url('files/'.$list->image)) }}"  data-id="{{$list->id}}" class="btn btn-sm btn-info me-1 reset-banner"><i class="bi bi-pencil me-1"></i>Reset</a>
                                     @endcan
                                     @can('Psc Free Class Category delete')
                                     <a  data-id="{{$list->id}}" href="{{route('adminkpsc.free_category.delete', $list->id)}}" class="btn btn-sm btn-danger me-1"><i class="bi bi-trash me-1"></i>Delete</a>

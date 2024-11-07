@@ -16,13 +16,13 @@
           <!-- Single Trending Post-->
           <div class="single-trending-post d-flex">
             <div class="post-content">
-              <a class="post-title" href="{{ Storage::url($list->file_name) }}" download="{{$list->title}}">
+              <a class="post-title" href="{{ Storage::url('files/'.$list->file_name) }}" download="{{$list->title}}">
                 {{$list->title}}
               </a>
               
             </div>
             <div class="post-thumbnail text-right">
-              <a  href="{{ Storage::url($list->file_name) }}" download="{{$list->title}}">
+              <a  href="{{ Storage::url('files/'.$list->file_name) }}" download="{{$list->title}}">
                 <img src="{{url('psc/img/download-png.png')}}" alt="">
               </a>
             </div>

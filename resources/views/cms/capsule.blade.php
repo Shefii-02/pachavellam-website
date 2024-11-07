@@ -116,7 +116,7 @@
                                     <div class="d-flex align-items-center">
                                         <!-- Image -->
                                         <div class="w-100px">
-                                            <img src="{{ Storage::url($list->image) }}" class="rounded" alt="">
+                                            <img src="{{ Storage::url('files/'.$list->image) }}" class="rounded" alt="">
                                         </div>
                                     </div>
                                     @else

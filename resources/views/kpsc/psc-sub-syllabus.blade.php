@@ -41,17 +41,17 @@ target='_blank' class="sharer button"><i class="fa fa-2x fa-whatsapp text-succes
           <!-- Single Trending Post-->
           <div class="single-trending-post d-flex">
             <div class="post-content">
-              <a class="post-title" href="{{ Storage::url($list->file_name) }}" download="{{$list->title}}">
+              <a class="post-title" href="{{ Storage::url('files/'.$list->file_name) }}" download="{{$list->title}}">
                 {{$list->title}}
               </a>
               <div class="post-meta d-flex align-items-center">
-                <a  href="{{ Storage::url($list->file_name) }}" download="{{$list->title}}">
+                <a  href="{{ Storage::url('files/'.$list->file_name) }}" download="{{$list->title}}">
                     <i class="fa fa-arrow-right"></i>   {{$list->category_no}}               
                 </a>
               </div>
             </div>
             <div class="post-thumbnail text-right">
-              <a  href="{{ Storage::url($list->file_name) }}" download="{{$list->title}}">
+              <a  href="{{ Storage::url('files/'.$list->file_name) }}" download="{{$list->title}}">
                 <img src="{{url('psc/img/download-png.png')}}" alt="">
               </a>
             </div>

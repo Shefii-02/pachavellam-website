@@ -106,7 +106,7 @@
                                         </td>
                                         <!-- Table data -->
                                         <td>
-                                            @if($list->file_name != null)<a target="_new" href="{{ Storage::url($list->file_name) }}">Open</a> @else {{ '---'}}  @endif                               
+                                            @if($list->file_name != null)<a target="_new" href="{{ Storage::url('files/'.$list->file_name) }}">Open</a> @else {{ '---'}}  @endif                               
                                         </td>
                                         <!-- Table data -->
                                         <td>

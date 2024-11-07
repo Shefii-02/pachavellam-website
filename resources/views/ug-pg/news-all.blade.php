@@ -55,7 +55,7 @@
                         <div class="col-md-4 col-12 ">
                             <div class="card specialvideos">
                             <a class=" w-100" href="{{ug_pg('news/'.$news->id)}}">
-                                <img src="{{ Storage::url($news->image) }}" alt="">
+                                <img src="{{ Storage::url('files/'.$news->image) }}" alt="">
                             <h6 class="text_limit">{{$news->title}}</h6></a></div>
                         </div>
                     @endforeach

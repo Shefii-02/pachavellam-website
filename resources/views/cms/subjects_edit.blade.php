@@ -38,7 +38,7 @@
                             <div class="col-md-5">
                                 <div class="text-center justify-content-center align-items-center p-4 p-sm-5 border border-2 border-dashed position-relative rounded-3">
                                     <!-- Image -->
-                                    <img  src="{{ Storage::url($subject->image) }}" id="uploaded-image" class="uploaded-image h-50px mb-2" alt="">
+                                    <img  src="{{ Storage::url('files/'.$subject->image) }}" id="uploaded-image" class="uploaded-image h-50px mb-2" alt="">
                                     <div>
                                         <label style="cursor:pointer;">
                                             <span> 

@@ -116,7 +116,7 @@
                                     <div class="d-flex align-items-center">
                                         <!-- Image -->
                                         <div class="w-100px">
-                                            <img src="{{ Storage::url($news_list->image) }}" class="rounded" alt="">
+                                            <img src="{{ Storage::url('files/'.$news_list->image) }}" class="rounded" alt="">
                                         </div>
                                         
                                     </div>
@@ -139,7 +139,7 @@
                                 <td>
                                     @can('Psc News edit')
                                     @if($news_list->type == 'Text')
-                                    <a data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Reset" aria-label="Reset"  href="#" data-title="{{$news_list->title}}" data-date="{{$news_list->post_date}}" data-image="{{ url(Storage::url($news_list->image)) }}" data-content="{{$news_list->description}}" data-id="{{$news_list->id}}" class="btn btn-sm btn-info  reset-banner btn-circle"><i class="bi bi-pencil"></i></a>
+                                    <a data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Reset" aria-label="Reset"  href="#" data-title="{{$news_list->title}}" data-date="{{$news_list->post_date}}" data-image="{{ url(Storage::url('files/'.$news_list->image)) }}" data-content="{{$news_list->description}}" data-id="{{$news_list->id}}" class="btn btn-sm btn-info  reset-banner btn-circle"><i class="bi bi-pencil"></i></a>
                                     @endif
                                     @endcan
                                     @can('Psc News delete')

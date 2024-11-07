@@ -49,7 +49,7 @@ class PscresultsController extends Controller
         $name = Str::random(40).'.pdf';
         
         $image = file_get_contents($request->file('file'));
-        Storage::put('/public/'.$name, $image);
+        Storage::put('/public/files'.$name, $image);
 
         $result_new  =  new Pscresults;
         $result_new->type= str_replace('-',' ',$request->type);

@@ -16,7 +16,7 @@
                 <!-- Catagory Card-->
                 <div class="col-lg-3 col-sm-3 col-sm-6 col-6 card catagory-card">
                 <a href="{{url('kpsc/premium/sub/'.$list->name_slug)}}">
-                    <img src="{{ Storage::url($list->image) }}" alt="{{$list->subcategory_name}}" class="w-100">
+                    <img src="{{ Storage::url('files/'.$list->image) }}" alt="{{$list->subcategory_name}}" class="w-100">
                     <h6>{{$list->subcategory_name}}</h6>
                 </a>
                 </div>

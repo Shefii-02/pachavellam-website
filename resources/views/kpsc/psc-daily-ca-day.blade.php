@@ -56,7 +56,7 @@
                                                 @else
                                                     <i class="fa fa-video-camera"> </i>  
                                                 @endif
-                                               <a target="_new" @if($list->type == 'Pdf') download="{!! $list->title !!}.pdf" href="{{ Storage::url($list->file_name) }}" @else  href="{!! $list->file_name  !!}" @endif>{!! $list->title !!}</a>
+                                               <a target="_new" @if($list->type == 'Pdf') download="{!! $list->title !!}.pdf" href="{{ Storage::url('files/'.$list->file_name) }}" @else  href="{!! $list->file_name  !!}" @endif>{!! $list->title !!}</a>
                                             </h2>
                                         </div>
                                       </div>
@@ -93,7 +93,7 @@
                                                 @else
                                                     <i class="fa fa-video-camera"> </i>  
                                                 @endif
-                                               <a target="_new" @if($list->type == 'Pdf') download="{!! $list->title !!}.pdf" href="{{ Storage::url($list->file_name) }}" @else  href="{!! $list->file_name  !!}" @endif>{!! $list->title !!}</a>
+                                               <a target="_new" @if($list->type == 'Pdf') download="{!! $list->title !!}.pdf" href="{{ Storage::url('files/'.$list->file_name) }}" @else  href="{!! $list->file_name  !!}" @endif>{!! $list->title !!}</a>
                                             </h2>
                                         </div>
                                       </div>

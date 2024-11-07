@@ -48,7 +48,7 @@ class SpecialTabController extends Controller
         $image = file_get_contents($request->image);
         $name = Str::random(40).'.png';
         
-        Storage::put('/public/'.$name, $image);
+        Storage::put('/public/files'.$name, $image);
         			
 
         $special_tab = new SpecialTab;
@@ -89,7 +89,7 @@ class SpecialTabController extends Controller
                             <div class="col-md-12">
                                 <div class="text-center justify-content-center align-items-center p-4 p-sm-5 border border-2 border-dashed position-relative rounded-3">
                                     <!-- Image -->
-                                    <img src="'.Storage::url($special_tab->image).'" id="uploaded-image" class="uploaded-image h-50px mb-2" alt="">
+                                    <img src="'.Storage::url('files/'.$special_tab->image).'" id="uploaded-image" class="uploaded-image h-50px mb-2" alt="">
                                     <div>
                                         <label style="cursor:pointer;">
                                             <span> 
@@ -138,7 +138,7 @@ class SpecialTabController extends Controller
             $image  = file_get_contents($request->image);
             $name   = Str::random(40).'.png';
             
-            Storage::put('/public/'.$name, $image);
+            Storage::put('/public/files'.$name, $image);
             
             Storage::delete('/public/'.$special_tab->image);
             $special_tab->image = $name;

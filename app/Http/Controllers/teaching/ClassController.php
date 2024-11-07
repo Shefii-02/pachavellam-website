@@ -356,7 +356,7 @@ class ClassController extends Controller
             $file = $request->file('file');
             $name1 = Str::random(40).'.'.$file->getClientOriginalExtension();
             $image1 = file_get_contents($file);
-            Storage::put('/public/ug-pg/question-paper/'.$name1, $image1);
+            Storage::put('/public/filesug-pg/question-paper/'.$name1, $image1);
             $add_new->content           = $name1;
         }
        
@@ -399,7 +399,7 @@ class ClassController extends Controller
                 $file = $request->file('file');
                 $name1 = Str::random(40).'.'.$file->getClientOriginalExtension();
                 $image1 = file_get_contents($file);
-                Storage::put('/public/ug-pg/question-paper/'.$name1, $image1);
+                Storage::put('/public/filesug-pg/question-paper/'.$name1, $image1);
                 $add_new->content           = $name1;
             }
         }
@@ -450,7 +450,7 @@ class ClassController extends Controller
             $file = $request->file('file');
             $name1 = Str::random(40).'.'.$file->getClientOriginalExtension();
             $image1 = file_get_contents($file);
-            Storage::put('/public/ug-pg/material/'.$name1, $image1);
+            Storage::put('/public/filesug-pg/material/'.$name1, $image1);
             $add_new->content           = $name1;
         }
         
@@ -490,7 +490,7 @@ class ClassController extends Controller
                 $file = $request->file('file');
                 $name1 = Str::random(40).'.'.$file->getClientOriginalExtension();
                 $image1 = file_get_contents($file);
-                Storage::put('/public/ug-pg/material/'.$name1, $image1);
+                Storage::put('/public/filesug-pg/material/'.$name1, $image1);
                 $add_new->content           = $name1;
             }
         }
@@ -558,7 +558,7 @@ class ClassController extends Controller
 
         $name = Str::random(40).'.pdf';
         $image = file_get_contents($request->file('file'));
-        Storage::put('/public/syllabus/'.$name, $image);
+        Storage::put('/public/filessyllabus/'.$name, $image);
         
         $add_new                    =    new Syllabus;
         $add_new->university_name   =    $request->university;

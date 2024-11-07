@@ -161,7 +161,7 @@
                                 <!-- Table data -->
                                 <td>
                                   
-                                 {{--   <a data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Reset" aria-label="Reset"  href="#" data-title="{{$list->title}}" data-date="{{$list->post_date}}" data-image="{{ url(Storage::url($list->image)) }}" data-content="{{$list->description}}" data-id="{{$list->id}}" class="btn btn-sm btn-info  reset-banner btn-circle"><i class="bi bi-pencil"></i></a>
+                                 {{--   <a data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Reset" aria-label="Reset"  href="#" data-title="{{$list->title}}" data-date="{{$list->post_date}}" data-image="{{ url(Storage::url('files/'.$list->image)) }}" data-content="{{$list->description}}" data-id="{{$list->id}}" class="btn btn-sm btn-info  reset-banner btn-circle"><i class="bi bi-pencil"></i></a>
                                  --}}
                                     <a data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete" aria-label="Delete"   data-id="{{$list->id}}" href="{{route('adminkpsc.daily-buckets.delete', $list->id)}}" class="btn btn-sm btn-danger  btn-circle"><i class="bi bi-trash "></i></a>
                                  

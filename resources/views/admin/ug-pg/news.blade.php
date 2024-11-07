@@ -102,7 +102,7 @@
                                     <div class="d-flex align-items-center">
                                         <!-- Image -->
                                         <div class="w-100px">
-                                            <img src="{{ Storage::url($news_list->image) }}" class="rounded" alt="">
+                                            <img src="{{ Storage::url('files/'.$news_list->image) }}" class="rounded" alt="">
                                         </div>
                                         
                                     </div>
@@ -123,7 +123,7 @@
 
                                 <!-- Table data -->
                                 <td>
-                                    <a href="#" data-title="{{$news_list->title}}" data-date="{{$news_list->post_date}}" data-image="{{ url(Storage::url($news_list->image)) }}" data-content="{{$news_list->description}}" data-id="{{$news_list->id}}" class="btn btn-sm btn-info me-1 reset-banner"><i class="bi bi-pencil me-1"></i>Reset</a>
+                                    <a href="#" data-title="{{$news_list->title}}" data-date="{{$news_list->post_date}}" data-image="{{ url(Storage::url('files/'.$news_list->image)) }}" data-content="{{$news_list->description}}" data-id="{{$news_list->id}}" class="btn btn-sm btn-info me-1 reset-banner"><i class="bi bi-pencil me-1"></i>Reset</a>
                                     <a  data-id="{{$news_list->id}}" href="{{ug_pg_cms('news/delete/'.$news_list->id)}}" class="btn btn-sm btn-danger me-1"><i class="bi bi-trash me-1"></i>Delete</a>
                                 </td>
                             </tr>

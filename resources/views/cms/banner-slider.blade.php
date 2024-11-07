@@ -90,7 +90,7 @@
                                     <div class="d-flex align-items-center">
                                         <!-- Image -->
                                         <div class="w-100px">
-                                            <img src="{{ Storage::url($banner_list->image) }}" class="rounded" alt="">
+                                            <img src="{{ Storage::url('files/'.$banner_list->image) }}" class="rounded" alt="">
                                         </div>
                                         
                                     </div>

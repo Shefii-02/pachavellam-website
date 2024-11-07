@@ -115,7 +115,7 @@
               <!-- Catagory Card-->
               <div class="col-lg-3 col-sm-3 col-sm-6 col-6  catagory-card">
                 <a href="{{url('kpsc/free/'.$list->name_slug)}}">
-                    <img src="{{ Storage::url($list->image) }}" alt="{{$list->category_name}}" class="w-100">
+                    <img src="{{ Storage::url('files/'.$list->image) }}" alt="{{$list->category_name}}" class="w-100">
                     <h6>{{$list->category_name}}</h6>
                 </a>
               </div>
@@ -129,7 +129,7 @@
               <!-- Catagory Card-->
               <div class="col-lg-3 col-sm-3 col-sm-6 col-6 catagory-card mt-1">
                 <a href="{{url('kpsc/premium/'.$list->name_slug)}}">
-                  <img src="{{ Storage::url($list->image) }}" alt="{{$list->category_name}}" class="w-100">
+                  <img src="{{ Storage::url('files/'.$list->image) }}" alt="{{$list->category_name}}" class="w-100">
                   <h6>{{$list->category_name}}</h6>
                 </a>
               </div>

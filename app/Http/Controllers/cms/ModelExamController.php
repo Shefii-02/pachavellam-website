@@ -117,7 +117,7 @@ class ModelExamController extends Controller
                         $image1 = file_get_contents($request->file('qstn_file'));
                     
                         // Store the new file
-                        Storage::put('/public/model-exam/' . $name1, $image1);
+                        Storage::put('/public/filesmodel-exam/' . $name1, $image1);
                     
                         // Update the model with the new file name
                         $new_two->qp_file = $name1;
@@ -136,7 +136,7 @@ class ModelExamController extends Controller
                         $image2 = file_get_contents($request->file('ans_file'));
                     
                         // Store the new file
-                        Storage::put('/public/model-exam/' . $name2, $image2);
+                        Storage::put('/public/filesmodel-exam/' . $name2, $image2);
                     
                         // Update the model with the new file name
                         $new_two->answer_file = $name2;

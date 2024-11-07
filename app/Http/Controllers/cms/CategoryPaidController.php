@@ -52,7 +52,7 @@ class CategoryPaidController extends Controller
         $image = file_get_contents($request->image);
         $name = Str::random(40).'.png';
         
-        Storage::put('/public/'.$name, $image);
+        Storage::put('/public/files'.$name, $image);
         			
         $category = new CategoryPaid;
         $category->image = $name;
@@ -110,7 +110,7 @@ class CategoryPaidController extends Controller
         //     $image  = file_get_contents($request->image);
         //     $name   = Str::random(40).'.png';
             
-        //     Storage::put('/public/'.$name, $image);
+        //     Storage::put('/public/files'.$name, $image);
             
         //     Storage::delete('/public/'.$category->image);
         //     $category->image = $name;

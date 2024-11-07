@@ -61,7 +61,7 @@
                         <a href="{{url('kpsc/subject/'.$category_name.'/'.$list->slug_name)}}">
                     <div class="parent ">
                             <div class="child">
-                              <img width="100%"  src="{{ Storage::url($list->image) }}">
+                              <img width="100%"  src="{{ Storage::url('files/'.$list->image) }}">
                             </div>
                             <p class="text-child">{{$list->subject_title}}</p>
                     </div>

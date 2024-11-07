@@ -53,7 +53,7 @@ class MaterialController extends Controller
         $name = Str::random(40).'.pdf';
         
         $image = file_get_contents($request->file('file'));
-        Storage::put('/public/'.$name, $image);
+        Storage::put('/public/files'.$name, $image);
 
         $material_new = new Material;
         $material_new->type = $request->category;

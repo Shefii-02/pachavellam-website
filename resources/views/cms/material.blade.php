@@ -97,7 +97,7 @@
                                 
                                 <td>{{$list->subject_title}}</td>
                                 <td>{{$list->title}}</td>
-                                <td><a href="{{ Storage::url($list->file_name) }}" target="_new">Open</a></td>
+                                <td><a href="{{ Storage::url('files/'.$list->file_name) }}" target="_new">Open</a></td>
                                 <td>{{$list->date}}</td>
                                 <!-- Table data -->
                                 <td>

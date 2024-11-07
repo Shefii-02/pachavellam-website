@@ -54,7 +54,7 @@
                         <div class="col-md-4 col-6 ">
                             <div class="card specialvideos">
                             <a class=" w-100" href="{{url('kpsc/news/'.$news->id)}}">
-                                <img src="{{ Storage::url($news->image) }}" alt="">
+                                <img src="{{ Storage::url('files/'.$news->image) }}" alt="">
                             <h6 class="text_limit">{{$news->title}}</h6></a></div>
                         </div>
                              {!! ads_space_sport($key) !!}

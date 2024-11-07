@@ -39,7 +39,7 @@
             @foreach ($banner as $banner_list)
               <!-- Single Hero Slide-->
               <a href="#">
-                <div class="single-hero-slide" style="background-image: url('{{ Storage::url($banner_list->image) }}')">
+                <div class="single-hero-slide" style="background-image: url('{{ Storage::url('files/'.$banner_list->image) }}')">
                   <!-- Background Shape-->
                   <div class="background-shape">
                     <div class="circle2"></div>
@@ -342,7 +342,7 @@
           <div class="single-editorial-slide ">
             <div class="card catagory-card">
                 <a href="{{ug_pg('news/'.$news->id)}}">
-              <img src="{{ Storage::url($news->image) }}" alt="">
+              <img src="{{ Storage::url('files/'.$news->image) }}" alt="">
               <h6 class="text_limit">{{$news->title}}</h6></a>
             </div>
           </div>

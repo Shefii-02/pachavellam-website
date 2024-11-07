@@ -105,7 +105,7 @@
         @foreach ($banner as $banner_list)
           <!-- Single Hero Slide-->
           <a href="{{$banner_list->redirection}}">
-            <div class="single-hero-slide" style="background-image: url('{{ Storage::url($banner_list->image) }}')">
+            <div class="single-hero-slide" style="background-image: url('{{ Storage::url('files/'.$banner_list->image) }}')">
               <!-- Background Shape-->
               <div class="background-shape">
                 <div class="circle2"></div>
@@ -298,7 +298,7 @@
                         <div  style="background:{{$whatsnew_list->bg_color}};color:{{$whatsnew_list->text_color}};border-radius:9px;">
                           <div class="single-trending-post1 p-2">
                               <div class="post-thumbnail1 text-center"> 
-                                <img src="{{ Storage::url($whatsnew_list->image) }}" alt="{{$whatsnew_list->title}}" class="w-25">
+                                <img src="{{ Storage::url('files/'.$whatsnew_list->image) }}" alt="{{$whatsnew_list->title}}" class="w-25">
                               </div> 
                               <div class="post-content1 p-3 text-center">
                                 <a class="post-title1" style="color:{{$whatsnew_list->text_color}};font-size:1rem;" href="{{$whatsnew_list->redirection}}">  
@@ -337,7 +337,7 @@
                         <div class="col-sm-12 col-md-6">
                             <div class=" mt-3">
                                 <a class="post-title rounded" href="{{$list->redirection}}">
-                                  <div class="post-thumbnail"><img src="{{ Storage::url($list->image) }}" alt=""></div>
+                                  <div class="post-thumbnail"><img src="{{ Storage::url('files/'.$list->image) }}" alt=""></div>
                                 </a>
                             </div>
                         </div>
@@ -376,7 +376,7 @@
                 <div class="parent ">
                     <a href="{{url('kpsc/subject/'.$list->name_slug)}}">
                         <div class="child">
-                          <img width="100%"  src="{{ Storage::url($list->image) }}">
+                          <img width="100%"  src="{{ Storage::url('files/'.$list->image) }}">
                         </div>
                         <p class="text-child">{{$list->category_name}}</p>
                     </a>
@@ -459,7 +459,7 @@
           <div class="single-editorial-slide ">
             <div class="card catagory-card">
                 <a href="{{url('kpsc/news/'.$news->id)}}">
-              <img src="{{ Storage::url($news->image) }}" alt="">
+              <img src="{{ Storage::url('files/'.$news->image) }}" alt="">
               <h6 class="text_limit">{{$news->title}}</h6></a>
             </div>
           </div>
