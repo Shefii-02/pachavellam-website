@@ -27,7 +27,7 @@ class SubjectController extends Controller
         if($request->has('image')){
             $image = file_get_contents($request->image);
             $name = Str::random(40).'.png';
-            Storage::put('/public/files/'.$name, $image);
+            Storage::put('/public/files/category/'.$name, $image);
         }	
         
         
@@ -35,7 +35,7 @@ class SubjectController extends Controller
         $subject->subject_title = $request->subject_name;
         $subject->bg_color      = $request->bg_color;
         $subject->text_color    = $request->text_color;
-        $subject->image         = $name;
+        $subject->image         = 'category/'.$name;
         $subject->slug_name     = Str::slug($request->subject_name);
         $subject->type          = 'parent';
         $subject->status        = 1;
@@ -101,10 +101,10 @@ class SubjectController extends Controller
                 $image  = file_get_contents($request->image);
                 $name   = Str::random(40).'.png';
                 
-                Storage::put('/public/files/'.$name, $image);
+                Storage::put('/public/files/category/'.$name, $image);
                 
                 Storage::delete('/public/files/'.$subject->image);
-                $subject->image = $name;
+                $subject->image = 'category/'.$name;
                 $subject->save();
             }
             
@@ -148,7 +148,7 @@ class SubjectController extends Controller
         if($request->has('image')){
             $image = file_get_contents($request->image);
             $name = Str::random(40).'.png';
-            Storage::put('/public/files/'.$name, $image);
+            Storage::put('/public/files/category/'.$name, $image);
         }	
         
         
@@ -156,7 +156,7 @@ class SubjectController extends Controller
         $subject->subject_title = $request->subject_name;
         $subject->bg_color      = $request->bg_color;
         $subject->text_color    = $request->text_color;
-        $subject->image         = $name;
+        $subject->image         = 'category/'.$name;
         $subject->slug_name     = Str::slug($request->subject_name);
         $subject->parent_id     = $request->parent;
         $subject->type          = 'child';
@@ -226,10 +226,10 @@ class SubjectController extends Controller
                 $image  = file_get_contents($request->image);
                 $name   = Str::random(40).'.png';
                 
-                Storage::put('/public/files/'.$name, $image);
+                Storage::put('/public/files/category/'.$name, $image);
                 
                 Storage::delete('/public/files/'.$subject->image);
-                $subject->image = $name;
+                $subject->image = 'category/'.$name;
                 $subject->save();
             }
             

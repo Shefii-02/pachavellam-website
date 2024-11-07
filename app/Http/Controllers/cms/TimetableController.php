@@ -41,7 +41,7 @@ class TimetableController extends Controller
         //
         $name = Str::random(40).'.pdf';
         $image = file_get_contents($request->file('file'));
-        Storage::put('/public/filestime-table/'.$name, $image);
+        Storage::put('/public/time-table/'.$name, $image);
         
         $new_one = new Timetable;
         $new_one->title = $request->title;

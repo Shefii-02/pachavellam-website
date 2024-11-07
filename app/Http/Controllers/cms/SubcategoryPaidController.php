@@ -53,12 +53,12 @@ class SubcategoryPaidController extends Controller
         $image = file_get_contents($request->image);
         $name = Str::random(40).'.png';
         
-        Storage::put('/public/files/'.$name, $image);
+        Storage::put('/public/files/category/'.$name, $image);
         	
         	
 
         $subcategory = new SubcategoryPaid;
-        $subcategory->image = $name;
+        $subcategory->image = 'category/'.$name;
         $subcategory->category_id = $request->category_name;
         $subcategory->subcategory_name = $request->subcategory_name;
         $subcategory->name_slug = Str::slug($request->subcategory_name);

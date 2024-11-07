@@ -49,14 +49,14 @@ class SyllabusController extends Controller
         $name = Str::random(40).'.pdf';
         
         $image = file_get_contents($request->file('file'));
-        Storage::put('/public/files/'.$name, $image);
+        Storage::put('/public/files/syllabus/'.$name, $image);
 
         $syllabus_new  =  new Syllabus;
         $syllabus_new->type= $request->type;
         $syllabus_new->title = $request->title;
         $syllabus_new->category_no = $request->category_no;
         $syllabus_new->date = $request->post_date;
-        $syllabus_new->file_name = $name;
+        $syllabus_new->file_name = 'syllabus/'.$name;
         $syllabus_new->save();
 
         return redirect()->route('adminkpsc.syllabus.index')->with('message','Data added Successfully');

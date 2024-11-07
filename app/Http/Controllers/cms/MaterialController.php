@@ -53,13 +53,13 @@ class MaterialController extends Controller
         $name = Str::random(40).'.pdf';
         
         $image = file_get_contents($request->file('file'));
-        Storage::put('/public/files/'.$name, $image);
+        Storage::put('/public/files/material/'.$name, $image);
 
         $material_new = new Material;
         $material_new->type = $request->category;
         $material_new->title = $request->title;
         $material_new->date = $request->post_date;
-        $material_new->file_name = $name;
+        $material_new->file_name = 'material/'.$name;
         $material_new->save();
         return redirect()->route('adminkpsc.material.index')->with('message','Data added Successfully');
 

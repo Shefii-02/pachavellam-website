@@ -52,10 +52,10 @@ class CategoryPaidController extends Controller
         $image = file_get_contents($request->image);
         $name = Str::random(40).'.png';
         
-        Storage::put('/public/files/'.$name, $image);
+        Storage::put('/public/files/category/'.$name, $image);
         			
         $category = new CategoryPaid;
-        $category->image = $name;
+        $category->image = 'category/'.$name;
         $category->category_name = $request->category_name;
         $category->name_slug = Str::slug($request->category_name);
         $category->status = 1;
@@ -139,7 +139,7 @@ class CategoryPaidController extends Controller
         //
         $bnr = $categoryPaid->where('id',$id)->first();
         
-        Storage::delete('/public/files/'.$bnr->image);
+        Storage::delete('/public/files/category/'.$bnr->image);
         $bnr->delete();
 
         return redirect()->route('kpsc/cms.paid_category_class.index')->with('message','Data Deleted Successfully');

@@ -22,11 +22,10 @@ class PrevQuestionController extends Controller
     public function index()
     {
         //
-        $prev_qstn     = PrevQuestion::Orderby('id','desc')->get();
+        $prev_qstn     = PrevQuestion::Orderby('id', 'desc')->get();
         $category      = PrevQuestion::distinct('category')->select('category')->get();
         $sub_category  = PrevQuestion::distinct('subcategory')->select('subcategory')->get();
-        return view('cms.prev-qstn', compact('prev_qstn','category','sub_category'));
-
+        return view('cms.prev-qstn', compact('prev_qstn', 'category', 'sub_category'));
     }
 
     /**
@@ -48,27 +47,26 @@ class PrevQuestionController extends Controller
     public function store(Request $request)
     {
         //
-        $name1 = Str::random(40).'.pdf';
-        
-        if($request->hasFile('qstn_file')){
-        $image1 = file_get_contents($request->file('qstn_file'));
-        Storage::put('/public/files/'.$name1, $image1);
+        $name1 = Str::random(40) . '.pdf';
+
+        if ($request->hasFile('qstn_file')) {
+            $image1 = file_get_contents($request->file('qstn_file'));
+            Storage::put('/public/files/question-papers/' . $name1, $image1);
         }
-        if($request->hasFile('ans_file')){
-        $name2 = Str::random(40).'.pdf';
-        $image2 = file_get_contents($request->file('ans_file'));
-        Storage::put('/public/files/'.$name2, $image2);
+        if ($request->hasFile('ans_file')) {
+            $name2 = Str::random(40) . '.pdf';
+            $image2 = file_get_contents($request->file('ans_file'));
+            Storage::put('/public/files/question-papers/' . $name2, $image2);
         }
         $prevqstn = new PrevQuestion;
         $prevqstn->category = $request->category;
         $prevqstn->subcategory = $request->subcategory;
         $prevqstn->title = $request->title;
-        $prevqstn->qstn_paper = $name1;
-        $prevqstn->ans_key = $name2;
+        $prevqstn->qstn_paper = 'question-papers/' . $name1;
+        $prevqstn->ans_key = 'question-papers/' . $name2;
         $prevqstn->save();
 
-        return redirect()->route('adminkpsc.prev-qstn.index')->with('message','Data added Successfully');
-
+        return redirect()->route('adminkpsc.prev-qstn.index')->with('message', 'Data added Successfully');
     }
 
     /**
@@ -77,10 +75,10 @@ class PrevQuestionController extends Controller
      * @param  \App\Models\PrevQuestion  $prevQuestion
      * @return \Illuminate\Http\Response
      */
-    public function show(PrevQuestion $prevQuestion,$id)
+    public function show(PrevQuestion $prevQuestion, $id)
     {
-        
-        
+
+
         //
     }
 
@@ -90,13 +88,13 @@ class PrevQuestionController extends Controller
      * @param  \App\Models\PrevQuestion  $prevQuestion
      * @return \Illuminate\Http\Response
      */
-    public function edit(PrevQuestion $prevQuestion,$id)
+    public function edit(PrevQuestion $prevQuestion, $id)
     {
         //
-        $prev_qstn     = PrevQuestion::where('id',$id)->first() ?? abort(404);
+        $prev_qstn     = PrevQuestion::where('id', $id)->first() ?? abort(404);
         $category      = PrevQuestion::distinct('category')->select('category')->get();
         $sub_category  = PrevQuestion::distinct('subcategory')->select('subcategory')->get();
-        return view('cms.prev-qstn-edit', compact('prev_qstn','category','sub_category'));
+        return view('cms.prev-qstn-edit', compact('prev_qstn', 'category', 'sub_category'));
     }
 
     /**
@@ -106,33 +104,32 @@ class PrevQuestionController extends Controller
      * @param  \App\Models\PrevQuestion  $prevQuestion
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request,$id)
+    public function update(Request $request, $id)
     {
         //
-         //
-        					
-        $prevqstn = PrevQuestion::where('id',$id)->first() ?? abort(404);
+        //
+
+        $prevqstn = PrevQuestion::where('id', $id)->first() ?? abort(404);
         $prevqstn->category = $request->category;
         $prevqstn->subcategory = $request->subcategory;
         $prevqstn->title = $request->title;
-        if($request->hasFile('qstn_file')){
-             Storage::delete('/public/files/'.$prevqstn->qstn_paper);
-            $name1 = Str::random(40).'.pdf';
+        if ($request->hasFile('qstn_file')) {
+            Storage::delete('/public/files/' . $prevqstn->qstn_paper);
+            $name1 = Str::random(40) . '.pdf';
             $image1 = file_get_contents($request->file('qstn_file'));
-            Storage::put('/public/files/'.$name1, $image1);
-            $prevqstn->qstn_paper = $name1;
+            Storage::put('/public/files/' . $name1, $image1);
+            $prevqstn->qstn_paper = 'question-papers/'.$name1;
         }
-        if($request->hasFile('ans_file')){
-            $name2 = Str::random(40).'.pdf';
-            Storage::delete('/public/files/'.$prevqstn->ans_key);
+        if ($request->hasFile('ans_file')) {
+            $name2 = Str::random(40) . '.pdf';
+            Storage::delete('/public/files/' . $prevqstn->ans_key);
             $image2 = file_get_contents($request->file('ans_file'));
-            Storage::put('/public/files/'.$name2, $image2);
-            $prevqstn->ans_key = $name2;
+            Storage::put('/public/files/' . $name2, $image2);
+            $prevqstn->ans_key = 'question-papers/'.$name2;
         }
 
-            $prevqstn->save();
-        return redirect()->route('adminkpsc.prev-qstn.index')->with('message','Data updated Successfully');
-
+        $prevqstn->save();
+        return redirect()->route('adminkpsc.prev-qstn.index')->with('message', 'Data updated Successfully');
     }
 
     /**
@@ -141,17 +138,17 @@ class PrevQuestionController extends Controller
      * @param  \App\Models\PrevQuestion  $prevQuestion
      * @return \Illuminate\Http\Response
      */
-    public function delete(PrevQuestion $prevQuestion,$id)
+    public function delete(PrevQuestion $prevQuestion, $id)
     {
         //
-         //
-         $bnr = $prevQuestion->where('id',$id)->first();
-         Storage::delete('/public/files/'.$bnr->qstn_paper);
-         Storage::delete('/public/files/'.$bnr->ans_key);
+        //
+        $bnr = $prevQuestion->where('id', $id)->first();
+        Storage::delete('/public/files/' . $bnr->qstn_paper);
+        Storage::delete('/public/files/' . $bnr->ans_key);
 
-         $bnr->delete();
- 
-         
-         return redirect()->route('adminkpsc.prev-qstn.index')->with('message','Data Deleted Successfully');
+        $bnr->delete();
+
+
+        return redirect()->route('adminkpsc.prev-qstn.index')->with('message', 'Data Deleted Successfully');
     }
 }

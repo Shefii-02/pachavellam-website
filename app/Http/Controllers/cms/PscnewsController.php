@@ -23,9 +23,8 @@ class PscnewsController extends Controller
     {
         //
         $psc_news = Pscnews::get();
-      
+
         return view('cms.psc-news', compact('psc_news'));
-       
     }
 
     /**
@@ -47,7 +46,7 @@ class PscnewsController extends Controller
     public function store(Request $request)
     {
 
-        
+
         if ($request->hasFile('file') && $request->type == 'Pdf') {
             $file = $request->file('file');
 
@@ -55,32 +54,29 @@ class PscnewsController extends Controller
             $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
 
             // Move the file to the storage directory
-            $file->storeAs('public/news/', $fileName);
-
-
+            $file->storeAs('public/files/news/', $fileName);
         }
-        
-        
+
+
         $image = file_get_contents($request->image);
-        $name = Str::random(40).'.png';
-        
-        Storage::put('/public/files/'.$name, $image);
+        $name = Str::random(40) . '.png';
+
+        Storage::put('/public/files/news/' . $name, $image);
         //
         $psc_news               = new Pscnews;
         $psc_news->title        = $request->title;
         $psc_news->slug         = Str::slug($request->title);
         $psc_news->type         = $request->type;
         $psc_news->post_date    = $request->date;
-        $psc_news->image        = $name;
+        $psc_news->image        = 'news/' . $name;
         $psc_news->status       = 1;
-        $psc_news->description  = $request->type == 'Pdf' ? $fileName : $request->content;
+        $psc_news->description  = $request->type == 'Pdf' ? 'news/'.$fileName : $request->content;
         $psc_news->save();
         $psc_news->position     = $psc_news->id;
         $psc_news->save();
 
-       
-        return redirect()->route('adminkpsc.psc-news.index')->with('message','Data added Successfully');
-        
+
+        return redirect()->route('adminkpsc.psc-news.index')->with('message', 'Data added Successfully');
     }
 
     /**
@@ -115,20 +111,20 @@ class PscnewsController extends Controller
     public function update_pscnews(Request $request, Pscnews $pscnews)
     {
         //
-        $psc_news = $pscnews->where('id',$request->id)->first();
+        $psc_news = $pscnews->where('id', $request->id)->first();
 
- 
-            // $image  = file_get_contents($request->image);
-            // $name   = Str::random(40).'.png';
-           
-            // Storage::put('/public/files/'.$name, $image);
-            
-            // Storage::delete('/public/files/'.$psc_news->image);
-            // $psc_news->image = $name;
-            // $psc_news->save();
-        
-            
-             
+
+        // $image  = file_get_contents($request->image);
+        // $name   = Str::random(40).'.png';
+
+        // Storage::put('/public/files/'.$name, $image);
+
+        // Storage::delete('/public/files/'.$psc_news->image);
+        // $psc_news->image = $name;
+        // $psc_news->save();
+
+
+
         if ($request->hasFile('file') && $request->type == 'Pdf') {
             $file = $request->file('file');
 
@@ -136,23 +132,18 @@ class PscnewsController extends Controller
             $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
 
             // Move the file to the storage directory
-            $file->storeAs('public/news/', $fileName);
-
-
+            $file->storeAs('public/files/news/', $fileName);
         }
-        
+
         $psc_news->slug         = Str::slug($request->title);
         $psc_news->type         = $request->type;
         $psc_news->title        = $request->title;
         $psc_news->post_date    = $request->date;
         $psc_news->status       = 1;
-        $psc_news->description  = $request->type == 'Pdf' ? $fileName : $request->content;
+        $psc_news->description  = $request->type == 'Pdf' ? 'news/'.$fileName : $request->content;
         $psc_news->save();
 
-        return redirect()->route('adminkpsc.psc-news.index')->with('message','Data Updated Successfully');
-
-
-
+        return redirect()->route('adminkpsc.psc-news.index')->with('message', 'Data Updated Successfully');
     }
 
     /**
@@ -161,15 +152,14 @@ class PscnewsController extends Controller
      * @param  \App\Models\Pscnews  $pscnews
      * @return \Illuminate\Http\Response
      */
-    public function delete(Pscnews $pscnews,$id)
+    public function delete(Pscnews $pscnews, $id)
     {
         //
-        $del_news = $pscnews->where('id',$id)->first();
-        
-        Storage::delete('/public/files/'.$del_news->image);
+        $del_news = $pscnews->where('id', $id)->first();
+
+        Storage::delete('/public/files/' . $del_news->image);
         $del_news->delete();
 
-        return redirect()->route('adminkpsc.psc-news.index')->with('message','Data Deleted Successfully');
-
+        return redirect()->route('adminkpsc.psc-news.index')->with('message', 'Data Deleted Successfully');
     }
 }

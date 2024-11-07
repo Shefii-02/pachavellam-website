@@ -48,11 +48,11 @@ class SpecialTabController extends Controller
         $image = file_get_contents($request->image);
         $name = Str::random(40).'.png';
         
-        Storage::put('/public/files/'.$name, $image);
+        Storage::put('/public/files/special/'.$name, $image);
         			
 
         $special_tab = new SpecialTab;
-        $special_tab->image =  $name;
+        $special_tab->image =  'special/'.$name;
         $special_tab->redirection =   $request->redirection;
         $special_tab->save();
 
@@ -138,10 +138,10 @@ class SpecialTabController extends Controller
             $image  = file_get_contents($request->image);
             $name   = Str::random(40).'.png';
             
-            Storage::put('/public/files/'.$name, $image);
+            Storage::put('/public/files/special/'.$name, $image);
             
             Storage::delete('/public/files/'.$special_tab->image);
-            $special_tab->image = $name;
+            $special_tab->image = 'special/'.$name;
             $special_tab->save();
         }
         

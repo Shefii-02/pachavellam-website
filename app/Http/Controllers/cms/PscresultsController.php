@@ -49,12 +49,12 @@ class PscresultsController extends Controller
         $name = Str::random(40).'.pdf';
         
         $image = file_get_contents($request->file('file'));
-        Storage::put('/public/files/'.$name, $image);
+        Storage::put('/public/files/results/'.$name, $image);
 
         $result_new  =  new Pscresults;
         $result_new->type= str_replace('-',' ',$request->type);
         $result_new->title = $request->title;
-        $result_new->file_name = $name;
+        $result_new->file_name = 'results/'.$name;
         $result_new->save();
 
         return redirect()->route('adminkpsc.psc-results.index')->with('message','Data added Successfully');

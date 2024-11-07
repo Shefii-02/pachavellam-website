@@ -51,13 +51,13 @@ class TodayBucketController extends Controller
             $file = $request->file('pdf_file');
             $name1 = Str::random(40).'.'.$file->getClientOriginalExtension();
             $image1 = file_get_contents($file);
-            Storage::put('/public/filesdaily-buckets/'.$name1, $image1);
+            Storage::put('/public/daily-buckets/'.$name1, $image1);
         }
         else if($request->type == 'Voice Msg'){
             $file = $request->file('voice_file');
             $name1 = Str::random(40).'.'.$file->getClientOriginalExtension();
             $image1 = file_get_contents($file);
-            Storage::put('/public/filesdaily-buckets/'.$name1, $image1);
+            Storage::put('/public/daily-buckets/'.$name1, $image1);
         }
         else if($request->type == "Link"){
            $name1 =  $request->link;
