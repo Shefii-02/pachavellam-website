@@ -24,7 +24,7 @@ class SubjectCategoryResources extends JsonResource
             'slug_name'     => $this->slug_name,
             'description'   => $this->description ?? $this->subject_title.' Subject related more details available our website please click below link',
             'bg_color'      => $this->bg_color,
-            'image'         => url('storage/'.$this->image),
+            'image'         => url('storage/files/'.$this->image),
             'type'          => $this->type,
             'parent_id'     => $this->parent_id,
             'position'      => $this->position,

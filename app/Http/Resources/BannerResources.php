@@ -19,7 +19,7 @@ class BannerResources extends JsonResource
         return [
            
             'id' => $this->id,
-            'image' => url('storage/'.$this->image),
+            'image' => url('storage/files/'.$this->image),
             'redirection' => $this->redirection,
             'title' => $this->title ?? null,
             'description' => $this->description ?? 'More about this course please click below link',

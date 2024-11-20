@@ -21,7 +21,7 @@ class SyllabusResources extends JsonResource
             'type' => $this->type,
             'title' => $this->title,
             'category_no' => $this->category_no,
-            'file_name' => url('storage/'.$this->file_name),
+            'file_name' => url('storage/files/'.$this->file_name),
             'download' => $this->download,
             'position' => $this->position,
             'date' => $this->date,

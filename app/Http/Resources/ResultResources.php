@@ -20,7 +20,7 @@ class ResultResources extends JsonResource
             'id' => $this->id,
             'title' => $this->title,
             'type' => $this->type,
-            'file_name' => url('storage/'.$this->file_name),
+            'file_name' => url('storage/files/'.$this->file_name),
             'download' => $this->download,
             'position' => $this->position,
             'status' => $this->status,
