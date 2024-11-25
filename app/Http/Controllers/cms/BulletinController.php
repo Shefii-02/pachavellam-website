@@ -47,7 +47,7 @@ class BulletinController extends Controller
     {
      
         $name = 'Psc-bullet-'.date("Y-M", strtotime($request->month)).'-Issued-'.$request->issue.'.pdf';
-        
+        dd($request->all());
         $image = file_get_contents($request->file('file'));
         Storage::put('/public/bullet-in/'.$name, $image);
 
