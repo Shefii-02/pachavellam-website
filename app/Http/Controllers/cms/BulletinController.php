@@ -22,7 +22,7 @@ class BulletinController extends Controller
     public function index()
     {
         //
-        $bulletin = Bulletin::orderBy('desc')->get();
+        $bulletin = Bulletin::orderBy('id','desc')->get();
       
         return view('cms.psc-bulletin', compact('bulletin'));
     }
