@@ -183,7 +183,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <form action="/kpsc/banner-slider/update-slider" method="POST">
+        <form action="/admin/kpsc/banner-slider/update-slider" method="POST">
             <div class="modal-body">
                 
                     @csrf()

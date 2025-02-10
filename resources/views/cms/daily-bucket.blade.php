@@ -192,7 +192,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <form action="/kpsc/psc-news/update-pscnews" method="POST">
+        <form action="/admin/kpsc/psc-news/update-pscnews" method="POST">
             <div class="modal-body">
                 
                     @csrf()

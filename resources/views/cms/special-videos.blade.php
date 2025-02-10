@@ -164,7 +164,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <form action="/kpsc/special-videos/update-spclvideos" method="POST">
+        <form action="/admin/kpsc/special-videos/update-spclvideos" method="POST">
             <div class="modal-body">
                 
                     @csrf()

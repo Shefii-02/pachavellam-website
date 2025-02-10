@@ -161,7 +161,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <form action="/kpsc/special-tab/update-specialtab" method="POST">
+        <form action="/admin/kpsc/special-tab/update-specialtab" method="POST">
             <div class="modal-body">
                 
                     @csrf()
