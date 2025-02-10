@@ -119,7 +119,7 @@ class HomeController extends Controller
    
         $title = "Kerala PSC ".$sub_category ;
         $redirection = url('kpsc/subject/'.$category_name);
-        $kpsc_activity = KpscActivities::get();
+        $kpsc_activity = KpscActivities::where('kpsc_activities.status','show')->get();
         
         $subject_dtls      = KpscSubject::where('slug_name',$category_name)->where('type','parent')->first();
      
