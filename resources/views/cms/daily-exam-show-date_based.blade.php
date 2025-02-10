@@ -24,7 +24,8 @@
                                     
                                     
                                     
-                                    <a  href="#" data-date="{{$date_list->exam_date}}"  data-started="{{date('Y-m-dTH:i',strtotime($date_list->started_at))}}" data-id="{{$date_list->id}}"  data-ended="{{date('Y-m-dTH:i',strtotime($date_list->ended_at))}}" data-title="{{$date_list->examtitle}}" data-subject="{{$date_list->subject}}" class="btn btn-info mb-2 exam_details_edit btn-sm float-left">
+                                    <a  href="#" data-date="{{$date_list->exam_date}}"  data-started="{{ date('Y-m-d\TH:i', strtotime($date_list->started_at)) }}" 
+                                        data-ended="{{ date('Y-m-d\TH:i', strtotime($date_list->ended_at)) }}"  data-id="{{$date_list->id}}"  data-title="{{$date_list->examtitle}}" data-subject="{{$date_list->subject}}" class="btn btn-info mb-2 exam_details_edit btn-sm float-left">
                                          <i class="bi bi-pencil"></i> 
                                         Edit Exam Details
                                     </a>
