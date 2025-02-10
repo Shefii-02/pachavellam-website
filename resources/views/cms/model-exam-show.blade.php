@@ -62,8 +62,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form action="{{ kpsc_cms('model-exam/edit-details/' . $list->id) }}" enctype="multipart/form-data"
-                        method="POST">
+                    <form action="{{ kpsc_cms('model-exam/edit-details') }}" enctype="multipart/form-data" method="POST">
                         @csrf
                         <div class="form-group border-bottom mb-2 p-3 bg-light">
                             <div class="row">
@@ -71,7 +70,7 @@
                                     <label class="form-label">Exam Date</label>
                                     <input class="form-control" required id="exam_date_edit" type="date" name="exam_date"
                                         placeholder="">
-                                    <input class="form-control" type="hidden" id="exam_id" name="exam_id" placeholder="" >
+                                    <input class="form-control" type="hidden" id="exam_id" name="exam_id" placeholder="">
 
 
                                 </div>
@@ -85,7 +84,7 @@
                                     <label class="form-label">Exam Ended</label>
                                     <input class="form-control" required id="exam_ended_edit" type="datetime-local"
                                         name="exam_ended" placeholder="">
-                                    <input class="form-control" type="hidden" id="exam_id" name="exam_id" placeholder="">
+
                                 </div>
                                 <div class="col-md-12 mt-2">
                                     <label class="form-label">Exam Title</label>

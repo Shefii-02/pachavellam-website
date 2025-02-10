@@ -89,7 +89,7 @@ class ModelExamController extends Controller
         $exam_ended   = $request->exam_ended;
         $examtitle    = $request->examtitle;
         $subject      = $request->subject;
-        dd($request->all());
+      
         $new_one = DailyExam::where('id',$request->exam_id)->where('section','Model Exam')->first() ?? abort(404);
             
             $new_one->exam_date  = date('Y-m-d',strtotime($exam_date));
