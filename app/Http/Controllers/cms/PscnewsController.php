@@ -22,7 +22,7 @@ class PscnewsController extends Controller
     public function index()
     {
         //
-        $psc_news = Pscnews::get();
+        $psc_news = Pscnews::orderBy('created_at','desc')->get();
 
         return view('cms.psc-news', compact('psc_news'));
     }

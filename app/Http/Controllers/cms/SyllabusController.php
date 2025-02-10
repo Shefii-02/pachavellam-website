@@ -9,7 +9,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use App\Helper\Reply;
 use App\Helper;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class SyllabusController extends Controller
@@ -22,7 +22,7 @@ class SyllabusController extends Controller
     public function index()
     {
         //
-        $syllabus_list = Syllabus::get();
+        $syllabus_list = Syllabus::orderBy('created_at','desc')->get();
       
         return view('cms.syllabus', compact('syllabus_list'));
     }

@@ -11,7 +11,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use App\Helper\Reply;
 use App\Helper;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 
@@ -19,7 +19,7 @@ class SubjectController extends Controller
 {
     public function subjects_all(){
         $all_subjects = KpscSubject::where('kpsc_subjects.type','parent')->get();
-        $activities = KpscActivities::get();
+        $activities = KpscActivities::where('kpsc_activities.status','show')->get();
         return view('cms.subjects_all',compact('all_subjects','activities'));
     }
   
@@ -64,7 +64,7 @@ class SubjectController extends Controller
     public function subject_edit($id){
         
         $subject = KpscSubject::where('id',$id)->first();
-        $activites = KpscActivities::get();
+        $activites = KpscActivities::where('kpsc_activities.status','show')->get();
         $subject_activites = KpscSubjectActivities::where('subject_id',$id)->get();
         
         return view('cms.subjects_edit',compact('subject','activites','subject_activites'));
@@ -140,7 +140,7 @@ class SubjectController extends Controller
      
         $parent_subjects = KpscSubject::where('kpsc_subjects.type','parent')->leftJoin('kpsc_subjects as parent','parent.id','kpsc_subjects.parent_id')
                                         ->select('kpsc_subjects.*','parent.subject_title as parent_title')->get();
-        $activities = KpscActivities::get();
+        $activities = KpscActivities::where('kpsc_activities.status','show')->get();
         return view('cms.sub_subjects_all',compact('all_subjects','activities','parent_subjects'));
     }
     
@@ -186,7 +186,7 @@ class SubjectController extends Controller
     
     public function sub_subject_edit($id){
         $subject = KpscSubject::where('id',$id)->first();
-        $activities = KpscActivities::get();
+        $activities = KpscActivities::where('kpsc_activities.status','show')->get();
         $parent_subjects = KpscSubject::where('kpsc_subjects.type','parent')
                                         ->leftJoin('kpsc_subjects as parent','parent.id','kpsc_subjects.parent_id')
                                         ->select('kpsc_subjects.*','parent.subject_title as parent_title')

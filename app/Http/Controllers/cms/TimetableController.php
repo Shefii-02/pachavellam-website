@@ -23,7 +23,7 @@ class TimetableController extends Controller
     public function index()
     {
         //
-        $time_table = Timetable::get();
+        $time_table = Timetable::orderBy('created_at','desc')->get();
       
         return view('cms.time-table', compact('time_table'));
        
