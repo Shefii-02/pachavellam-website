@@ -493,7 +493,7 @@
 
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    {{-- <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
         var options = {
             chart: {
@@ -856,5 +856,5 @@
 
         var chart = new ApexCharts(document.querySelector("#timeseries"), options);
         chart.render();
-    </script>
+    </script> --}}
 @endsection

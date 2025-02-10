@@ -201,366 +201,366 @@
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script>
-var options = {
-  chart: {
-    width: "100%",
-    height: 300,
-    type: "bar"
-  },
-  plotOptions: {
-    bar: {
-      horizontal: false
-    }
-  },
-  dataLabels: {
-    enabled: false
-  },
-  stroke: {
-    width: 1,
-    colors: ["#fff"]
-  },
-  series: [
-    {
-      data: [44, 55, 41, 64,] },
-      {
-          data: [30, 85, 11, 78]
-        }, {
-          data: [53, 32, 33, 52]
-        }
+// var options = {
+//   chart: {
+//     width: "100%",
+//     height: 300,
+//     type: "bar"
+//   },
+//   plotOptions: {
+//     bar: {
+//       horizontal: false
+//     }
+//   },
+//   dataLabels: {
+//     enabled: false
+//   },
+//   stroke: {
+//     width: 1,
+//     colors: ["#fff"]
+//   },
+//   series: [
+//     {
+//       data: [44, 55, 41, 64,] },
+//       {
+//           data: [30, 85, 11, 78]
+//         }, {
+//           data: [53, 32, 33, 52]
+//         }
    
-  ],
-  xaxis: {
-    categories: [
-      "Kpsc",
-      "Ug-Pg",
-      "Edu Counseling",
-      "1 to 12",
-    ],
-  },
-  legend: {
-    position: "right",
-    verticalAlign: "top",
-    containerMargin: {
-      left: 35,
-      right: 60
-    }
-  },
-  responsive: [
-    {
-      breakpoint: 1000,
-      options: {
-        plotOptions: {
-          bar: {
-            horizontal: false
-          }
-        },
-        legend: {
-          position: "bottom"
-        }
-      }
-    }
-  ]
-};
+//   ],
+//   xaxis: {
+//     categories: [
+//       "Kpsc",
+//       "Ug-Pg",
+//       "Edu Counseling",
+//       "1 to 12",
+//     ],
+//   },
+//   legend: {
+//     position: "right",
+//     verticalAlign: "top",
+//     containerMargin: {
+//       left: 35,
+//       right: 60
+//     }
+//   },
+//   responsive: [
+//     {
+//       breakpoint: 1000,
+//       options: {
+//         plotOptions: {
+//           bar: {
+//             horizontal: false
+//           }
+//         },
+//         legend: {
+//           position: "bottom"
+//         }
+//       }
+//     }
+//   ]
+// };
 
-var chart = new ApexCharts(
-  document.querySelector("#responsive-chart"),
-  options
-);
+// var chart = new ApexCharts(
+//   document.querySelector("#responsive-chart"),
+//   options
+// );
 
 
 
-chart.render();
+// chart.render();
 
-   var options = {
-          series: [44, 55, 13, 43, 22],
-          chart: {
-          width: "100%",
-          height: 300,
-          type: 'pie',
-          toolbar: {
-              show: true
-                },
-        },
-        labels: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E'],
-        color: '#fff',
-        responsive: [{
-          breakpoint: 480,
-          options: {
-            chart: {
-              width: 200
-            },
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }]
+//    var options = {
+//           series: [44, 55, 13, 43, 22],
+//           chart: {
+//           width: "100%",
+//           height: 300,
+//           type: 'pie',
+//           toolbar: {
+//               show: true
+//                 },
+//         },
+//         labels: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E'],
+//         color: '#fff',
+//         responsive: [{
+//           breakpoint: 480,
+//           options: {
+//             chart: {
+//               width: 200
+//             },
+//             legend: {
+//               position: 'bottom'
+//             }
+//           }
+//         }]
        
             
-        };
+//         };
 
-var chart = new ApexCharts(document.querySelector("#pie_chart"), options);
-chart.render();
+// var chart = new ApexCharts(document.querySelector("#pie_chart"), options);
+// chart.render();
 
-  var options = {
-          series: [44, 55, 41, 17, 15],
-          chart: {
-          width: "100%",
-          height: 300,
-          type: 'donut',
-        },
-        responsive: [{
-          breakpoint: 480,
-          options: {
-            chart: {
-              width: 200
-            },
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }]
-        };
+  // var options = {
+  //         series: [44, 55, 41, 17, 15],
+  //         chart: {
+  //         width: "100%",
+  //         height: 300,
+  //         type: 'donut',
+  //       },
+  //       responsive: [{
+  //         breakpoint: 480,
+  //         options: {
+  //           chart: {
+  //             width: 200
+  //           },
+  //           legend: {
+  //             position: 'bottom'
+  //           }
+  //         }
+  //       }]
+  //       };
 
-        var chart = new ApexCharts(document.querySelector("#donut-chart"), options);
-        chart.render();
+  //       var chart = new ApexCharts(document.querySelector("#donut-chart"), options);
+  //       chart.render();
         
         
         
-    var options = {
-          series: [44, 55, 41, 17, 15],
-          chart: {
-             width: "100%",
-            height: 300,
-            type: 'donut',
-        },
-        plotOptions: {
-          pie: {
-            startAngle: -90,
-            endAngle: 270
-          }
-        },
-        dataLabels: {
-          enabled: false
-        },
-        fill: {
-          type: 'gradient',
-        },
-        legend: {
-          formatter: function(val, opts) {
-            return val + " - " + opts.w.globals.series[opts.seriesIndex]
-          }
-        },
-        // title: {
-        //   text: 'Gradient Donut with custom Start-angle'
-        // },
-        responsive: [{
-          breakpoint: 480,
-          options: {
-            chart: {
-              width: 200
-            },
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }]
-        };
+  //   var options = {
+  //         series: [44, 55, 41, 17, 15],
+  //         chart: {
+  //            width: "100%",
+  //           height: 300,
+  //           type: 'donut',
+  //       },
+  //       plotOptions: {
+  //         pie: {
+  //           startAngle: -90,
+  //           endAngle: 270
+  //         }
+  //       },
+  //       dataLabels: {
+  //         enabled: false
+  //       },
+  //       fill: {
+  //         type: 'gradient',
+  //       },
+  //       legend: {
+  //         formatter: function(val, opts) {
+  //           return val + " - " + opts.w.globals.series[opts.seriesIndex]
+  //         }
+  //       },
+  //       // title: {
+  //       //   text: 'Gradient Donut with custom Start-angle'
+  //       // },
+  //       responsive: [{
+  //         breakpoint: 480,
+  //         options: {
+  //           chart: {
+  //             width: 200
+  //           },
+  //           legend: {
+  //             position: 'bottom'
+  //           }
+  //         }
+  //       }]
+  //       };
 
-        var chart = new ApexCharts(document.querySelector("#donut-chart-2"), options);
-        chart.render();
+  //       var chart = new ApexCharts(document.querySelector("#donut-chart-2"), options);
+  //       chart.render();
         
         
          
-        var options = {
-          series: [44, 55, 41, 17, 15],
-          chart: {
-          width: "100%",
-            height: 300,
-          type: 'donut',
-          dropShadow: {
-            enabled: true,
-            color: '#111',
-            top: -1,
-            left: 3,
-            blur: 3,
-            opacity: 0.2
-          }
-        },
-        stroke: {
-          width: 0,
-        },
-        plotOptions: {
-          pie: {
-            donut: {
-              labels: {
-                show: true,
-                total: {
-                  showAlways: true,
-                  show: true
-                }
-              }
-            }
-          }
-        },
-        labels: ["Comedy", "Action", "SciFi", "Drama", "Horror"],
-        dataLabels: {
-          dropShadow: {
-            blur: 3,
-            opacity: 0.8
-          }
-        },
-        fill: {
-        type: 'pattern',
-          opacity: 1,
-          pattern: {
-            enabled: true,
-            style: ['verticalLines', 'squares', 'horizontalLines', 'circles','slantedLines'],
-          },
-        },
-        states: {
-          hover: {
-            filter: 'none'
-          }
-        },
-        theme: {
-          palette: 'palette2'
-        },
-        // title: {
-        //   text: "Favourite Movie Type"
-        // },
-        responsive: [{
-          breakpoint: 480,
-          options: {
-            chart: {
-              width: 200
-            },
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }]
-        };
+  //       var options = {
+  //         series: [44, 55, 41, 17, 15],
+  //         chart: {
+  //         width: "100%",
+  //           height: 300,
+  //         type: 'donut',
+  //         dropShadow: {
+  //           enabled: true,
+  //           color: '#111',
+  //           top: -1,
+  //           left: 3,
+  //           blur: 3,
+  //           opacity: 0.2
+  //         }
+  //       },
+  //       stroke: {
+  //         width: 0,
+  //       },
+  //       plotOptions: {
+  //         pie: {
+  //           donut: {
+  //             labels: {
+  //               show: true,
+  //               total: {
+  //                 showAlways: true,
+  //                 show: true
+  //               }
+  //             }
+  //           }
+  //         }
+  //       },
+  //       labels: ["Comedy", "Action", "SciFi", "Drama", "Horror"],
+  //       dataLabels: {
+  //         dropShadow: {
+  //           blur: 3,
+  //           opacity: 0.8
+  //         }
+  //       },
+  //       fill: {
+  //       type: 'pattern',
+  //         opacity: 1,
+  //         pattern: {
+  //           enabled: true,
+  //           style: ['verticalLines', 'squares', 'horizontalLines', 'circles','slantedLines'],
+  //         },
+  //       },
+  //       states: {
+  //         hover: {
+  //           filter: 'none'
+  //         }
+  //       },
+  //       theme: {
+  //         palette: 'palette2'
+  //       },
+  //       // title: {
+  //       //   text: "Favourite Movie Type"
+  //       // },
+  //       responsive: [{
+  //         breakpoint: 480,
+  //         options: {
+  //           chart: {
+  //             width: 200
+  //           },
+  //           legend: {
+  //             position: 'bottom'
+  //           }
+  //         }
+  //       }]
+  //       };
 
-        var chart = new ApexCharts(document.querySelector("#donut-chart-3"), options);
-        chart.render();
+  //       var chart = new ApexCharts(document.querySelector("#donut-chart-3"), options);
+  //       chart.render();
         
         
       
-        var options = {
-          series: [{
-          name: 'series1',
-          data: [31, 40, 28, 51, 42, 109, 100]
-        }, {
-          name: 'series2',
-          data: [11, 32, 45, 32, 34, 52, 41]
-        }],
-          chart: {
-             width: "100%",
-    height: 300,
-          type: 'area'
-        },
-        dataLabels: {
-          enabled: false
-        },
-        stroke: {
-          curve: 'smooth'
-        },
-        xaxis: {
-          type: 'datetime',
-          categories: ["2018-09-19T00:00:00.000Z", "2018-09-19T01:30:00.000Z", "2018-09-19T02:30:00.000Z", "2018-09-19T03:30:00.000Z", "2018-09-19T04:30:00.000Z", "2018-09-19T05:30:00.000Z", "2018-09-19T06:30:00.000Z"]
-        },
-        tooltip: {
-          x: {
-            format: 'dd/MM/yy HH:mm'
-          },
-        },
-        };
+  //       var options = {
+  //         series: [{
+  //         name: 'series1',
+  //         data: [31, 40, 28, 51, 42, 109, 100]
+  //       }, {
+  //         name: 'series2',
+  //         data: [11, 32, 45, 32, 34, 52, 41]
+  //       }],
+  //         chart: {
+  //            width: "100%",
+  //   height: 300,
+  //         type: 'area'
+  //       },
+  //       dataLabels: {
+  //         enabled: false
+  //       },
+  //       stroke: {
+  //         curve: 'smooth'
+  //       },
+  //       xaxis: {
+  //         type: 'datetime',
+  //         categories: ["2018-09-19T00:00:00.000Z", "2018-09-19T01:30:00.000Z", "2018-09-19T02:30:00.000Z", "2018-09-19T03:30:00.000Z", "2018-09-19T04:30:00.000Z", "2018-09-19T05:30:00.000Z", "2018-09-19T06:30:00.000Z"]
+  //       },
+  //       tooltip: {
+  //         x: {
+  //           format: 'dd/MM/yy HH:mm'
+  //         },
+  //       },
+  //       };
 
-        var chart = new ApexCharts(document.querySelector("#spline"), options);
-        chart.render();
+  //       var chart = new ApexCharts(document.querySelector("#spline"), options);
+  //       chart.render();
    
-        var options = {
-          series: [{
-          name: 'PRODUCT A',
-          data: dataSet[0]
-        }, {
-          name: 'PRODUCT B',
-          data: dataSet[1]
-        }, {
-          name: 'PRODUCT C',
-          data: dataSet[2]
-        }],
-          chart: {
-          type: 'area',
-          stacked: false,
-          height: 350,
-          zoom: {
-            enabled: false
-          },
-        },
-        dataLabels: {
-          enabled: false
-        },
-        markers: {
-          size: 0,
-        },
-        fill: {
-          type: 'gradient',
-          gradient: {
-              shadeIntensity: 1,
-              inverseColors: false,
-              opacityFrom: 0.45,
-              opacityTo: 0.05,
-              stops: [20, 100, 100, 100]
-            },
-        },
-        yaxis: {
-          labels: {
-              style: {
-                  colors: '#8e8da4',
-              },
-              offsetX: 0,
-              formatter: function(val) {
-                return (val / 1000000).toFixed(2);
-              },
-          },
-          axisBorder: {
-              show: false,
-          },
-          axisTicks: {
-              show: false
-          }
-        },
-        xaxis: {
-          type: 'datetime',
-          tickAmount: 8,
-          min: new Date("01/01/2014").getTime(),
-          max: new Date("01/20/2014").getTime(),
-          labels: {
-              rotate: -15,
-              rotateAlways: true,
-              formatter: function(val, timestamp) {
-                return moment(new Date(timestamp)).format("DD MMM YYYY")
-            }
-          }
-        },
-        title: {
-          text: 'Irregular Data in Time Series',
-          align: 'left',
-          offsetX: 14
-        },
-        tooltip: {
-          shared: true
-        },
-        legend: {
-          position: 'top',
-          horizontalAlign: 'right',
-          offsetX: -10
-        }
-        };
+  //       var options = {
+  //         series: [{
+  //         name: 'PRODUCT A',
+  //         data: dataSet[0]
+  //       }, {
+  //         name: 'PRODUCT B',
+  //         data: dataSet[1]
+  //       }, {
+  //         name: 'PRODUCT C',
+  //         data: dataSet[2]
+  //       }],
+  //         chart: {
+  //         type: 'area',
+  //         stacked: false,
+  //         height: 350,
+  //         zoom: {
+  //           enabled: false
+  //         },
+  //       },
+  //       dataLabels: {
+  //         enabled: false
+  //       },
+  //       markers: {
+  //         size: 0,
+  //       },
+  //       fill: {
+  //         type: 'gradient',
+  //         gradient: {
+  //             shadeIntensity: 1,
+  //             inverseColors: false,
+  //             opacityFrom: 0.45,
+  //             opacityTo: 0.05,
+  //             stops: [20, 100, 100, 100]
+  //           },
+  //       },
+  //       yaxis: {
+  //         labels: {
+  //             style: {
+  //                 colors: '#8e8da4',
+  //             },
+  //             offsetX: 0,
+  //             formatter: function(val) {
+  //               return (val / 1000000).toFixed(2);
+  //             },
+  //         },
+  //         axisBorder: {
+  //             show: false,
+  //         },
+  //         axisTicks: {
+  //             show: false
+  //         }
+  //       },
+  //       xaxis: {
+  //         type: 'datetime',
+  //         tickAmount: 8,
+  //         min: new Date("01/01/2014").getTime(),
+  //         max: new Date("01/20/2014").getTime(),
+  //         labels: {
+  //             rotate: -15,
+  //             rotateAlways: true,
+  //             formatter: function(val, timestamp) {
+  //               return moment(new Date(timestamp)).format("DD MMM YYYY")
+  //           }
+  //         }
+  //       },
+  //       title: {
+  //         text: 'Irregular Data in Time Series',
+  //         align: 'left',
+  //         offsetX: 14
+  //       },
+  //       tooltip: {
+  //         shared: true
+  //       },
+  //       legend: {
+  //         position: 'top',
+  //         horizontalAlign: 'right',
+  //         offsetX: -10
+  //       }
+  //       };
 
-        var chart = new ApexCharts(document.querySelector("#timeseries"), options);
-        chart.render();
+  //       var chart = new ApexCharts(document.querySelector("#timeseries"), options);
+  //       chart.render();
         
 </script>
 @endsection
