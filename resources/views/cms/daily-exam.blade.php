@@ -39,12 +39,12 @@
                                 </div>
                                 <div class="col-md-3 mt-2">
                                     <label class="form-label">Exam Started At</label>
-                                            <input class="form-control" required  type="time" name="exam_started" placeholder="" >     
+                                            <input class="form-control" required  type="datetime-local" name="exam_started" placeholder="" >     
                                 </div>
                            
                                 <div class="col-md-3 mt-2">
                                     <label class="form-label">Exam Ended</label>
-                                            <input class="form-control" required  type="time" name="exam_ended" placeholder="" >
+                                            <input class="form-control" required  type="datetime-local" name="exam_ended" placeholder="" >
                                             
                                 </div>
                                 <div class="col-md-6 mt-2">

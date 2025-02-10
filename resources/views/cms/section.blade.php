@@ -44,7 +44,7 @@
 				</li>	<!-- menu item 2 -->
 			    <li class="nav-item" >
 					<a class="nav-link {!! active_menu('model-exam') !!} "  href="{{url('admin/kpsc/model-exam')}}">
-						<i class="bi bi-basket fa-fw me-2"></i>Model Exam
+						<i class="bi bi-basket fa-fw me-2"></i>OMR Exam
 					</a>
 				</li>
 				<li class="nav-item" >

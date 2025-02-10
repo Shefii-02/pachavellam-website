@@ -49,12 +49,12 @@ class ModelExamController extends Controller
         }
       
             $new_one  = new DailyExam();
-            $new_one->section = "Model Exam";
-            $new_one->exam_date = date('Y-m-d',strtotime($request->exam_date));
-            $new_one->started_at = date('Y-m-d',strtotime($request->exam_date)) . ' '.date('H:i:s',strtotime($request->exam_started));
-            $new_one->ended_at = date('Y-m-d',strtotime($request->exam_date)) . ' '.date('H:i:s',strtotime($request->exam_ended));
-            $new_one->subject = $request->subject ?? null;
-            $new_one->examtitle = $request->examtitle;
+            $new_one->section    = "Model Exam";
+            $new_one->exam_date  =  date('Y-m-d',strtotime($request->exam_date));
+            $new_one->started_at =  date('Y-m-d H:i:s',strtotime($request->exam_started));
+            $new_one->ended_at   =  date('Y-m-d H:i:s',strtotime($request->exam_ended));
+            $new_one->subject    = $request->subject ?? null;
+            $new_one->examtitle  = $request->examtitle;
             try{
                 $new_one->save();
                  
@@ -92,12 +92,10 @@ class ModelExamController extends Controller
         
         $new_one = DailyExam::where('id',$request->exam_id)->where('section','Model Exam')->first() ?? abort(404);
             
-            $new_one->exam_date = date('Y-m-d',strtotime($exam_date));
-            $new_one->started_at = date('Y-m-d',strtotime($exam_date)) . ' '.date('H:i:s',strtotime($exam_started));
-            $new_one->ended_at = date('Y-m-d',strtotime($exam_date)) . ' '.date('H:i:s',strtotime($exam_ended));
-            $new_one->examtitle = $examtitle;
-            
-            
+            $new_one->exam_date  = date('Y-m-d',strtotime($exam_date));
+            $new_one->started_at = date('Y-m-d H:i:s',strtotime($request->exam_started));
+            $new_one->ended_at   = date('Y-m-d H:i:s',strtotime($request->exam_ended));
+            $new_one->examtitle  = $examtitle;
             
             try{
                  $new_one->save();
