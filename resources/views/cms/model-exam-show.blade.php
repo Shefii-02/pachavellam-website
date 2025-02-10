@@ -71,12 +71,12 @@
                                 </div>
                                 <div class="col-md-12 mt-2">
                                     <label class="form-label">Exam Started At</label>
-                                            <input class="form-control" required id="exam_started_edit" type="time" name="exam_started" placeholder="" >     
+                                            <input class="form-control" required id="exam_started_edit" type="datetime-local" name="exam_started" placeholder="" >     
                                 </div>
                            
                                 <div class="col-md-12 mt-2">
                                     <label class="form-label">Exam Ended</label>
-                                            <input class="form-control" required id="exam_ended_edit" type="time" name="exam_ended" placeholder="" >
+                                            <input class="form-control" required id="exam_ended_edit" type="datetime-local" name="exam_ended" placeholder="" >
                                              <input class="form-control" type="hidden" id="exam_id" name="exam_id" placeholder="" >
                                 </div>
                                 <div class="col-md-12 mt-2">
