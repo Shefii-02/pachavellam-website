@@ -65,14 +65,8 @@
                         <i class="bi bi-basket fa-fw me-2"></i>Capsule
                     </a>
                 </li>
-                
-                <!-- menu item 5 -->
-                <li class="nav-item">
-                    <a class="nav-link {!! active_menu('notifications') !!}"  href="{{url('admin/kpsc/notifications')}}">
-                        <i class="bi bi-basket fa-fw me-2"></i>Notifications
-                    </a>
-                </li>
-                <li class="nav-item">
+              
+                {{-- <li class="nav-item">
                     <a class="nav-link {!! active_menu('free-class') !!}"  href="{{url('admin/kpsc/free-class')}}">
                         <i class="bi bi-basket fa-fw me-2"></i> Free Class
                     </a>
@@ -82,13 +76,13 @@
                     <a class="nav-link {!! active_menu('premium-class') !!}"  href="{{url('admin/kpsc/paid-class')}}">
                         <i class="bi bi-basket fa-fw me-2"></i> Premium Class
                     </a>
-                </li>
+                </li> --}}
                 <!-- menu item 6 -->
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <a class="nav-link {!! active_menu('our-videos') !!}"  href="{{url('admin/kpsc/our-videos')}}">
                         <i class="bi bi-basket fa-fw me-2"></i>Our Videos
                     </a>
-                </li>
+                </li> --}}
                 <!-- menu item 7 -->
                 <li class="nav-item">
                     <a class="nav-link {!! active_menu('special-videos') !!}"  href="{{url('admin/kpsc/special-videos')}}">
@@ -115,13 +109,19 @@
                     </a>
                 </li>
                 
-                 <!-- menu item 13 -->
+                 {{-- <!-- menu item 13 -->
                 <li class="nav-item">
                     <a class="nav-link {!! active_menu('new-qa') !!}"  href="{{url('admin/kpsc/new-qa')}}">
                         <i class="bi bi-basket fa-fw me-2"></i>New Q & A
                     </a>
+                </li> --}}
+                 
+                <!-- menu item 5 -->
+                <li class="nav-item">
+                    <a class="nav-link {!! active_menu('notifications') !!}"  href="{{url('admin/kpsc/notifications')}}">
+                        <i class="bi bi-basket fa-fw me-2"></i>Notifications
+                    </a>
                 </li>
-               
                 <!-- menu item 14 -->
                 <li class="nav-item">
                     <a class="nav-link {!! active_menu('psc-results') !!}"  href="{{url('admin/kpsc/psc-results')}}">
@@ -154,12 +154,12 @@
                     </a>
                 </li>
                 <!-- menu item 17 -->
-                <li class="nav-item">
+                {{-- <li class="nav-item">
                     <a class="nav-link {!! active_menu('today-bucket') !!}"  href="{{url('admin/kpsc/today-bucket')}}">
                         <i class="bi bi-basket fa-fw me-2"></i>
                         Roaring 40`s
                     </a>
-                </li>
+                </li> --}}
                  <!-- menu item 18 -->
 				 <!--<li class="nav-item">-->
      <!--               <a class="nav-link {!! active_menu('free-class') !!}"  href="{{url('admin/kpsc/free-class')}}">-->

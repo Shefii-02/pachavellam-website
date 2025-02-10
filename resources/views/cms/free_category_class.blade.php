@@ -148,7 +148,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <form action="/kpsc/cms/free_category_class/update-freecategory" method="POST">
+        <form action="/kpsc/free_category_class/update-freecategory" method="POST">
             <div class="modal-body">
                 
                     @csrf()

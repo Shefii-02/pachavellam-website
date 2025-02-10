@@ -107,8 +107,8 @@ class HomeController extends Controller
                                 ->where('kpsc_activities.status','show')
                                 ->select('kpsc_activities.*')->get();
                              
-            $kpsc_activity = KpscActivities::get();
-                           
+            $kpsc_activity = KpscActivities::where('kpsc_activities.status','show')->get();
+            
                                 
             return view('kpsc.subject',compact('category_name','title','redirection','kpsc_subject_activity','kpsc_activity'));
            
@@ -128,7 +128,9 @@ class HomeController extends Controller
         $kpsc_subject_activity = KpscSubjectActivities::leftJoin('kpsc_activities','kpsc_activities.id','kpsc_subject_activities.activity_id')
                                 ->where('kpsc_subject_activities.subject_id',$sub_subject_dtls->id)
                                 ->where('kpsc_activities.status','show')
-                                ->select('kpsc_activities.*')->get();
+                                ->select('kpsc_activities.*')
+                                ->where('kpsc_activities.status','show')->get();
+
                                 
         return view('kpsc.subject',compact('title','redirection','sub_category','category_name','kpsc_subject_activity','kpsc_activity')); 
     }
