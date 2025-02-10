@@ -1,7 +1,7 @@
 @extends('layouts.without-bottom')
 @extends('kpsc.section_header')
-@section('title', $title ?? 'KPSC-Model Exam List-')
-@php $title = "KPSC-Model Exam List"; @endphp
+@section('title', $title ?? 'KPSC-OMR Exam List-')
+@php $title = "KPSC-OMR Exam List"; @endphp
 @section('styles')
     <style>
         body {
