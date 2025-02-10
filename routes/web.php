@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use  App\Http\Controllers;
-
+use Illuminate\Http\Request;
 
 /* Route::get("/world-cup-prediction", function(){
 
@@ -551,8 +551,9 @@ Route::group(['prefix'=>'kpsc','as'=>'kpsc'], function(){
 
 
     
-    Route::get("model-exam-mark-form", function(){
-       return view("kpsc.model-exam-mark-form");
+    Route::get("model-exam-mark-form", function(Request $request){
+        $id = $request->id;
+       return view("kpsc.model-exam-mark-form",compact('id'));
     });
 
     
