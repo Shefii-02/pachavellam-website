@@ -158,7 +158,7 @@
                     </div>
                     <!-- Counter boxes END -->
                  
-                            <div id="ChartPayout"></div>
+                            {{-- <div id="ChartPayout"></div>
                     <div class="row">
                          <div class="col-md-6 mb-2">
                             <div id="donut-chart-2" class="border border-muted rounded p-3"></div>
@@ -188,7 +188,7 @@
                          </div>
                          
                          
-                    </div>
+                    </div> --}}
                      
                 </div>
             </div>
