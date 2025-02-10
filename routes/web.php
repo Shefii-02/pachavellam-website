@@ -438,7 +438,7 @@ Route::group(['prefix'=>'admin','as'=>'admin','middleware' => ['auth']], functio
         Route::get('daily-exam/view', 'cms\DailyexamController@daily_exams_show'); 
         Route::get('daily-exam/date_based', 'cms\DailyexamController@daily_exams_date_based'); 
         Route::post('daily-exam/store', 'cms\DailyexamController@daily_exams_store'); 
-        Route::post('daily-exam/edit-details/{id}', 'cms\DailyexamController@exam_details_update');
+        Route::post('daily-exam/edit-details', 'cms\DailyexamController@exam_details_update');
         Route::get('daily-exam/edit/{id}', 'cms\DailyexamController@daily_exams_edit'); 
         Route::post('daily-exam/update/{id}', 'cms\DailyexamController@daily_exams_update'); 
         Route::get('daily-exam/delete/{id}', 'cms\DailyexamController@daily_exams_delete'); 
@@ -453,7 +453,7 @@ Route::group(['prefix'=>'admin','as'=>'admin','middleware' => ['auth']], functio
         Route::get('model-exam/view', 'cms\ModelExamController@model_exams_show'); 
         Route::get('model-exam/date_based', 'cms\ModelExamController@model_exams_date_based'); 
         Route::post('model-exam/store', 'cms\ModelExamController@model_exams_store'); 
-        Route::post('model-exam/edit-details/{id}', 'cms\ModelExamController@exam_details_update');
+        Route::post('model-exam/edit-details', 'cms\ModelExamController@exam_details_update');
        
         Route::post('model-exam/update/{id}', 'cms\ModelExamController@model_exams_update'); 
         Route::get('model-exam/delete/{id}', 'cms\ModelExamController@model_exams_delete'); 
