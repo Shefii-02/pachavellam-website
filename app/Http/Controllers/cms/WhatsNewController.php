@@ -7,8 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Helper\Reply;
 use App\Helper;
-use Storage;
-  
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class WhatsNewController extends Controller
@@ -21,10 +20,9 @@ class WhatsNewController extends Controller
     public function index()
     {
         //
-        $whatsnew = WhatsNew::get();
-    
-        return view('cms.whats-new', compact('whatsnew'));
+        $whatsnew = WhatsNew::orderBy('position', 'asc')->get();
 
+        return view('cms.whats-new', compact('whatsnew'));
     }
 
     /**
@@ -46,15 +44,24 @@ class WhatsNewController extends Controller
     public function store(Request $request)
     {
         //
-   
+
+
+        $validated = $request->validate([
+            'image' => 'required',
+            'redirection' => 'required',
+            'title'  => 'required',
+            'bgcolor'  => 'required',
+            'textcolor'  => 'required',
+        ]);
+
         $image = file_get_contents($request->image);
-        $name = Str::random(40).'.png';
-        
-        Storage::put('/public/files/whats-new/'.$name, $image);
-        			
+        $name = Str::random(40) . '.png';
+
+        Storage::put('/public/files/whats-new/' . $name, $image);
+
 
         $whatsnews = new WhatsNew;
-        $whatsnews->image = 'whats-new/'.$name;
+        $whatsnews->image = 'whats-new/' . $name;
         $whatsnews->title = $request->title;
         $whatsnews->redirection = $request->redirection;
         $whatsnews->bg_color = $request->bgcolor;
@@ -63,7 +70,7 @@ class WhatsNewController extends Controller
 
         $whatsnews->position = $whatsnews->id;
         $whatsnews->save();
-        return redirect()->route('adminkpsc.whats-new.index')->with('message','Data added Successfully');
+        return redirect()->route('adminkpsc.whats-new.index')->with('message', 'Data added Successfully');
     }
 
     /**
@@ -86,16 +93,16 @@ class WhatsNewController extends Controller
     public function edit($id)
     {
         //
-        $whats_new = WhatsNew::where('id',$id)->first();
+        $whats_new = WhatsNew::where('id', $id)->first();
         $edit_modal = '<div class="row">
                         <div class="col-md-12">
                             <div class="text-center justify-content-center align-items-center p-4 p-sm-5 border border-2 border-dashed position-relative rounded-3">
                                 <!-- Image -->
-                                <img src="'.Storage::url('files/'.$whats_new->image).'" id="uploaded-image" class="uploaded-image h-50px mb-2" alt="">
+                                <img src="' . Storage::url('files/' . $whats_new->image) . '" id="uploaded-image2" class="uploaded-image h-50px mb-2" alt="">
                                 <div>
                                     <label style="cursor:pointer;">
                                         <span> 
-                                            <input class="form-control stretched-link" type="file"  accept="image/*" id="pic2" name="my-image" accept="image/gif, image/jpeg, image/png" />
+                                            <input class="form-control stretched-link  pic1" type="file"  accept="image/*" id="pic2" name="my-image" accept="image/gif, image/jpeg, image/png" />
                                             <input type="hidden" name="image" id="picture2" />
                                         </span>
                                     </label>
@@ -105,18 +112,18 @@ class WhatsNewController extends Controller
                         <div class="col-md-12">
                             <div class="col-md-12">
                                 <label class="form-label">Title</label>
-                                <input type="hidden" value="'.$whats_new->id.'" name="id">
-                                <input class="form-control" value="'.$whats_new->title.'" type="text"  name="title" required placeholder="Enter Title" >
+                                <input type="hidden" value="' . $whats_new->id . '" name="id">
+                                <input class="form-control" value="' . $whats_new->title . '" type="text"  name="title" required placeholder="Enter Title" >
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label">Redirection</label>
-                                <input class="form-control" value="'.$whats_new->redirection.'" type="text"  name="redirection" required placeholder="Enter Redirection link" >
+                                <input class="form-control" value="' . $whats_new->redirection . '" type="text"  name="redirection" required placeholder="Enter Redirection link" >
                             </div>
                         </div>
                         <div class="col-md-12 row">
                             <div class="col-lg-6">
                                 <label class="form-label"> Position</label>
-                                <input class="form-control" name="position" type="text" value="'.$whats_new->position.'" placeholder="Showing Position" >
+                                <input class="form-control" name="position" type="text" value="' . $whats_new->position . '" placeholder="Showing Position" >
                             </div>
                             <div class="col-lg-6">
                                 <label class="form-label">Status</label>
@@ -130,12 +137,12 @@ class WhatsNewController extends Controller
                         <div class="col-md-12 row">
                             <div class="col-md-6">
                                 <label class="form-label">Bacground Color</label>
-                                <input class="form-control" value="'.$whats_new->bg_color.'" type="color" name="bgcolor" required placeholder="Section background color" >
+                                <input class="form-control" value="' . $whats_new->bg_color . '" type="color" name="bgcolor" required placeholder="Section background color" >
                             
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Text Color</label>
-                                <input class="form-control" value="'.$whats_new->text_color.'" type="color" name="textcolor" required placeholder="Title text color" >
+                                <input class="form-control" value="' . $whats_new->text_color . '" type="color" name="textcolor" required placeholder="Title text color" >
                                 
                             </div>
                             <div classs="col-md-12 ">
@@ -144,7 +151,7 @@ class WhatsNewController extends Controller
                         </div>
                     </div>';
 
-            return $edit_modal;
+        return $edit_modal;
     }
 
     /**
@@ -157,18 +164,25 @@ class WhatsNewController extends Controller
     public function update_whatsnew(Request $request, WhatsNew $whatsNew)
     {
         //
-   
-        $whatsnews = $whatsNew->where('id',$request->id)->first();
 
-        if(strlen($request->image) > 0){
+        $validated = $request->validate([
+            'redirection' => 'required',
+            'title'  => 'required',
+            'bgcolor'  => 'required',
+            'textcolor'  => 'required',
+        ]);
+
+        $whatsnews = $whatsNew->where('id', $request->id)->first();
+
+        if (strlen($request->image) > 0) {
             $image  = file_get_contents($request->image);
-            $name   = Str::random(40).'.png';
-            
-            Storage::put('/public/files/whats-new/'.$name, $image);
-            
-            Storage::delete('/public/files/'.$whatsnews->image);
+            $name   = Str::random(40) . '.png';
 
-            $whatsnews->image = 'whats-new/'.$name;
+            Storage::put('/public/files/whats-new/' . $name, $image);
+
+            Storage::delete('/public/files/' . $whatsnews->image);
+
+            $whatsnews->image = 'whats-new/' . $name;
             $whatsnews->save();
         }
 
@@ -179,10 +193,7 @@ class WhatsNewController extends Controller
         $whatsnews->position = $request->position;
         $whatsnews->status = $request->status;
         $whatsnews->save();
-        return redirect()->route('adminkpsc.whats-new.index')->with('message','Data Updated Successfully');
-
-
-
+        return redirect()->route('adminkpsc.whats-new.index')->with('message', 'Data Updated Successfully');
     }
 
     /**
@@ -191,15 +202,14 @@ class WhatsNewController extends Controller
      * @param  \App\Models\WhatsNew  $whatsNew
      * @return \Illuminate\Http\Response
      */
-    public function delete($id,WhatsNew $whatsNew)
+    public function delete($id, WhatsNew $whatsNew)
     {
         //
-        $wtsnew = $whatsNew->where('id',$id)->first();
-        Storage::delete('/public/files/'.$wtsnew->image);
+        $wtsnew = $whatsNew->where('id', $id)->first();
+        Storage::delete('/public/files/' . $wtsnew->image);
         $wtsnew->delete();
 
-     
-        return redirect()->route('adminkpsc.whats-new.index')->with('message','Data Deleted Successfully');
 
+        return redirect()->route('adminkpsc.whats-new.index')->with('message', 'Data Deleted Successfully');
     }
 }

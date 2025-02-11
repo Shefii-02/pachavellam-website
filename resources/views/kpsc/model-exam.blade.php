@@ -402,7 +402,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">Upload your exam mark details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">X</button>
+                    <button type="button" class="btn-close" onclick="$('#fromModal').modal('hide');" data-bs-dismiss="modal" aria-label="Close">X</button>
                 </div>
                 <div class="modal-body upload-form">
 

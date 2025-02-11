@@ -9,7 +9,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use App\Helper\Reply;
 use App\Helper;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class BulletinController extends Controller
@@ -46,6 +46,11 @@ class BulletinController extends Controller
     public function store(Request $request)
     {
      
+        $validated = $request->validate([
+            'file' => 'required',
+            'month' => 'required'
+        ]);
+
         $name = 'Psc-bullet-'.date("Y-M", strtotime($request->month)).'-Issued-'.$request->issue.'.pdf';
      
         $image = file_get_contents($request->file('file'));

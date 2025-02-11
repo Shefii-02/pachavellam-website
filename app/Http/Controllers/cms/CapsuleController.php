@@ -9,10 +9,9 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use App\Helper\Reply;
 use App\Helper;
-use Storage;
 use App\Models\CapsuleComment;
 use App\Models\CapsuleLike;
-
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CapsuleController extends Controller
@@ -25,8 +24,8 @@ class CapsuleController extends Controller
     public function index()
     {
         //
-        $capsule_list = Capsule::orderBy('id','desc')->paginate(10);
-      
+        $capsule_list = Capsule::orderBy('id', 'desc')->paginate(10);
+
         return view('cms.capsule', compact('capsule_list'));
     }
 
@@ -49,29 +48,31 @@ class CapsuleController extends Controller
     public function store(Request $request)
     {
         //
-        
+        if ($request->type == 'Image') {
+            $validated = $request->validate([
+                'image' => 'required',
+            ]);
+        }
+
         $caps = new Capsule;
         $caps->type  = $request->type;
-        
+
         $caps->author_id = auth()->user()->id;
         $caps->status = 1;
         $caps->save();
-       
-           
-        if($request->type == 'Image'){
-            $image = file_get_contents($request->image);
-            $name = 'Capsule-'.Str::random(40).'.png';
-            Storage::put('/public/files/capsule/'.$name, $image);
-            $caps->image = 'capsule/'.$name; 
-            $caps->position = $caps->id;
 
-        }
-        else{
+
+        if ($request->type == 'Image') {
+            $image = file_get_contents($request->image);
+            $name = 'Capsule-' . Str::random(40) . '.png';
+            Storage::put('/public/files/capsule/' . $name, $image);
+            $caps->image = 'capsule/' . $name;
+            $caps->position = $caps->id;
+        } else {
             $caps->content  = $request->content;
-            
         }
-                   $caps->save();
-        return redirect()->route('adminkpsc.capsule.index')->with('message','Data added Successfully');
+        $caps->save();
+        return redirect()->route('adminkpsc.capsule.index')->with('message', 'Data added Successfully');
     }
 
     /**
@@ -114,16 +115,16 @@ class CapsuleController extends Controller
      * @param  \App\Models\Capsule  $capsule
      * @return \Illuminate\Http\Response
      */
-    public function delete(Capsule $capsule,$id)
+    public function delete(Capsule $capsule, $id)
     {
         //
-        $bnr = $capsule->where('id',$id)->first();
-        Storage::delete('/public/files/capsule/'.$bnr->image);
+        $bnr = $capsule->where('id', $id)->first();
+        Storage::delete('/public/files/capsule/' . $bnr->image);
         $bnr->delete();
-        CapsuleComment::where('cap_id',$id)->delete();
-        CapsuleLike::where('cap_id',$id)->delete();
+        CapsuleComment::where('cap_id', $id)->delete();
+        CapsuleLike::where('cap_id', $id)->delete();
 
-        
-        return redirect()->route('adminkpsc.capsule.index')->with('message','Data Deleted Successfully');
+
+        return redirect()->route('adminkpsc.capsule.index')->with('message', 'Data Deleted Successfully');
     }
 }

@@ -9,10 +9,9 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use App\Helper\Reply;
 use App\Helper;
-use Storage;
 use Illuminate\Support\Str;
 use App\Models\KpscSubject;
-
+use Illuminate\Support\Facades\Storage;
 
 class MaterialController extends Controller
 {
@@ -24,11 +23,10 @@ class MaterialController extends Controller
     public function index()
     {
         //
-        $material_list = Material::leftJoin('kpsc_subjects','kpsc_subjects.id','material.type')->select('material.*','kpsc_subjects.subject_title')->get();
-        $exam_subjects = KpscSubject::where('status','show')->orderby('position')->get();
+        $material_list = Material::leftJoin('kpsc_subjects', 'kpsc_subjects.id', 'material.type')->select('material.*', 'kpsc_subjects.subject_title')->orderBy('created_at', 'desc')->get();
+        $exam_subjects = KpscSubject::where('status', 'show')->orderby('position')->get();
 
-        return view('cms.material', compact('material_list','exam_subjects'));
-        
+        return view('cms.material', compact('material_list', 'exam_subjects'));
     }
 
     /**
@@ -50,19 +48,26 @@ class MaterialController extends Controller
     public function store(Request $request)
     {
         //
-        $name = Str::random(40).'.pdf';
-        
+
+        $validated = $request->validate([
+            'file' => 'required',
+            'category' => 'required',
+            'title'  => 'required',
+            'post_date'  => 'required',
+        ]);
+
+        $name = Str::random(40) . '.pdf';
+
         $image = file_get_contents($request->file('file'));
-        Storage::put('/public/files/material/'.$name, $image);
+        Storage::put('/public/files/material/' . $name, $image);
 
         $material_new = new Material;
         $material_new->type = $request->category;
         $material_new->title = $request->title;
         $material_new->date = $request->post_date;
-        $material_new->file_name = 'material/'.$name;
+        $material_new->file_name = 'material/' . $name;
         $material_new->save();
-        return redirect()->route('adminkpsc.material.index')->with('message','Data added Successfully');
-
+        return redirect()->route('adminkpsc.material.index')->with('message', 'Data added Successfully');
     }
 
     /**
@@ -105,14 +110,14 @@ class MaterialController extends Controller
      * @param  \App\Models\Material  $material
      * @return \Illuminate\Http\Response
      */
-    public function delete(Material $material,$id)
+    public function delete(Material $material, $id)
     {
         //
-        $bnr = $material->where('id',$id)->first();
-        Storage::delete('/public/files/'.$bnr->file_name);
+        $bnr = $material->where('id', $id)->first();
+        Storage::delete('/public/files/' . $bnr->file_name);
         $bnr->delete();
 
-        
-        return redirect()->route('adminkpsc.material.index')->with('message','Data Deleted Successfully');
+
+        return redirect()->route('adminkpsc.material.index')->with('message', 'Data Deleted Successfully');
     }
 }

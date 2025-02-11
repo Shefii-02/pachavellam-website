@@ -34,20 +34,19 @@
                                 </option>
                             @endforeach
                         </select>
-
                     </div>
-                    <div class="col-md-4 mt-2">
+                    {{-- <div class="col-md-4 mt-2">
                         <label class="form-label">Subject</label>
                         <select class="form-control" id="subject_sec" name="subject">
-                            <option value="">Select Subject</option>
-                            {{-- @foreach ($exam_subjects as $list)
+                            <option value="">Select Subject</option> --}}
+                    {{-- @foreach ($exam_subjects as $list)
                                 
                                     <option value="{{$list->id}}">
                                         {{$list->subject_title}}
                                     </option>
                                 @endforeach --}}
-                        </select>
-                    </div>
+                    {{-- </select>
+                    </div> --}}
                     <div class="col-md-4 mt-2">
                         <button class="mt-4 btn btn-info search_date_based"><i class="fa fa-search"></i> Search</button>
                     </div>
@@ -55,6 +54,83 @@
             </div>
             <div class="col-lg-12 mt-4 date_based_list">
 
+                <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
+                    <!-- Table head -->
+                    <thead>
+                        <tr>
+                            <th scope="col" class="border-0 rounded-start">Exam date</th>
+                            <th scope="col" class="border-0">Title</th>
+                            <th scope="col" class="border-0">Total Qstn</th>
+                            <th scope="col" class="border-0">Attended</th>
+                            <th scope="col" class="border-0">Status</th>
+                            <th scope="col" class="border-0 rounded-end">Action</th>
+                        </tr>
+                    </thead>
+
+                    <!-- Table body START -->
+                    <tbody>
+                        @foreach ($existingExams ?? [] as $itemExam)
+                            <tr>
+                                <td>
+                                    <span class="small"> Start : {{ DateTimeFormat($itemExam->started_at) }}<br>
+                                        End : {{ DateTimeFormat($itemExam->ended_at) }}</span>
+                                </td>
+                                <td>
+                                    <span class="small"> <strong class="fw-bold">{{ $itemExam->examtitle }}</strong><br>
+                                        Subject :
+                                        {{ $itemExam->subjectDetailed ? $itemExam->subjectDetailed->subject_title : '' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="small">
+                                        {{ $itemExam->exam_details ? $itemExam->exam_details->count() : 0 }}</span>
+                                </td>
+                                <td>
+                                    <span class="small">
+                                        {{ $itemExam->exam_attend_list ? $itemExam->exam_attend_list->count() : 0 }}</span>
+                                </td>
+                                <td>
+                                    @if ($itemExam->status == 1)
+                                        <span class="text-success fw-bold small">Published</span>
+                                    @else
+                                        <span class="text-primary fw-bold small">Drafted</span>
+                                    @endif
+                                </td>
+                                <td align="right">
+                                    <a title="Edit" href="{{ kpsc_cms('daily-exam/edit/' . $itemExam->id) }}"
+                                        class="btn text-info mb-2 p-0 m-0 btn-sm float-left">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+
+
+                                    @if ($itemExam->status == 1)
+                                        <a target="_new" title="Leaderboard"
+                                            href="{{ url('kpsc/daily-exam/' . $itemExam->exam_date . '/' . $itemExam->id . '/leaderboard') }}"
+                                            class="btn btn-sm text-primary p-0 m-0 mb-2 float-left">
+                                            <i class="bi bi-bar-chart"></i>
+
+                                        </a>
+
+                                        <a target="_new2" title="View"
+                                            href="{{ url('kpsc/daily-exam/' . $itemExam->exam_date . '/' . $itemExam->id) }}"
+                                            class="btn btn-sm text-dark p-0 m-0 mb-2 float-left">
+                                            <i class="bi bi-eye"></i>
+
+                                        </a>
+                                    @endif
+
+
+                                    {{-- <a onclick="return confirm('Are you sure can`t retrive data?')"
+                                        href="{{ kpsc_cms('daily-exam/clear-leaderboard/' . $itemExam->exam_id) }}"
+                                        class="btn btn-danger btn-sm mb-2 float-left"><i class="fa fa-trash"></i> Clear
+                                        Leaderboard</a> --}}
+
+                                    {{-- @dump($itemExam) --}}
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
             </div>
 
         </div>
@@ -67,7 +143,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exam_detailsLabel">Exam Details title</h5>
+                    <h5 class="modal-title" id="exam_detailsLabel">Exam Details</h5>
                     <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -81,7 +157,6 @@
                                     <label class="form-label">Exam Date</label>
                                     <input class="form-control" required id="exam_date_edit" type="date" name="exam_date"
                                         placeholder="">
-
                                 </div>
                                 <div class="col-md-12 mt-2">
                                     <label class="form-label">Exam Started At</label>
@@ -93,7 +168,8 @@
                                     <label class="form-label">Exam Ended</label>
                                     <input class="form-control" required id="exam_ended_edit" type="datetime-local"
                                         name="exam_ended" placeholder="">
-                                    <input class="form-control" type="hidden" id="exam_id" name="exam_id" placeholder="">
+                                    <input class="form-control" type="hidden" id="exam_id" name="exam_id"
+                                        placeholder="">
                                 </div>
                                 <div class="col-md-12 mt-2">
                                     <label class="form-label">Exam Title</label>
@@ -108,7 +184,6 @@
 
                                 <div class="col-md-12 mt-2">
                                     <label class="form-label">Subject</label>
-
                                     <select name="subject" id="subject_edit" class="form-control" required
                                         autocomplete="off">
                                         @foreach ($exam_subjects as $list)
@@ -116,7 +191,6 @@
                                                 {{ $list->subject_title }}
                                             </option>
                                         @endforeach
-
                                     </select>
 
                                     {{-- <datalist id="subject" >
@@ -139,67 +213,20 @@
         </div>
     </div>
 
-
-
     <!-- Modal -->
     <div class="modal fade" id="edit_question" tabindex="-1" role="dialog" aria-labelledby="edit_questionLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exam_detailsLabel">Exam Question</h5>
+                    <h5 class="modal-title" id="exam_detailsLabel">Edit Exam Question </h5>
                     <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <form action="" method="POST" id="question_edit_form">
-                        @csrf()
-                        <div class="  border-bottom mb-2 p-3 bg-light">
-                            <div class="row">
-                                <div class="col-md-12 mt-2">
-                                    <label class="form-label">Question <sub class="text-danger">(* Shift+Enter = newline )
-                                        </sub></label>
+                <div class="modal-body editQuestionDetails">
 
-                                    <textarea class="form-control question" id="desc-editor-0" required name="question" placeholder="Enter Question"
-                                        rows="3"></textarea>
-
-                                </div>
-                                <div class="col-md-12 mt-2">
-                                    <label class="form-label">Answer</label>
-                                    <input class="form-control" required autocomplete="off" id="answer"
-                                        type="text" name="answer" placeholder="Enter Answer">
-
-                                </div>
-                                <div class="col-md-6 mt-2">
-                                    <label class="form-label">Option1</label>
-                                    <input class="form-control" autocomplete="off" id="option1" type="text"
-                                        name="option1" placeholder="Enter Option1">
-                                </div>
-                                <div class="col-md-6 mt-2">
-                                    <label class="form-label">Option2</label>
-                                    <input class="form-control" autocomplete="off" id="option2" type="text"
-                                        name="option2" placeholder="Enter Option2">
-                                </div>
-                                <div class="col-md-6 mt-2">
-                                    <label class="form-label">Option3</label>
-                                    <input class="form-control" autocomplete="off" id="option3" type="text"
-                                        name="option3" placeholder="Enter Option3">
-                                </div>
-                                <div class="col-md-6 mt-2">
-                                    <label class="form-label">Option4</label>
-                                    <input class="form-control" autocomplete="off" id="option4" type="text"
-                                        name="option4" placeholder="Enter Option4">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="submit" class="btn btn-primary">Update changes</button>
-                        </div>
-                    </form>
                 </div>
-
             </div>
         </div>
     </div>
@@ -214,14 +241,14 @@
             $('body').on('click', '.search_date_based', function() {
 
                 var date = $('#exam_date').val();
-                var subject = $('#subject_sec').val();
+                // var subject = $('#subject_sec').val();
                 $(".date_based_list").html('');
                 $.ajax({
                     url: "{{ kpsc_cms('daily-exam/date_based') }}",
                     cache: false,
                     data: {
                         date: date,
-                        subject: subject
+                        // subject: subject
                     },
                     success: function(html) {
                         $(".date_based_list").html(html);
@@ -230,21 +257,20 @@
             });
 
 
-            $('body').on('change', '#exam_date', function() {
+            // $('body').on('change', '#exam_date', function() {
 
-                var date = $('#exam_date').val();
-                $.ajax({
-                    url: "{{ kpsc_cms('daily-exam/date_depend_subjects') }}",
-                    cache: false,
-                    data: {
-                        date: date
-                    },
-                    success: function(html) {
-                        $("#subject_sec").html(html);
-                    }
-                });
-
-            });
+            //     var date = $('#exam_date').val();
+            //     $.ajax({
+            //         url: "{{ kpsc_cms('daily-exam/date_depend_subjects') }}",
+            //         cache: false,
+            //         data: {
+            //             date: date
+            //         },
+            //         success: function(html) {
+            //             $("#subject_sec").html(html);
+            //         }
+            //     });
+            // });
 
             $('body').on('click', '.exam_details_edit', function(e) {
                 e.preventDefault();
@@ -299,7 +325,11 @@
 
             });
 
+            // $('body').on('click', '.remove-div', function() {
+            //     var class_val = $(this).data('val');
 
+            //     $('.' + class_val).remove();
+            // });
 
 
 

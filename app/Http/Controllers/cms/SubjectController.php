@@ -24,6 +24,13 @@ class SubjectController extends Controller
     }
   
     public function subject_store(Request $request){
+
+        $validated = $request->validate([
+            'image' => 'required',
+            'subject_name' => 'required'
+        ]);
+
+
         if($request->has('image')){
             $image = file_get_contents($request->image);
             $name = Str::random(40).'.png';
@@ -72,7 +79,10 @@ class SubjectController extends Controller
     }
     public function subject_update($id,Request $request){
         
-        
+        $validated = $request->validate([
+            'subject_name' => 'required'
+        ]);
+
         
         $subject = KpscSubject::where('id',$id)->first();
         $subject->subject_title = $request->subject_name;
@@ -145,6 +155,13 @@ class SubjectController extends Controller
     }
     
     public function sub_subject_store(Request $request){
+
+        $validated = $request->validate([
+            'image' => 'required',
+            'subject_name' => 'required'
+        ]);
+
+
         if($request->has('image')){
             $image = file_get_contents($request->image);
             $name = Str::random(40).'.png';
@@ -199,6 +216,12 @@ class SubjectController extends Controller
     }
     
     public function sub_subject_update($id,Request $request){
+
+        $validated = $request->validate([
+            'subject_name' => 'required'
+        ]);
+
+
         $subject = KpscSubject::where('id',$id)->first();
         $subject->subject_title = $request->subject_name;
         $subject->bg_color      = $request->bg_color;

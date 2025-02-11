@@ -15,24 +15,31 @@ class DailyExam extends Model
     {
         return $this->hasMany('App\Models\DailyExamdetails', 'exam_id', 'id');
     }
-    
-     public function exam_attend_list()
+
+    public function exam_attend_list()
     {
         return $this->hasMany('App\Models\DailyExamattempt', 'exam_id', 'id');
     }
-    
-    
-    public function model_exam_details(){ 
+
+    public function subjectDetailed()
+    {
+        return $this->hasOne('App\Models\KpscSubject', 'id', 'subject');
+    }
+
+
+    public function model_exam_details()
+    {
         return $this->hasMany('App\Models\ModelExamDetails', 'exam_id', 'id');
     }
-    
-    
-    public function model_exam_details_one(){ 
+
+
+    public function model_exam_details_one()
+    {
         return $this->hasOne('App\Models\ModelExamDetails', 'exam_id', 'id');
     }
-    
-    public function model_exam_attened(){ 
+
+    public function model_exam_attened()
+    {
         return $this->hasMany('App\Models\ModelExamAttempt', 'exam_id', 'id');
     }
-    
 }

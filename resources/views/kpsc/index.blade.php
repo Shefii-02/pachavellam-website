@@ -388,7 +388,7 @@
                 <div class="for-you-news-wrapper">
                     <div class="container">
                       <div class="editorial-choice-title text-center mb-4"><i class="lni lni-files"></i>
-                        <h4 class="newsten-title text-dark">Special Material </h4>
+                        <h4 class="newsten-title text-dark">What's New</h4>
                       </div>
                     </div>
                     <!-- <div class="video-icon"><i class="lni lni-play"></i></div> -->
@@ -440,7 +440,7 @@
         </div>
         <div class="container">
           <div class="editorial-choice-title text-center mb-4">
-            <h4 class="newsten-title text-dark">Subject Category </h4><i class="lni lni-protection mt-1"></i>
+            <h4 class="newsten-title text-dark">Subject Categories </h4><i class="lni lni-protection mt-1"></i>
           </div>
         </div>
         <div class="container">

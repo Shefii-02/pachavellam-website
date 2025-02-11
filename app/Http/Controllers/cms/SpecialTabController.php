@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Helper\Reply;
 use App\Helper;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 
@@ -22,7 +22,7 @@ class SpecialTabController extends Controller
     {
         //
         $special_tb = SpecialTab::get();
-      
+
         return view('cms.special-tab', compact('special_tb'));
     }
 
@@ -44,23 +44,28 @@ class SpecialTabController extends Controller
      */
     public function store(Request $request)
     {
+
+        $validated = $request->validate([
+            'image' => 'required',
+            'redirection' => 'required',
+        ]);
+
         //
         $image = file_get_contents($request->image);
-        $name = Str::random(40).'.png';
-        
-        Storage::put('/public/files/special/'.$name, $image);
-        			
+        $name = Str::random(40) . '.png';
+
+        Storage::put('/public/files/special/' . $name, $image);
+
 
         $special_tab = new SpecialTab;
-        $special_tab->image =  'special/'.$name;
+        $special_tab->image =  'special/' . $name;
         $special_tab->redirection =   $request->redirection;
         $special_tab->save();
 
         $special_tab->position = $special_tab->id;
         $special_tab->save();
 
-        return redirect()->route('adminkpsc.special-tab.index')->with('message','Data added Successfully');
-
+        return redirect()->route('adminkpsc.special-tab.index')->with('message', 'Data added Successfully');
     }
 
     /**
@@ -83,18 +88,18 @@ class SpecialTabController extends Controller
     public function edit($id)
     {
         //
-        $special_tab = SpecialTab::where('id',$id)->first();
+        $special_tab = SpecialTab::where('id', $id)->first();
 
         $edit_modal =   '<div class="row">
                             <div class="col-md-12">
                                 <div class="text-center justify-content-center align-items-center p-4 p-sm-5 border border-2 border-dashed position-relative rounded-3">
                                     <!-- Image -->
-                                    <img src="'.Storage::url('files/'.$special_tab->image).'" id="uploaded-image" class="uploaded-image h-50px mb-2" alt="">
+                                    <img src="' . Storage::url('files/' . $special_tab->image) . '" id="uploaded-image" class="uploaded-image h-50px mb-2" alt="">
                                     <div>
                                         <label style="cursor:pointer;">
                                             <span> 
-                                                <input class="form-control stretched-link" type="file"   accept="image/*" id="pic1" name="my-image"  accept="image/gif, image/jpeg, image/png" />
-                                                <input type="hidden" name="image" id="picture1" />
+                                                <input class="form-control stretched-link pic1" type="file"   accept="image/*" id="pic1" name="my-image"  accept="image/gif, image/jpeg, image/png" />
+                                                <input type="hidden" name="image" id="picture2" />
                                             </span>
                                         </label>
                                     </div>	
@@ -102,12 +107,12 @@ class SpecialTabController extends Controller
                             </div>
                             <div class="col-md-12">
                                 <label class="form-label">Redirection</label>
-                                <input class="form-control" value="'.$special_tab->redirection.'" type="text" name="redirection" placeholder="Enter Redirection link" >
-                                <input type="hidden" name="id" value="'.$special_tab->id.'">
+                                <input class="form-control" value="' . $special_tab->redirection . '" type="text" name="redirection" placeholder="Enter Redirection link" >
+                                <input type="hidden" name="id" value="' . $special_tab->id . '">
                             </div>
                             <div class="col-lg-12">
                                 <label class="form-label"> Position</label>
-                                <input class="form-control" name="position" type="text" value="'.$special_tab->position.'" placeholder="Showing Position" >
+                                <input class="form-control" name="position" type="text" value="' . $special_tab->position . '" placeholder="Showing Position" >
                             </div>
                             <div class="col-lg-12">
                                 <label class="form-label">Status</label>
@@ -119,7 +124,7 @@ class SpecialTabController extends Controller
                             
                         </div>';
 
-            return $edit_modal;
+        return $edit_modal;
     }
 
     /**
@@ -131,28 +136,32 @@ class SpecialTabController extends Controller
      */
     public function update_specialtab(Request $request, SpecialTab $specialTab)
     {
+        $validated = $request->validate([
+            'redirection' => 'required',
+        ]);
         //
-        $special_tab = $specialTab->where('id',$request->id)->first();
 
-        if(strlen($request->image) > 0){
+      
+        $special_tab = $specialTab->where('id', $request->id)->first();
+
+        if (strlen($request->image) > 0) {
             $image  = file_get_contents($request->image);
-            $name   = Str::random(40).'.png';
-            
-            Storage::put('/public/files/special/'.$name, $image);
-            
-            Storage::delete('/public/files/'.$special_tab->image);
-            $special_tab->image = 'special/'.$name;
+            $name   = Str::random(40) . '.png';
+
+            Storage::put('/public/files/special/' . $name, $image);
+
+            Storage::delete('/public/files/' . $special_tab->image);
+            $special_tab->image = 'special/' . $name;
             $special_tab->save();
         }
-        
-        
+
+
         $special_tab->redirection = $request->redirection;
         $special_tab->position   = $request->position;
         $special_tab->status     =  $request->status;
         $special_tab->save();
 
-        return redirect()->route('adminkpsc.special-tab.index')->with('message','Data Updated Successfully');
-
+        return redirect()->route('adminkpsc.special-tab.index')->with('message', 'Data Updated Successfully');
     }
 
     /**
@@ -161,14 +170,14 @@ class SpecialTabController extends Controller
      * @param  \App\Models\SpecialTab  $specialTab
      * @return \Illuminate\Http\Response
      */
-    public function delete(SpecialTab $specialTab,$id)
+    public function delete(SpecialTab $specialTab, $id)
     {
         //
-        $bnr = $specialTab->where('id',$id)->first();
-        
+        $bnr = $specialTab->where('id', $id)->first();
+
         $bnr->delete();
 
-        Storage::delete('/public/files/'.$bnr->image);
-        return redirect()->route('adminkpsc.special-tab.index')->with('message','Data Deleted Successfully');
+        Storage::delete('/public/files/' . $bnr->image);
+        return redirect()->route('adminkpsc.special-tab.index')->with('message', 'Data Deleted Successfully');
     }
 }

@@ -10,7 +10,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use App\Helper\Reply;
 use App\Helper;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 
@@ -24,10 +24,9 @@ class BannerController extends Controller
     public function index()
     {
         //
-        $banner = Banner::get();
-      
-        return view('cms.banner-slider', compact('banner'));
+        $banner = Banner::orderBy('id', 'desc')->get();
 
+        return view('cms.banner-slider', compact('banner'));
     }
 
     /**
@@ -38,7 +37,7 @@ class BannerController extends Controller
     public function create()
     {
         //
-        
+
 
     }
 
@@ -51,25 +50,29 @@ class BannerController extends Controller
     public function store(Request $request)
     {
 
-       
+        $validated = $request->validate([
+            'image' => 'required',
+            'redirection' => 'required'
+        ]);
+
 
         $image = file_get_contents($request->image);
-        $name = 'Banner-'.Str::random(40).'.png';
-        
-        Storage::put('/public/files/banner/'.$name, $image);
-        			
+        $name = 'Banner-' . Str::random(40) . '.png';
+
+        Storage::put('/public/files/banner/' . $name, $image);
+
         $banner = new Banner;
-        $banner->image = 'banner/'.$name;
+        $banner->image = 'banner/' . $name;
         $banner->redirection = $request->redirection;
         $banner->save();
 
         $banner->position = $banner->id;
         $banner->save();
 
-       
-        return redirect()->route('adminkpsc.banner-slider.index')->with('message','Data added Successfully');
+
+        return redirect()->route('adminkpsc.banner-slider.index')->with('message', 'Data added Successfully');
         //
-      
+
     }
 
     /**
@@ -81,7 +84,7 @@ class BannerController extends Controller
     public function show(Banner $banner)
     {
         //
-        
+
     }
 
     /**
@@ -90,11 +93,11 @@ class BannerController extends Controller
      * @param  \App\Models\Banner  $banner
      * @return \Illuminate\Http\Response
      */
-    public function edit(Banner $banner,$id)
+    public function edit(Banner $banner, $id)
     {
         //
-        $banner_list = $banner->where('id',$id)->first();
-     
+        $banner_list = $banner->where('id', $id)->first();
+
         $edit_model = '
        
         <div class="row">
@@ -102,7 +105,7 @@ class BannerController extends Controller
         <div class="col-md-12">
             <div class="text-center justify-content-center align-items-center p-4 p-sm-5 border border-2 border-dashed position-relative rounded-3">
                 <!-- Image -->
-                <img src="'.Storage::url('files/'.$banner_list->image).'" id="uploaded-image2" class="uploaded-image2 h-50px mb-2" alt="">
+                <img src="' . Storage::url('files/' . $banner_list->image) . '" id="uploaded-image2" class="uploaded-image2 h-50px mb-2" alt="">
                 <div>
                     <label style="cursor:pointer;">
                         <span> 
@@ -117,12 +120,12 @@ class BannerController extends Controller
             <div class="row">
                 <div class="col-lg-12">
                     <label class="form-label">Redirection</label>
-                    <input type="hidden" value="'.$banner_list->id.'" name="id">
-                    <input class="form-control" type="text" name="redirection" value="'.$banner_list->redirection.'" placeholder="Enter Redirection link" >
+                    <input type="hidden" value="' . $banner_list->id . '" name="id">
+                    <input class="form-control" type="text" name="redirection" value="' . $banner_list->redirection . '" placeholder="Enter Redirection link" >
                 </div>
                 <div class="col-lg-12">
                     <label class="form-label"> Position</label>
-                    <input class="form-control" name="position" type="text" value="'.$banner_list->position.'" placeholder="Showing Position" >
+                    <input class="form-control" name="position" type="text" value="' . $banner_list->position . '" placeholder="Showing Position" >
                 </div>
                 <div class="col-lg-12">
                     <label class="form-label">Status</label>
@@ -147,28 +150,30 @@ class BannerController extends Controller
     public function update_slider(Request $request, Banner $banner)
     {
         //
-        $banners = $banner->where('id',$request->id)->first();
+        $validated = $request->validate([
+            'redirection' => 'required'
+        ]);
 
-        if(strlen($request->image) > 0){
+        $banners = $banner->where('id', $request->id)->first();
+
+        if (strlen($request->image) > 0) {
             $image  = file_get_contents($request->image);
-            $name   = Str::random(40).'.png';
-            
-            Storage::put('/public/files/banner/'.$name, $image);
-            
-            Storage::delete('/public/files/banner/'.$banners->image);
-            $banners->image = 'banner/'.$name;
+            $name   = Str::random(40) . '.png';
+
+            Storage::put('/public/files/banner/' . $name, $image);
+
+            Storage::delete('/public/files/banner/' . $banners->image);
+            $banners->image = 'banner/' . $name;
             $banners->save();
         }
-        
-        
+
+
         $banners->redirection = $request->redirection;
         $banners->position   = $request->position;
         $banners->status     =  $request->status;
         $banners->save();
 
-        return redirect()->route('adminkpsc.banner-slider.index')->with('message','Data Updated Successfully');
-
-
+        return redirect()->route('adminkpsc.banner-slider.index')->with('message', 'Data Updated Successfully');
     }
 
     /**
@@ -177,15 +182,14 @@ class BannerController extends Controller
      * @param  \App\Models\Banner  $banner
      * @return \Illuminate\Http\Response
      */
-    public function delete(Banner $banner,$id)
+    public function delete(Banner $banner, $id)
     {
         //
-        $bnr = $banner->where('id',$id)->first();
-        
+        $bnr = $banner->where('id', $id)->first();
+
         $bnr->delete();
 
-        Storage::delete('/public/files/banner/'.$bnr->image);
-        return redirect()->route('adminkpsc.banner-slider.index')->with('message','Data Deleted Successfully');
-
+        Storage::delete('/public/files/banner/' . $bnr->image);
+        return redirect()->route('adminkpsc.banner-slider.index')->with('message', 'Data Deleted Successfully');
     }
 }

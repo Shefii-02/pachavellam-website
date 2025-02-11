@@ -11,10 +11,10 @@
 
                 <!-- Select option -->
                 <div class="col-md-3">
-                    @can('Time Table Add')
+                    {{-- @can('Time Table Add') --}}
                     <!-- Short by filter -->
                     <a href="#" class="btn btn-sm btn-primary me-1 add_new_banner"><i class="bi bi-plus me-1"></i>Add New</a>
-                    @endcan
+                    {{-- @endcan --}}
                     <span class="js-choice ">
                         
                     </span>
@@ -31,7 +31,7 @@
             <div class="row g-3 align-items-center justify-content-between mb-4">
                 
                 <div class="col-lg-12 new-banner-section " style="display: none;">
-                    @can('Time Table Add')
+                    {{-- @can('Time Table Add') --}}
                     <form action="" method="POST" enctype="multipart/form-data">
                         <div class="row">
                             
@@ -50,7 +50,7 @@
                         </div>
                         @csrf()
                     </form>
-                   @endcan
+                   {{-- @endcan --}}
 
                        
                     
@@ -58,7 +58,7 @@
                 </div>
             </div>
             <!-- Search and select END -->
-            @can('Time Table List')
+            {{-- @can('Time Table List') --}}
             <!-- Course list table START -->
             <div class="table-responsive border-0">
                 <table class="table table-dark-gray align-middle p-4 mb-0 table-hover">
@@ -97,9 +97,9 @@
                             <!-- Table data -->
                             <td>
                                 
-                                @can('Time Table Delete')
+                                {{-- @can('Time Table Delete') --}}
                                 <a data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Delete" aria-label="Delete"   data-id="{{$list->id}}" href="{{route('adminkpsc.time-table.delete', $list->id)}}" class="btn btn-sm btn-danger btn-circle "><i class="bi bi-trash "></i></a>
-                                @endcan
+                                {{-- @endcan --}}
                             </td>
                         </tr>
 
@@ -111,7 +111,7 @@
                 </table>
             </div>
             <!-- Course list table END -->
-            @endcan
+            {{-- @endcan --}}
             
         </div>
         <!-- Card body START -->

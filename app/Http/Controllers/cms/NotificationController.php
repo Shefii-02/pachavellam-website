@@ -46,6 +46,11 @@ class NotificationController extends Controller
     public function store(Request $request)
     {
         //
+        $validated = $request->validate([
+            'title' => 'required',
+            'redirection' => 'required'
+        ]);
+
         $notify = new Notification;
         $notify->title = $request->title;
         $notify->redirection =$request->redirection;
@@ -102,6 +107,12 @@ class NotificationController extends Controller
      */
     public function update_notify(Request $request, Notification $notification)
     {
+
+        $validated = $request->validate([
+            'title' => 'required',
+            'redirection' => 'required'
+        ]);
+        
         //
         $notifications = $notification->where('id',$request->id)->first();
         $notifications->title = $request->title;

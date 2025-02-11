@@ -115,8 +115,8 @@
                             <tr>
                                 <!-- Table data -->
                                 <td>{{$list->category}}</td>
-                                <td>Issue-{{$list->subcategory}}</td>
-                                <td>Issue-{{$list->title}}</td>
+                                <td>{{$list->subcategory}}</td>
+                                <td>{{$list->title}}</td>
                                 <td><a href="{{ Storage::url('files/'.$list->qstn_paper) }}" target="_new">Open</a></td>
                                 <td><a href="{{ Storage::url('files/'.$list->ans_key) }}" target="_new">Open</a></td>
                                 <!-- Table data -->

@@ -9,7 +9,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use App\Helper\Reply;
 use App\Helper;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PrevQuestionController extends Controller
@@ -46,24 +46,38 @@ class PrevQuestionController extends Controller
      */
     public function store(Request $request)
     {
-        //
-        $name1 = Str::random(40) . '.pdf';
+        $validated = $request->validate([
+            'qstn_file' => 'required',
+            'category' => 'required',
+            'subcategory'  => 'required',
+            'title'  => 'required',
+        ]);
 
+        //
+
+        $name1 = null;
+        $name2 = null;
+
+        $prevqstn = new PrevQuestion;
         if ($request->hasFile('qstn_file')) {
+            $name1 = Str::random(40) . '.pdf';
             $image1 = file_get_contents($request->file('qstn_file'));
             Storage::put('/public/files/question-papers/' . $name1, $image1);
+        } else {
+            $prevqstn->qstn_paper = 'question-papers/' . $name1;
         }
+
         if ($request->hasFile('ans_file')) {
             $name2 = Str::random(40) . '.pdf';
             $image2 = file_get_contents($request->file('ans_file'));
             Storage::put('/public/files/question-papers/' . $name2, $image2);
+        } else {
+            $prevqstn->ans_key = 'question-papers/' . $name2;
         }
-        $prevqstn = new PrevQuestion;
+
         $prevqstn->category = $request->category;
         $prevqstn->subcategory = $request->subcategory;
         $prevqstn->title = $request->title;
-        $prevqstn->qstn_paper = 'question-papers/' . $name1;
-        $prevqstn->ans_key = 'question-papers/' . $name2;
         $prevqstn->save();
 
         return redirect()->route('adminkpsc.prev-qstn.index')->with('message', 'Data added Successfully');
@@ -108,6 +122,11 @@ class PrevQuestionController extends Controller
     {
         //
         //
+        $validated = $request->validate([
+            'category' => 'required',
+            'subcategory'  => 'required',
+            'title'  => 'required',
+        ]);
 
         $prevqstn = PrevQuestion::where('id', $id)->first() ?? abort(404);
         $prevqstn->category = $request->category;
@@ -118,14 +137,14 @@ class PrevQuestionController extends Controller
             $name1 = Str::random(40) . '.pdf';
             $image1 = file_get_contents($request->file('qstn_file'));
             Storage::put('/public/files/' . $name1, $image1);
-            $prevqstn->qstn_paper = 'question-papers/'.$name1;
+            $prevqstn->qstn_paper = 'question-papers/' . $name1;
         }
         if ($request->hasFile('ans_file')) {
             $name2 = Str::random(40) . '.pdf';
             Storage::delete('/public/files/' . $prevqstn->ans_key);
             $image2 = file_get_contents($request->file('ans_file'));
             Storage::put('/public/files/' . $name2, $image2);
-            $prevqstn->ans_key = 'question-papers/'.$name2;
+            $prevqstn->ans_key = 'question-papers/' . $name2;
         }
 
         $prevqstn->save();

@@ -9,7 +9,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use App\Helper\Reply;
 use App\Helper;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PscresultsController extends Controller
@@ -22,7 +22,7 @@ class PscresultsController extends Controller
     public function index()
     {
         //
-        $result_list = Pscresults::get();
+        $result_list = Pscresults::orderBy('id','desc')->get();
       
         return view('cms.psc-results', compact('result_list'));
     }
@@ -46,6 +46,14 @@ class PscresultsController extends Controller
     public function store(Request $request)
     {
         //
+
+
+        $validated = $request->validate([
+            'file' => 'required',
+            'type' => 'required',
+            'title'  => 'required',
+        ]);
+
         $name = Str::random(40).'.pdf';
         
         $image = file_get_contents($request->file('file'));

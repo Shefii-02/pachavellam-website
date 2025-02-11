@@ -6,7 +6,7 @@ use App\Models\Timetable;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Helper;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
         
@@ -39,6 +39,15 @@ class TimetableController extends Controller
     public function store(Request $request)
     {
         //
+
+
+
+        $validated = $request->validate([
+            'file' => 'required',
+            'title'  => 'required',
+        ]);
+
+        
         $name = Str::random(40).'.pdf';
         $image = file_get_contents($request->file('file'));
         Storage::put('/public/time-table/'.$name, $image);

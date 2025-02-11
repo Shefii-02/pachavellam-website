@@ -9,7 +9,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use App\Helper\Reply;
 use App\Helper;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PscnewsController extends Controller
@@ -22,7 +22,7 @@ class PscnewsController extends Controller
     public function index()
     {
         //
-        $psc_news = Pscnews::orderBy('created_at','desc')->get();
+        $psc_news = Pscnews::orderBy('created_at', 'desc')->get();
 
         return view('cms.psc-news', compact('psc_news'));
     }
@@ -47,6 +47,12 @@ class PscnewsController extends Controller
     {
 
 
+        $validated = $request->validate([
+            'title'  => 'required',
+            'date'  => 'required',
+            'image'  => 'required',
+        ]);
+
         if ($request->hasFile('file') && $request->type == 'Pdf') {
             $file = $request->file('file');
 
@@ -70,7 +76,7 @@ class PscnewsController extends Controller
         $psc_news->post_date    = $request->date;
         $psc_news->image        = 'news/' . $name;
         $psc_news->status       = 1;
-        $psc_news->description  = $request->type == 'Pdf' ? 'news/'.$fileName : $request->content;
+        $psc_news->description  = $request->type == 'Pdf' ? 'news/' . $fileName : $request->content;
         $psc_news->save();
         $psc_news->position     = $psc_news->id;
         $psc_news->save();
@@ -111,18 +117,23 @@ class PscnewsController extends Controller
     public function update_pscnews(Request $request, Pscnews $pscnews)
     {
         //
+
+        $validated = $request->validate([
+            'title'  => 'required',
+            'date'  => 'required'
+        ]);
+
         $psc_news = $pscnews->where('id', $request->id)->first();
 
 
-        // $image  = file_get_contents($request->image);
-        // $name   = Str::random(40).'.png';
-
-        // Storage::put('/public/files/'.$name, $image);
-
-        // Storage::delete('/public/files/'.$psc_news->image);
-        // $psc_news->image = $name;
-        // $psc_news->save();
-
+        if (strlen($request->image) > 0) {
+            $image  = file_get_contents($request->image);
+            $name   = Str::random(40) . '.png';
+            Storage::put('/public/files/' . $name, $image);
+            Storage::delete('/public/files/' . $psc_news->image);
+            $psc_news->image = $name;
+            $psc_news->save();
+        }
 
 
         if ($request->hasFile('file') && $request->type == 'Pdf') {
@@ -140,7 +151,7 @@ class PscnewsController extends Controller
         $psc_news->title        = $request->title;
         $psc_news->post_date    = $request->date;
         $psc_news->status       = 1;
-        $psc_news->description  = $request->type == 'Pdf' ? 'news/'.$fileName : $request->content;
+        $psc_news->description  = $request->type == 'Pdf' ? 'news/' . $fileName : $request->content;
         $psc_news->save();
 
         return redirect()->route('adminkpsc.psc-news.index')->with('message', 'Data Updated Successfully');
