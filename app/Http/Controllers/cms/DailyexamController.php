@@ -260,10 +260,6 @@ class DailyexamController extends Controller
     }
 
 
-
-
-
-
     public function daily_exams_delete($id)
     {
 
@@ -275,7 +271,7 @@ class DailyexamController extends Controller
 
     public function daily_exams_delete_all($id)
     {
-        $exam = DailyExam::where('id', $id)->first();
+        $exam = DailyExam::where('id', $id)->first();  
         DailyExamdetails::where('exam_id', $id)->delete();
         DailyExamattempt::where('exam_id', $id)->delete();
         DailyExam::where('id', $id)->delete();
