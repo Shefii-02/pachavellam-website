@@ -145,8 +145,8 @@ class DailyexamController extends Controller
     {
 
         $date_list  = DailyExam::where('section', 'Daily Exam')->where('exam_date', $request->date)->get() ?? abort(404);
-        
-        return view('cms.daily-exam-show-date_based', compact( 'date_list'));
+
+        return view('cms.daily-exam-show-date_based', compact('date_list'));
     }
 
     public function daily_exams_edit($id)
@@ -251,15 +251,15 @@ class DailyexamController extends Controller
     public function questionDelete(Request $request)
     {
         $deleted = DailyExamdetails::where('id', $request->id)->delete();
-    
+
         if (!$deleted) {
             return response()->json(['error' => 'Not found'], 404);
         }
-    
+
         return response()->json(['success' => true]);
     }
-    
-    
+
+
 
 
 
@@ -275,7 +275,12 @@ class DailyexamController extends Controller
 
     public function daily_exams_delete_all($id)
     {
-        DailyExam::leftJoin('kpsc_daily_exams_details', 'kpsc_daily_exams_details.exam_id', 'kpsc_daily_exams.id')->where('kpsc_daily_exams_details.exam_id', $id)->where('kpsc_daily_exams.id', $id)->delete();
+        $exam = DailyExam::where('id', $id)->first();
+        DailyExamdetails::where('exam_id', $id)->delete();
+        DailyExamattempt::where('exam_id', $id)->delete();
+        DailyExam::where('id', $id)->delete();
+
+        // DailyExam::leftJoin('kpsc_daily_exams_details', 'kpsc_daily_exams_details.exam_id', 'kpsc_daily_exams.id')->where('kpsc_daily_exams_details.exam_id', $id)->where('kpsc_daily_exams.id', $id)->delete();
         return redirect()->back()->with('message', 'Data deleted Successfully');
     }
 
