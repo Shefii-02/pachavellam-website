@@ -66,7 +66,7 @@ class HomeController extends Controller
         
         date_default_timezone_set('Asia/Kolkata');
         
-        $next_exam = DailyExam::where('section','Daily Exam')->where('ended_at','>',date('Y-m-d H:i:s'))->orderby('started_at')->first();
+        $next_exam = DailyExam::where('section','Daily Exam')->where('ended_at','>',date('Y-m-d H:i:s'))->where('status',1)->orderby('started_at')->first();
         
         return view('kpsc.index',compact('banner', 'noftify', 'whatsnew', 'specialtab', 'ourvideos', 'category_free', 'category_paid','specialvideos','psc_news','next_exam'));
     }
@@ -84,7 +84,7 @@ class HomeController extends Controller
         
         date_default_timezone_set('Asia/Kolkata');
         
-        $next_exam = DailyExam::where('section','Daily Exam')->where('ended_at','>',date('Y-m-d H:i:s'))->orderby('started_at')->first();
+        $next_exam = DailyExam::where('section','Daily Exam')->where('ended_at','>',date('Y-m-d H:i:s'))->orderby('started_at')->where('status',1)->first();
         
         return view('kpsc.new-index',compact('banner', 'noftify', 'whatsnew', 'specialtab', 'ourvideos', 'category_free', 'category_paid','specialvideos','psc_news','next_exam'));
     }

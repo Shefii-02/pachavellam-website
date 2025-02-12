@@ -146,11 +146,11 @@
                     </li>
 
                     <!-- menu item 15 -->
-                    <li class="nav-item">
+                    {{-- <li class="nav-item">
                         <a class="nav-link {!! active_menu('time-table') !!}" href="{{ url('admin/kpsc/time-table') }}">
                             <i class="bi bi-table fa-fw me-2"></i>Time Table
                         </a>
-                    </li>
+                    </li> --}}
                     <!-- menu item 12 -->
                     <li class="nav-item">
                         <a class="nav-link {!! active_menu('syllabus') !!}" href="{{ url('admin/kpsc/syllabus') }}">
