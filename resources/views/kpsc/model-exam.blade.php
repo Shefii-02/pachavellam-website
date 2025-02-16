@@ -117,11 +117,11 @@
                                                     r="45"></circle>
                                                 <path id="base-timer-path-remaining" stroke-dasharray="-14 283"
                                                     class="base-timer__path-remaining red" d="
-                                      M 50, 50
-                                      m -45, 0
-                                      a 45,45 0 1,0 90,0
-                                      a 45,45 0 1,0 -90,0
-                                    "></path>
+                                          M 50, 50
+                                          m -45, 0
+                                          a 45,45 0 1,0 90,0
+                                          a 45,45 0 1,0 -90,0
+                                        "></path>
                                             </g>
                                         </svg>
                                         <span id="base-timer-label" class="base-timer__label hour">0:00</span>
@@ -136,11 +136,11 @@
                                                     r="45"></circle>
                                                 <path id="base-timer-path-remaining" stroke-dasharray="-14 283"
                                                     class="base-timer__path-remaining red" d="
-                                      M 50, 50
-                                      m -45, 0
-                                      a 45,45 0 1,0 90,0
-                                      a 45,45 0 1,0 -90,0
-                                    "></path>
+                                          M 50, 50
+                                          m -45, 0
+                                          a 45,45 0 1,0 90,0
+                                          a 45,45 0 1,0 -90,0
+                                        "></path>
                                             </g>
                                         </svg>
                                         <span id="base-timer-label" class="base-timer__label minutes">0:00</span>
@@ -155,11 +155,11 @@
                                                     r="45"></circle>
                                                 <path id="base-timer-path-remaining" stroke-dasharray="-14 283"
                                                     class="base-timer__path-remaining red" d="
-                                      M 50, 50
-                                      m -45, 0
-                                      a 45,45 0 1,0 90,0
-                                      a 45,45 0 1,0 -90,0
-                                    "></path>
+                                          M 50, 50
+                                          m -45, 0
+                                          a 45,45 0 1,0 90,0
+                                          a 45,45 0 1,0 -90,0
+                                        "></path>
                                             </g>
                                         </svg>
                                         <span id="base-timer-label" class="base-timer__label seconds">0:00</span>
@@ -287,6 +287,11 @@
                                 <a href="{{ url('kpsc/model-exam/' . $list_date->exam_date . '/' . $list_date->id . '/answerkey') }}"
                                     class=" py-2 badge badge-pill badge-info mb-2">Answer Key</a>
 
+                                <!-- Button trigger modal -->
+                                <button type="button" class=" py-2 badge badge-pill badge-success mb-2 upload-mark"
+                                    data-id="{{ $list_date->id }}">
+                                    Upload your marks
+                                </button>
 
 
                             </div>
@@ -402,7 +407,8 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="exampleModalLabel">Upload your exam mark details</h5>
-                    <button type="button" class="btn-close" onclick="$('#fromModal').modal('hide');" data-bs-dismiss="modal" aria-label="Close">X</button>
+                    <button type="button" class="btn-close" onclick="$('#fromModal').modal('hide');"
+                        data-bs-dismiss="modal" aria-label="Close">X</button>
                 </div>
                 <div class="modal-body upload-form">
 
