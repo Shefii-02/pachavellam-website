@@ -1,0 +1,17 @@
+[
+    {
+      "relation": [
+        "delegate_permission/common.handle_all_urls",
+        "delegate_permission/common.get_login_creds"
+      ],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.pachavellam.pachavellamofficial",
+        "sha256_cert_fingerprints": [
+          "EB:61:A7:DA:CF:06:80:AB:59:E7:63:39:81:31:66:D1:9E:1D:A3:3D:E3:87:9D:63:E1:50:96:B4:53:23:18:62",
+          "CA:03:61:7F:D0:29:F0:09:28:FC:3D:84:6A:FA:DF:C9:5E:10:5C:72:E3:DA:52:CF:CE:C2:73:40:26:E4:07:17",
+          "E5:DA:76:AE:87:9B:14:51:77:8F:AD:FA:02:8F:E2:75:C3:46:27:C5:E4:F2:5F:E6:B3:9F:52:2E:48:7F:6D:04"
+        ]
+      }
+    }
+  ]
