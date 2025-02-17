@@ -302,9 +302,9 @@
                 <h6 class="text-center">
                     Previous Exams
                 </h6>
+                @dump(date('Y-m-d H:i:s'))
 {{-- @dump(->where('exam_date', '<=', date('Y-m-d'))) --}}
-                @foreach ($date_list->where('ended_at', '<',
-                        date('Y-m-d H:i:s'))->sortByDesc('exam_date') as $key => $list_date)
+                @foreach ($date_list->where('ended_at', '<', date('Y-m-d H:i:s'))->sortByDesc('exam_date') as $key => $list_date)
                         <!-- Single Trending Post-->
                         <div class="single-trending-post bg-dark  d-flex">
                             <div class="post-thumbnail text-right mt-4">
