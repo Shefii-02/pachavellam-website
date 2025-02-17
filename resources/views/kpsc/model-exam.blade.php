@@ -302,7 +302,8 @@
                 <h6 class="text-center">
                     Previous Exams
                 </h6>
-
+@dump($date_list->where('exam_date', '<=', date('Y-m-d'))->where('ended_at', '<',
+                        date('Y-m-d H:i:s'))->sortByDesc('exam_date'),date('Y-m-d'))
                 @foreach ($date_list->where('exam_date', '<=', date('Y-m-d'))->where('ended_at', '<',
                         date('Y-m-d H:i:s'))->sortByDesc('exam_date') as $key => $list_date)
                         <!-- Single Trending Post-->
