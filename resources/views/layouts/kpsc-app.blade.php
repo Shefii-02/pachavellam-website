@@ -189,7 +189,7 @@
 <script src="/psc/js/wow.min.js"></script>
 <script src="/psc/js/default/date-clock.js"></script>
 <script src="/psc/js/default/dark-mode-switch.js"></script>
-<script src="/psc/js/default/active.js?v=1.1.4"></script>
+<script src="/psc/js/default/active.js?v=1.1.5"></script>
 <script>
     $.ajaxSetup({
 

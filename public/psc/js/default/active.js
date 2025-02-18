@@ -41,22 +41,22 @@
             dots: false,
             responsive:{
                 0:{
-                    items:1,
+                    items:2,
                     mouseDrag: true,
                     touchDrag: true
                 },
                 480:{
-                    items:1,
+                    items:2,
                     mouseDrag: true,
                     touchDrag: true
                 },
                 750:{
-                    items:2,
+                    items:4,
                     mouseDrag: true,
                     touchDrag: true
                 },
                 1000:{
-                    items:2,
+                    items:4,
                     dots: false,
                     nav: false,
                     mouseDrag: true,
@@ -96,7 +96,7 @@
                     touchDrag: true
                 },
                 1000:{
-                    items:3,
+                    items:4,
                     dots: false,
                     // nav: false,
                     // mouseDrag: false,
@@ -137,7 +137,7 @@
                     touchDrag: true
                 },
                 1000:{
-                    items:3,
+                    items:4,
                     dots: false,
                     nav: false,
                     mouseDrag: false,
