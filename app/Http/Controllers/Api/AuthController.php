@@ -6,11 +6,12 @@ use Laravel\Socialite\Facades\Socialite;
 use Exception;
 use App\Models\{User,ModelExamAttempt,DailyExamattempt,CapsuleComment,CapsuleLike};
 use Illuminate\Support\Facades\Auth;
-use Storage;
-use Hash;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use App\Http\Resources\UserResources;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 
@@ -66,7 +67,7 @@ class AuthController extends Controller
             }
               else
             {
-                 \Log::info(" data error");
+                Log::info(" data error");
                             return response()->json(['message' => 'data is null'], 401);
             
             }
@@ -101,12 +102,12 @@ class AuthController extends Controller
                     }
                     $finduser->save();
                     
-                    \Log::info('user existed');
+                    Log::info('user existed');
                     return response()->json(['message' => 'User signed in successfully','user' => new UserResources($finduser),'token' => $token],200);
     
                 }else{
                     
-                    \Log::info('user new');
+                    Log::info('user new');
 
                     $contents = file_get_contents($user['image']);
                     $name = Str::random(40).'.png';
@@ -131,7 +132,7 @@ class AuthController extends Controller
             }
             else
             {
-                 \Log::info(" data error");
+                 Log::info(" data error");
                             return response()->json(['message' => 'data is null'], 401);
             
             }
@@ -166,7 +167,7 @@ class AuthController extends Controller
             if ($request->filled('password')) {
                 $user->password = Hash::make($request->password);
             }
-
+            Log::info($request->all());
             if ($request->hasFile('profile_image')) {
                 // Delete old image if exists
                
@@ -177,6 +178,7 @@ class AuthController extends Controller
                 $image = $request->file('profile_image');
                 $imagePath = $image->store('users', 'public');
                 $user->image = basename($imagePath);
+                Log::info($imagePath);
             }
 
             $user->name = $request->full_name;
