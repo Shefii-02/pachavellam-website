@@ -179,7 +179,7 @@ class AuthController extends Controller
                     Log::info('New image stored at: users/' . $filename);
                     $user->image = $filename;
                 }
-            }
+            }   
             
 
             $user->name = $request->full_name;
