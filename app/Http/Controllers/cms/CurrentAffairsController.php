@@ -130,8 +130,10 @@ class CurrentAffairsController extends Controller
     }
 
     public function csvtype_store(Request $request){
-      
-// ,
+        $request->validate([
+            'file' => 'required|mimes:csv,txt,application/csv,application/vnd.ms-excel|max:2048',
+        ]);
+        
         Excel::import(new DailyCA,request()->file('file'));
             
         return redirect()->route('adminkpsc.daily-ca.index')->with('message','File uploaded Successfully');

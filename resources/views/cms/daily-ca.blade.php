@@ -432,21 +432,18 @@
                                 <div class="row">
                                     <div class="col-md-4 mt-2">
                                         <label class="form-label">Question</label>
-                                        <input class="form-control" required type="text" name="question[]"
-                                            placeholder="Enter Question">
+                                        <textarea class="form-control" required type="text" name="question[]" placeholder="Enter Question"></textarea>
 
                                     </div>
                                     <div class="col-md-4 mt-2">
                                         <label class="form-label">Answer</label>
-                                        <input class="form-control" required type="text" name="answer[]"
-                                            placeholder="Enter Answer">
+                                        <textarea class="form-control" required type="text" name="answer[]" placeholder="Enter Answer"></textarea>
 
                                     </div>
                                     <div class="col-md-4 mt-2">
                                         <label class="form-label">Note</label>
                                         <i class="float-end bi bi-trash  remove-div3" data-val="{{ $rand }}"></i>
-                                        <input class="form-control" type="text" name="note[]"
-                                            placeholder="Enter Note">
+                                        <textarea class="form-control" type="text" name="note[]" placeholder="Enter Note"></textarea>
                                     </div>
 
 
@@ -712,16 +709,16 @@
                     '<div class="row">' +
                     '<div class="col-md-4 mt-2">' +
                     '<label class="form-label">Question</label>' +
-                    '<input class="form-control" required  type="question" name="question[]" placeholder="Enter Question" >' +
+                    '<textarea class="form-control" required  type="question" name="question[]" placeholder="Enter Question" ></textarea>' +
                     '</div>' +
                     '<div class="col-md-4 mt-2">' +
                     '<label class="form-label">Answer</label>' +
-                    '<input class="form-control" required type="text" name="answer[]" placeholder="Enter Answer" >' +
+                    '<textarea class="form-control" required type="text" name="answer[]" placeholder="Enter Answer" ></textarea>' +
                     '</div>' +
                     '<div class="col-md-4 mt-2">' +
                     '<label class="form-label">Note</label>' +
                     '<i class="float-end bi bi-trash remove-div" data-val="' + rand + '"></i>' +
-                    '<input class="form-control"  type="text" name="note[]" placeholder="Enter Note" >' +
+                    '<textarea class="form-control"  type="text" name="note[]" placeholder="Enter Note" ></textarea>' +
                     '</div>' +
                     '</div>' +
                     '</div>';
