@@ -158,28 +158,23 @@ class AuthController extends Controller
             if ($request->hasFile('profile_image')) {
                 $image = $request->file('profile_image');
                 Log::info('Uploading file: ' . $image->getClientOriginalName() . ' (' . $image->getSize() . ' bytes)');
-            
+                
                 // Delete old image if exists
                 if ($user->image && Storage::disk('public')->exists('users/' . $user->image)) {
                     Storage::disk('public')->delete('users/' . $user->image);
                 }
-            
-                // Create a custom file name
+                
                 $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
-            
-                // Read the file content
-                $content = file_get_contents($image->getRealPath());
-            
-                // Put the file in the 'users' directory on the public disk
-                $path = Storage::disk('public')->put('users/' . $filename, $content);
-            
-                if (!$path) {
-                    Log::error('Image storage failed for file: ' . $image->getClientOriginalName());
+                $storedPath = Storage::disk('public')->putFileAs('users', $image, $filename);
+                
+                if (!$storedPath) {
+                    Log::error('Storage::putFileAs() failed for file: ' . $filename);
                 } else {
-                    Log::info('New image stored at: users/' . $filename);
+                    Log::info('New image stored at: ' . $storedPath);
                     $user->image = $filename;
                 }
-            }   
+            }
+            
             
 
             $user->name = $request->full_name;
