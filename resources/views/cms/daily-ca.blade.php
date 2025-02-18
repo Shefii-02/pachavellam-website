@@ -430,17 +430,17 @@
                             @php $rand = rand(100000,99999999999); @endphp
                             <div class="{{ $rand }}">
                                 <div class="row">
-                                    <div class="col-md-4 mt-2">
+                                    <div class="col-md-12 mt-2">
                                         <label class="form-label">Question</label>
                                         <textarea class="form-control" required type="text" name="question[]" placeholder="Enter Question"></textarea>
 
                                     </div>
-                                    <div class="col-md-4 mt-2">
+                                    <div class="col-md-12 mt-2">
                                         <label class="form-label">Answer</label>
                                         <textarea class="form-control" required type="text" name="answer[]" placeholder="Enter Answer"></textarea>
 
                                     </div>
-                                    <div class="col-md-4 mt-2">
+                                    <div class="col-md-12 mt-2">
                                         <label class="form-label">Note</label>
                                         <i class="float-end bi bi-trash  remove-div3" data-val="{{ $rand }}"></i>
                                         <textarea class="form-control" type="text" name="note[]" placeholder="Enter Note"></textarea>
@@ -707,15 +707,15 @@
                 var rand = Math.random().toString(36).slice(2);
                 var div_val = '<div class="' + rand + '">' +
                     '<div class="row">' +
-                    '<div class="col-md-4 mt-2">' +
+                    '<div class="col-md-12 mt-2">' +
                     '<label class="form-label">Question</label>' +
                     '<textarea class="form-control" required  type="question" name="question[]" placeholder="Enter Question" ></textarea>' +
                     '</div>' +
-                    '<div class="col-md-4 mt-2">' +
+                    '<div class="col-md-12 mt-2">' +
                     '<label class="form-label">Answer</label>' +
                     '<textarea class="form-control" required type="text" name="answer[]" placeholder="Enter Answer" ></textarea>' +
                     '</div>' +
-                    '<div class="col-md-4 mt-2">' +
+                    '<div class="col-md-12 mt-2">' +
                     '<label class="form-label">Note</label>' +
                     '<i class="float-end bi bi-trash remove-div" data-val="' + rand + '"></i>' +
                     '<textarea class="form-control"  type="text" name="note[]" placeholder="Enter Note" ></textarea>' +
