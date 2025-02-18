@@ -87,10 +87,12 @@ class ApiCollectionController extends Controller
         if($exm_details){
 
           if($exm_details->section == 'Daily Exam'){
-               $exam_attended = DailyExamattempt::with('user')->where('exam_id',$request->exam_id)->where('attend_ended_at','<=',$exm_details->ended_at)->orderBy('total_mark','DESC')->orderBy('attend_ended_at','ASC')->get();
+            // ->where('attend_ended_at','<=',$exm_details->ended_at)
+               $exam_attended = DailyExamattempt::with('user')->where('exam_id',$request->exam_id)->orderBy('total_mark','DESC')->orderBy('attend_ended_at','ASC')->get();
           }
           else{
-           $exam_attended = ModelExamAttempt::with('user')->where('exam_id',$request->exam_id)->where('answer_uploaded','<=',$exm_details->ended_at)->orderBy('total_mark','DESC')->orderBy('answer_uploaded','ASC')->get();
+            // ->where('answer_uploaded','<=',$exm_details->ended_at)
+           $exam_attended = ModelExamAttempt::with('user')->where('exam_id',$request->exam_id)->orderBy('total_mark','DESC')->orderBy('answer_uploaded','ASC')->get();
         
           }
 
