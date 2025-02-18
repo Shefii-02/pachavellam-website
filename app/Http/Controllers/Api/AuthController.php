@@ -153,19 +153,26 @@ class AuthController extends Controller
                 $user->password = Hash::make($request->password);
             }
 
-            // Log all request data for debugging
             Log::info('Update Profile Request:', $request->all());
 
             if ($request->hasFile('profile_image')) {
-                // Delete old image if exists using the correct path
+                $image = $request->file('profile_image');
+                Log::info('Uploading file: ' . $image->getClientOriginalName() . ' (' . $image->getSize() . ' bytes)');
+
+                // Delete old image if exists (using the correct path)
                 if ($user->image && Storage::disk('public')->exists('users/' . $user->image)) {
                     Storage::disk('public')->delete('users/' . $user->image);
                 }
-                // Store new image in the 'users' directory on the public disk
-                $image = $request->file('profile_image');
+
+                // Store new image
                 $imagePath = $image->store('users', 'public');
-                $user->image = basename($imagePath);
-                Log::info('New image stored at: ' . $imagePath);
+
+                if (!$imagePath) {
+                    Log::error('Image storage failed for file: ' . $image->getClientOriginalName());
+                } else {
+                    Log::info('New image stored at: ' . $imagePath);
+                    $user->image = basename($imagePath);
+                }
             }
 
             $user->name = $request->full_name;
@@ -181,7 +188,6 @@ class AuthController extends Controller
             return response()->json(['message' => $e->getMessage()], 500);
         }
     }
-
 
     public function forgetPassword(Request $request) {}
 
