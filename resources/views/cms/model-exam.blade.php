@@ -64,7 +64,7 @@
                                         <option class="plus two level">Plus two level</option>
                                         <option class="degree level">Degree level</option>
                                         <option class="programmer">Programmer</option>
-                                        <option class="typest">Typest</option>
+                                        <option class="typist">Typist</option>
                                     </select>
                                 </div>
 
