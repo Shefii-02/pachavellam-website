@@ -106,6 +106,7 @@
       width: 50px;
       background: #fff;
       border-radius: 50%;
+      height: 50px;
     }
     
     .flex{
