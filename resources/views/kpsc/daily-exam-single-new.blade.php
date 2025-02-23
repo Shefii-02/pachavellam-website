@@ -62,7 +62,7 @@
         <div class="questionBox1 mt-5">
             @foreach($QStn['questions'] as $index => $question)
                 <div class="questionContainer" id="question-{{ $index }}" style="display: {{ $index == 0 ? 'block' : 'none' }};">
-                    <div class="titleContainer">
+                    <div class="titleContainer bg-gray mt-4">
                         <h2 class="title">
                             {{-- {{ $index + 1 }}. --}}
                              {!! $question['text'] !!}</h2>
