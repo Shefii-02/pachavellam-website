@@ -59,17 +59,19 @@
             <input type="hidden" name="attempt" id="attempt" value="{{ $exam_id }}">
         </form>
 
-        <div class="questionBox">
+        <div class="questionBox mt-5">
             @foreach($QStn['questions'] as $index => $question)
                 <div class="questionContainer" id="question-{{ $index }}" style="display: {{ $index == 0 ? 'block' : 'none' }};">
                     <div class="titleContainer">
-                        <h2 class="title">{{ $index + 1 }}. {{ $question['text'] }}</h2>
+                        <h2 class="title">
+                            {{-- {{ $index + 1 }}. --}}
+                             {!! $question['text'] !!}</h2>
                     </div>
 
                     <div class="optionContainer">
                         @foreach($question['responses'] as $respIndex => $response)
                             <div class="option" onclick="selectOption({{ $index }}, {{ $respIndex }})">
-                                {{ chr(97 + $respIndex) }}. {{ $response['text'] }}
+                                {!! chr(97 + $respIndex) !!}. {!! $response['text'] !!}
                             </div>
                         @endforeach
                     </div>
