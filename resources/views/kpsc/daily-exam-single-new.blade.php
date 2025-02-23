@@ -342,7 +342,7 @@
                                         @click="selectOption(index)"
                                         :class="{ 'is-selected': userResponses[questionIndex] == index }"
                                         :key="index">
-                                        @{{ index | charIndex }}. @{!! response.text !!}
+                                        @{{ index | charIndex }}. @{{ response.text }}
                                     </div>
                                     
                                 </div>
