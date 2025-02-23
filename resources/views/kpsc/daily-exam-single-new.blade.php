@@ -157,7 +157,13 @@
                     return String.fromCharCode(97 + i);
                 }
             },
-
+            computed: {
+                charIndex() {
+                    return function(i) {
+                        return String.fromCharCode(97 + i);
+                    };
+                }
+            },
             methods: {
                 selectOption: function(index) {
                     Vue.set(this.userResponses, this.questionIndex, index);
@@ -338,15 +344,21 @@
 
                                 <!-- quizOptions -->
                                 <div class="optionContainer">
-                                    <div class="option" v-for="(response, index) in quiz.questions[questionIndex].responses"
+                                    {{-- <div class="option" v-for="(response, index) in quiz.questions[questionIndex].responses"
                                         @click="selectOption(index)"
                                         :class="{ 'is-selected': userResponses[questionIndex] == index }"
                                         :key="index">
                                         @{{ index | charIndex }}. @{{ response.text }}
+                                    </div> --}}
+                                    <div class="option" v-for="(response, index) in quiz.questions[questionIndex].responses"
+                                        @click="selectOption(index)"
+                                        :class="{ 'is-selected': userResponses[questionIndex] == index }"
+                                        :key="index">
+                                        {{ charIndex(index) }}. {{ response . text }}
                                     </div>
-                                    
+
                                 </div>
-                                
+
 
                                 <!--quizFooter: navigation and progress-->
                                 <div class="questionFooter">
@@ -467,7 +479,7 @@
         <!--/heroBody-->
 
     </section>
-@endsection 
+@endsection
 
 
 {{-- <div id="app">
