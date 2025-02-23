@@ -330,7 +330,7 @@
 
                                 <!-- questionTitle -->
                                 <div class="titleContainer ">
-                                    <h2 class="title d-inline" v-html="questionIndex+1"></h2>
+                                    {{-- <h2 class="title d-inline" v-html="questionIndex+1"></h2> --}}
                                     <h2 class="title d-inline" v-html="quiz.questions[questionIndex].text">
 
                                     </h2>
@@ -342,8 +342,7 @@
                                         @click="selectOption(index)"
                                         :class="{ 'is-selected': userResponses[questionIndex] == index }"
                                         :key="index">
-                                        {{-- @{{ index | charIndex }}. --}}
-                                         @{{ response.text }}
+                                        @{{ index | charIndex }}. @{{ response.text }}
                                     </div>
                                     
                                 </div>
