@@ -338,15 +338,21 @@
 
                                 <!-- quizOptions -->
                                 <div class="optionContainer">
-                                    <div class="option" v-for="(response, index) in quiz.questions[questionIndex].responses"
+                                    {{-- <div class="option" v-for="(response, index) in quiz.questions[questionIndex].responses"
                                         @click="selectOption(index)"
                                         :class="{ 'is-selected': userResponses[questionIndex] == index }"
                                         :key="index">
                                         @{{ index | charIndex }}. @{{ response.text }}
+                                    </div> --}}
+                                    <div class="option" v-for="(response, index) in quiz.questions[questionIndex].responses"
+                                        @click="selectOption(index)"
+                                        :class="{ 'is-selected': userResponses[questionIndex] == index }"
+                                        :key="index">
+                                        {{ String . fromCharCode(97 + index) }}. {{ response . text }}
                                     </div>
-                                    
+
                                 </div>
-                                
+
 
                                 <!--quizFooter: navigation and progress-->
                                 <div class="questionFooter">
@@ -467,7 +473,7 @@
         <!--/heroBody-->
 
     </section>
-@endsection 
+@endsection
 
 
 {{-- <div id="app">
