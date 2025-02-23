@@ -410,7 +410,8 @@
                                     </tr>
                                     <tr>
                                         <td>
-                                            @{{ score()[0] }} / @{{ quiz.questions.length }}
+                                            {{-- @{{ score()[0] }} / --}}
+                                             @{{ quiz.questions.length }}
                                         </td>
                                     </tr>
 
