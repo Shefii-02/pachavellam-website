@@ -348,7 +348,7 @@
                                         @click="selectOption(index)"
                                         :class="{ 'is-selected': userResponses[questionIndex] == index }"
                                         :key="index">
-                                        <span v-text="String.fromCharCode(97 + index) + '. ' + response.text"></span>
+                                        <span v-html="String.fromCharCode(97 + index) + '. ' + response.text"></span>
                                     </div>
 
                                 </div>
