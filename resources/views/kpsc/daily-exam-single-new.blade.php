@@ -70,7 +70,7 @@
 
                     <div class="optionContainer">
                         @foreach($question['responses'] as $respIndex => $response)
-                            <div class="option d-inline" onclick="selectOption({{ $index }}, {{ $respIndex }})">
+                            <div class="option " onclick="selectOption({{ $index }}, {{ $respIndex }})">
                                 {!! chr(97 + $respIndex) !!}. {!! $response['text'] !!}
                             </div>
                         @endforeach
