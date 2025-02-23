@@ -169,8 +169,10 @@
             <div class="person second">
                 <div class="num">2</div>
                 <i class="fas fa-caret-up"></i>
-                <img src="@if ($list_attempt->get(1)->image != null) {{ Storage::url('users/' . $list_attempt->get(1)->image) }} @else https://img.icons8.com/bubbles/100/000000/user.png @endif"
-                    alt="" class="photo">
+                <img src="{{ $list_attempt->get(1)->image ? Storage::url('users/' . $list_attempt->get(1)->image) : 'https://img.icons8.com/bubbles/100/000000/user.png' }}" 
+                onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?background=5c60f5&color=fff&name={{ urlencode($list_attempt->get(1)->name ?? 'User') }}';"
+                alt="" class="photo">
+           
                 <p class="link">@ {!! $list_attempt->get(1)->name !!}</p>
                 <p class="points">{!! number_format($list_attempt->get(1)->total_mark, 2) !!}</p>
                 <p class="points">{!! date('H:i:s', $list_attempt->get(1)->attempt_time) !!}</p>
@@ -180,8 +182,10 @@
             <div class="person first">
                 <div class="num">1</div>
                 <i class="fas fa-crown"></i>
-                <img src="@if ($list_attempt->get(0)->image) {{ Storage::url('users/' . $list_attempt->get(0)->image) }} @else https://img.icons8.com/bubbles/100/000000/user.png @endif"
-                    alt="" class="photo main">
+                <img src="{{ $list_attempt->get(0)->image ? Storage::url('users/' . $list_attempt->get(0)->image) : 'https://img.icons8.com/bubbles/100/000000/user.png' }}" 
+                onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?background=5c60f5&color=fff&name={{ urlencode($list_attempt->get(0)->name ?? 'User') }}';"
+                alt="" class="photo main">
+           
                 <p class="link">@ {!! $list_attempt->get(0)->name !!}</p>
                 <p class="points">{!! number_format($list_attempt->get(0)->total_mark, 2) !!}</p>
                 <p class="points">{!! date('H:i:s', $list_attempt->get(0)->attempt_time) !!}</p>
@@ -192,8 +196,9 @@
                 <div class="num">3</div>
                 <i class="fas fa-caret-up"></i>
 
-                <img src="@if ($list_attempt->get(2)->image != null) {{ Storage::url('users/' . $list_attempt->get(2)->image) }} @else https://img.icons8.com/bubbles/100/000000/user.png @endif"
-                    alt="" class="photo">
+                <img src="{{ $list_attempt->get(2)->image ? Storage::url('users/' . $list_attempt->get(2)->image) : 'https://img.icons8.com/bubbles/100/000000/user.png' }}" 
+                onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?background=5c60f5&color=fff&name={{ urlencode($list_attempt->get(2)->name ?? 'User') }}';"
+                alt="" class="photo">           
                 <p class="link">@ {!! $list_attempt->get(2)->name !!}</p>
                 <p class="points">{!! number_format($list_attempt->get(2)->total_mark, 2) !!}</p>
                 <p class="points">{!! date('H:i:s', $list_attempt->get(2)->attempt_time) !!}</p>
