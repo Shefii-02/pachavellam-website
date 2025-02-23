@@ -62,7 +62,7 @@
         <div class="questionBox1 mt-5">
             @foreach($QStn['questions'] as $index => $question)
                 <div class="questionContainer" id="question-{{ $index }}" style="display: {{ $index == 0 ? 'block' : 'none' }};">
-                    <div class="titleContainer bg-gray mt-4">
+                    <div class="titleContainer bg-gray mt-4 p-4">
                         <h2 class="title">
                             {{-- {{ $index + 1 }}. --}}
                              {!! $question['text'] !!}</h2>
@@ -70,7 +70,7 @@
 
                     <div class="optionContainer">
                         @foreach($question['responses'] as $respIndex => $response)
-                            <div class="option" onclick="selectOption({{ $index }}, {{ $respIndex }})">
+                            <div class="option d-inline" onclick="selectOption({{ $index }}, {{ $respIndex }})">
                                 {!! chr(97 + $respIndex) !!}. {!! $response['text'] !!}
                             </div>
                         @endforeach
