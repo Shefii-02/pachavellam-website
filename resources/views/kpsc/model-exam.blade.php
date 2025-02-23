@@ -244,7 +244,7 @@
 
                     $date_ongoing = $date_list
                         // ->where('exam_date', date('Y-m-d'))
-                        // ->where('started_at', '<=', date('Y-m-d H:i:s'))
+                        ->where('started_at', '<=', date('Y-m-d H:i:s'))
                         ->where('ended_at', '>=', date('Y-m-d H:i:s'));
                 @endphp
 
