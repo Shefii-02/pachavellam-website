@@ -94,7 +94,7 @@
                 @php
                     date_default_timezone_set('Asia/Kolkata');
                     $date_upcoming = $date_list
-                        ->where('exam_date', '>=', date('Y-m-d'))
+                        // ->where('exam_date', '>=', date('Y-m-d'))
                         ->where('started_at', '>', date('Y-m-d H:i:s'));
                     $k = 0;
                 @endphp
@@ -244,7 +244,7 @@
 
                     $date_ongoing = $date_list
                         // ->where('exam_date', date('Y-m-d'))
-                        ->where('started_at', '<=', date('Y-m-d H:i:s'))
+                        // ->where('started_at', '<=', date('Y-m-d H:i:s'))
                         ->where('ended_at', '>=', date('Y-m-d H:i:s'));
                 @endphp
 
