@@ -1,4 +1,4 @@
-{{-- @extends('layouts.without-bottom')
+@extends('layouts.without-bottom')
 @extends('kpsc.section_header')
 @section('title', $title ?? 'KPSC-Daily Exam List-')
 @php $title = "KPSC-Daily Exam List"; @endphp
@@ -465,10 +465,10 @@
         <!--/heroBody-->
 
     </section>
-@endsection --}}
+@endsection 
 
 
-<div id="app">
+{{-- <div id="app">
     <form id="daily_exam" action="{{ url('kpsc/daily-exam-store-result/' . $exam_date . '/' . $exam_id) }}"
         method="POST">
         @csrf
@@ -571,4 +571,4 @@
             }
         });
     }
-</script>
+</script> --}}
