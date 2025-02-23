@@ -59,7 +59,7 @@
             <input type="hidden" name="attempt" id="attempt" value="{{ $exam_id }}">
         </form>
 
-        <div class="questionBox mt-5">
+        <div class="questionBox1 mt-5">
             @foreach($QStn['questions'] as $index => $question)
                 <div class="questionContainer" id="question-{{ $index }}" style="display: {{ $index == 0 ? 'block' : 'none' }};">
                     <div class="titleContainer">
