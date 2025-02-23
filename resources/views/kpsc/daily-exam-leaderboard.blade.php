@@ -203,7 +203,8 @@
               </div>
               <div class="info flex">
                   
-                <img src="@if($list->image != null) {{ Storage::url('users/'.$list->image) }} @else https://img.icons8.com/bubbles/100/000000/user.png @endif" alt="" class="p_img">
+                {{-- <img src="@if($list->image != null) {{ Storage::url('users/'.$list->image) }} @else https://img.icons8.com/bubbles/100/000000/user.png @endif" alt="" class="p_img"> --}}
+                <img src="@if($list->image != null) {{ Storage::url('users/'.$list->image) }} @else https://img.icons8.com/bubbles/100/000000/user.png @endif" onerror="this.src='https://ui-avatars.com/api//?background=5c60f5&color=fff&name='.$list->name; alt="" class="p_img">
                 <p class="link">@ {!! $list->name !!}</p>
                 <p class="points">{!! number_format($list->total_mark,2) !!}<br>{!! date('H:i:s',$list->attempt_time) !!}</p>>
               </div>
