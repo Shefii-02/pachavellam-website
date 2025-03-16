@@ -72,6 +72,8 @@ Route::group(['prefix'=>'auth'], function(){
     Route::post('refferal-friends', 'Api\ApiCollectionController@refferalFriends');
   
     Route::post('ca-daily-exams', 'Api\ApiCollectionController@CaDailyExams');
+    Route::post('ca-daily-exam-single', 'Api\ApiCollectionController@CaDailyExamSingle');
+    
     
 
     Route::post('increase-bulletin-download-count/{id}', 'Api\ApiDataSaverController@BulletInDownload');

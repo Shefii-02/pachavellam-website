@@ -319,5 +319,12 @@ class ApiCollectionController extends Controller
         return response()->json(["data" => $data]);
     }
 
-    
+
+    public function CaDailyExamSingle(Request $request){
+        $date_details = DailyExamdetails::where('exam_id', $request->exam_id)->get();
+        $exam = DailyExam::where('id', $request->exam_id)->first();
+
+        return response()->json(['data' => DailyExamDetailsResources::collection($date_details), 'exam_ended' => $exam->ended_at, 'status' => 200]);
+    }
+
 }
