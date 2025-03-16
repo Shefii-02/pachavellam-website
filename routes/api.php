@@ -73,6 +73,7 @@ Route::group(['prefix'=>'auth'], function(){
   
     Route::post('ca-daily-exams', 'Api\ApiCollectionController@CaDailyExams');
     Route::post('ca-daily-exam-single', 'Api\ApiCollectionController@CaDailyExamSingle');
+
     
     
 
@@ -82,6 +83,7 @@ Route::group(['prefix'=>'auth'], function(){
     Route::post('feeds/add-comment', 'Api\ApiDataSaverController@FeedCommentStore');
     Route::post('feeds/add-like', 'Api\ApiDataSaverController@FeedAddLike');
     Route::post('daily-exam-single/store', 'Api\ApiDataSaverController@DailyExamSingleStore');
+    Route::post('ca-daily-exam-single/store', 'Api\ApiDataSaverController@CaDailyExamStore');
     Route::post('feeds/report-post', 'Api\ApiDataSaverController@FeedReportRequest');
     Route::post('feeds/report-comment', 'Api\ApiDataSaverController@FeedReportCommentRequest');
     Route::post('chat/report-message', 'Api\ApiDataSaverController@ReportMessageRequest');

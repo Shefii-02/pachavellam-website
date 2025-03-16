@@ -17,7 +17,7 @@ use App\Http\Resources\UserResources;
 use Illuminate\Support\Str;
 use App\Http\Resources\{BulletinResources, FeedResources, DailyExamResources, DailyExamDetailsResources, DailyExamLeaderboardResources};
 use App\Http\Resources\{ModelExamResources, ModelExamDetailsResources, ModelExamLeaderboardResources, BannerResources, PrevQyestionPapperResources};
-use App\Http\Resources\{ResultResources, SyllabusResources, SubjectCategoryResources};
+use App\Http\Resources\{ResultResources, SyllabusResources, SubjectCategoryResources, CaDailyExamListResources};
 
 class ApiCollectionController extends Controller
 
@@ -270,61 +270,26 @@ class ApiCollectionController extends Controller
 
     public function refferalFriends(Request $request)
     {
-
         $users = User::get();
         return response()->json(['data' => UserResources::collection($users), 'status' => 200]);
     }
 
     public function CaDailyExams(Request $request)
     {
-        $data = [
-            [
-                "id" => 1,
-                "day" => "1",
-                "started_at" => "2025-03-16 10:00:00",
-                "ended_at" => "2025-03-17 10:00:00",
-                "examtitle" => "TYPIST OMR - 10 (133/22)",
-                "status" => 1,
-                "attended" => true,
-                "first_attempt" => 8,
-                "last_attempt" => 10,
-                "star" => 3
-            ],
-            [
-                "id" => 2,
-                "day" => "2",
-                "started_at" => "2025-03-17 10:00:00",
-                "ended_at" => "2025-03-18 10:00:00",
-                "examtitle" => "TYPIST OMR - 11 (134/22)",
-                "status" => 1,
-                "attended" => true,
-                "first_attempt" => 6,
-                "last_attempt" => 9,
-                "star" => 2
-            ],
-            [
-                "id" => 3,
-                "day" => "3",
-                "started_at" => "2025-03-18 10:00:00",
-                "ended_at" => "2025-03-19 10:00:00",
-                "examtitle" => "TYPIST OMR - 12 (135/22)",
-                "status" => 0,
-                "attended" => false,
-                "first_attempt" => 0,
-                "last_attempt" => 0,
-                "star" => 0
-            ],
-        ];
-
-        return response()->json(["data" => $data]);
+        $user_id = $request->user_id;
+        $data = DailyExam::where('section', 'Daily Exam')->where('status', 1)
+            ->orderBy('id', 'ASC')
+            ->orderBy('examtitle', 'ASC')
+            ->get();
+        return response()->json(['data' => CaDailyExamListResources::collection($data), 'status' => 200]);
     }
 
 
-    public function CaDailyExamSingle(Request $request){
+    public function CaDailyExamSingle(Request $request)
+    {
         $date_details = DailyExamdetails::where('exam_id', $request->id)->get();
         $exam = DailyExam::where('id', $request->id)->first();
 
         return response()->json(['data' => DailyExamDetailsResources::collection($date_details), 'exam_ended' => $exam->ended_at, 'status' => 200]);
     }
-
 }
