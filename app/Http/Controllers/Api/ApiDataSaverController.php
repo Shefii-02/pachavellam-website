@@ -264,10 +264,9 @@ class ApiDataSaverController extends Controller
             $new_one->wrong           = $request->incorrect;
             $new_one->skipped         = $request->unanswered;
             $new_one->attend_ended_at = date('Y-m-d H:i:s');
-            $new_one->attempt_time    = null;
             $new_one->total           = ($request->correct - ($request->incorrect * 0.333));
             $new_one->star            = $star; // Now integer
-            $new_one->summary         = $request->summary;
+            $new_one->summary         = $request->summary ?? '';
             $new_one->status          = "1";
             $new_one->save();
 
