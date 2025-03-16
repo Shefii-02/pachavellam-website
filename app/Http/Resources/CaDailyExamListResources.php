@@ -33,10 +33,10 @@ class CaDailyExamListResources extends JsonResource
             'ended_at' => $this->ended_at,
             'examtitle' => $this->examtitle,
             'status' => $this->status,
-            'attended' => $attempts->exists(),
-            'first_attempt' => $attempts->orderBy('id', 'asc')->pluck('total')->first() ?? 0,
-            'last_attempt' => $attempts->orderBy('id', 'desc')->pluck('total')->first() ?? 0,
-            'star' => $attempts->orderBy('star', 'desc')->pluck('star')->first() ?? 0,
+            'attended' => $this->ca_exam_attened ? true : false,
+            'first_attempt' => $this->ca_exam_attened->orderBy('id', 'asc')->pluck('total')->first() ?? 0,
+            'last_attempt' => $this->ca_exam_attened->orderBy('id', 'desc')->pluck('total')->first() ?? 0,
+            'star' => $$this->ca_exam_attened->orderBy('star', 'desc')->pluck('star')->first() ?? 0,
         ];
     }
 }
