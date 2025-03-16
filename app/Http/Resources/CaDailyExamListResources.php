@@ -21,7 +21,9 @@ class CaDailyExamListResources extends JsonResource
      * @return array<string, mixed>
      */
     public function toArray($request)
-    {        
+    {
+        $attempts = $this->ca_exam_attened ?? collect(); // Ensure it's a collection
+
         return [
             'id' => $this->id,
             'day' => $this->examtitle,
@@ -30,10 +32,10 @@ class CaDailyExamListResources extends JsonResource
             'ended_at' => $this->ended_at,
             'examtitle' => $this->examtitle,
             'status' => $this->status,
-            'attended' => $this->ca_exam_attened ? true : false,
-            'first_attempt' => $this->ca_exam_attened->orderBy('id', 'asc')->pluck('total')->first() ?? 0,
-            'last_attempt' => $this->ca_exam_attened->orderBy('id', 'desc')->pluck('total')->first() ?? 0,
-            'star' => $this->ca_exam_attened->orderBy('star', 'desc')->pluck('star')->first() ?? 0,
+            'attended' => $attempts->isNotEmpty(), // Check if the relationship has data
+            'first_attempt' => $attempts->sortBy('id')->pluck('total')->first() ?? 0,
+            'last_attempt' => $attempts->sortByDesc('id')->pluck('total')->first() ?? 0,
+            'star' => $attempts->sortByDesc('star')->pluck('star')->first() ?? 0,
         ];
     }
 }
