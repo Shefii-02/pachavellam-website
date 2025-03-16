@@ -278,16 +278,16 @@ class ApiCollectionController extends Controller
     {
         $user_id = $request->user_id;
     
-        $data = DailyExam::whereHas('exam_details') // Ensure exam has details
-            ->with('ca_exam_attened') // Load user attempts
-            ->whereHas('ca_exam_attened', function ($query) use ($user_id) {
-                $query->where('user_id', $user_id); // Check if the user attempted
-            })
-            ->where('section', 'CA-Daily-Exam')
-            ->where('status', 1)
-            ->orderBy('id', 'ASC')
-            ->orderBy('examtitle', 'ASC')
-            ->get();
+        $data = DailyExam::whereHas('exam_details')
+                    ->with(['ca_exam_attened' => function ($query) use ($user_id) {
+                        $query->where('user_id', $user_id);
+                    }])
+                    ->where('section', 'CA-Daily-Exam')
+                    ->where('status', 1)
+                    ->orderBy('id', 'ASC')
+                    ->orderBy('examtitle', 'ASC')
+                    ->get();
+    
     
         return response()->json(['data' => CaDailyExamListResources::collection($data), 'status' => 200]);
     }
