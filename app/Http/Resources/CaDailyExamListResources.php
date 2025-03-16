@@ -23,11 +23,8 @@ class CaDailyExamListResources extends JsonResource
     public function toArray($request)
     {
         $user_id = $this->user_id ?? $request->user_id;
-
-        // Fetch exam attempts for the user
-        $attempts = CaDailyExamAttempt::where('user_id', $user_id)
-            ->where('exam_id', $this->id);
-
+        $attempts = CaDailyExamAttempt::where('user_id', $user_id)->where('exam_id', $this->id);
+        $attempts->dd();
         return [
             'id' => $this->id,
             'day' => $this->examtitle,
@@ -37,9 +34,9 @@ class CaDailyExamListResources extends JsonResource
             'examtitle' => $this->examtitle,
             'status' => $this->status,
             'attended' => $attempts->exists(),
-            'first_attempt' => $attempts->clone()->orderBy('id', 'asc')->value('total') ?? 0,
-            'last_attempt' => $attempts->clone()->orderBy('id', 'desc')->value('total') ?? 0,
-            'star' => $attempts->clone()->orderBy('star', 'desc')->value('star') ?? 0,
+            'first_attempt' => $attempts->orderBy('id', 'asc')->pluck('total')->first() ?? 0,
+            'last_attempt' => $attempts->orderBy('id', 'desc')->pluck('total')->first() ?? 0,
+            'star' => $attempts->orderBy('star', 'desc')->pluck('star')->first() ?? 0,
         ];
     }
 }
