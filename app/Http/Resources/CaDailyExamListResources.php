@@ -24,7 +24,7 @@ class CaDailyExamListResources extends JsonResource
     {
         $user_id = $this->user_id ?? $request->user_id;
         $attempts = CaDailyExamAttempt::where('user_id', $user_id)->where('exam_id', $this->id);
-        $attempts->dd();
+        
         return [
             'id' => $this->id,
             'day' => $this->examtitle,
