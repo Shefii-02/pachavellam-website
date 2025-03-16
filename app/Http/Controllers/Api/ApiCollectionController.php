@@ -277,7 +277,7 @@ class ApiCollectionController extends Controller
     public function CaDailyExams(Request $request)
     {
         $user_id = $request->user_id;
-        $data = DailyExam::whereHAs('exam_details')->where('section', 'CA-Daily-Exam')->where('status', 1)
+        $data = DailyExam::whereHas('exam_details')->where('section', 'CA-Daily-Exam')->where('status', 1)
             ->orderBy('id', 'ASC')
             ->orderBy('examtitle', 'ASC')
             ->get();
