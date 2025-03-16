@@ -281,7 +281,12 @@ class ApiCollectionController extends Controller
             ->orderBy('id', 'ASC')
             ->orderBy('examtitle', 'ASC')
             ->get();
-        return response()->json(['data' => CaDailyExamListResources::collection($data), 'status' => 200]);
+            return response()->json([
+                'data' => CaDailyExamListResources::collection($data)->map(function ($resource) use ($user_id) {
+                    return (new CaDailyExamListResources($resource, $user_id))->toArray(request());
+                }),
+                'status' => 200
+            ]);    
     }
 
 
