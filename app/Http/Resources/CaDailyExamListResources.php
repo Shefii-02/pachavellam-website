@@ -21,10 +21,7 @@ class CaDailyExamListResources extends JsonResource
      * @return array<string, mixed>
      */
     public function toArray($request)
-    {
-        $user_id = $this->user_id ?? $request->user_id;
-        $attempts = CaDailyExamAttempt::where('user_id', $user_id)->where('exam_id', $this->id);
-        
+    {        
         return [
             'id' => $this->id,
             'day' => $this->examtitle,
@@ -36,7 +33,7 @@ class CaDailyExamListResources extends JsonResource
             'attended' => $this->ca_exam_attened ? true : false,
             'first_attempt' => $this->ca_exam_attened->orderBy('id', 'asc')->pluck('total')->first() ?? 0,
             'last_attempt' => $this->ca_exam_attened->orderBy('id', 'desc')->pluck('total')->first() ?? 0,
-            'star' => $$this->ca_exam_attened->orderBy('star', 'desc')->pluck('star')->first() ?? 0,
+            'star' => $this->ca_exam_attened->orderBy('star', 'desc')->pluck('star')->first() ?? 0,
         ];
     }
 }
