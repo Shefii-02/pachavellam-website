@@ -257,9 +257,9 @@ class ApiDataSaverController extends Controller
         date_default_timezone_set('Asia/Kolkata');
 
         try {
-            $new_one = DailyExamattempt::where('user_id', $request->user_id)
-                ->where('exam_id', $request->exam_id)
-                ->first();
+            $new_one = CaDailyExamAttempt::where('user_id', $request->user_id)
+                                    ->where('exam_id', $request->exam_id)
+                                    ->first();
 
             if (!$new_one) {
                 $new_one = new CaDailyExamAttempt();

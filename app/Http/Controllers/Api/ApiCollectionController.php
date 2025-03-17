@@ -287,7 +287,6 @@ class ApiCollectionController extends Controller
                             ->orderBy('level', 'ASC')
                             ->get();
     
-    
         return response()->json(['data' => CaDailyExamListResources::collection($data), 'status' => 200]);
     }
     
@@ -295,7 +294,7 @@ class ApiCollectionController extends Controller
 
     public function CaDailyExamSingle(Request $request)
     {
-        $date_details = DailyExamdetails::where('exam_id', $request->id)->get();
+        $date_details = DailyExamdetails::where('exam_id', $request->id)->inRandomOrder()->get();
         $exam = DailyExam::where('id', $request->id)->first();
 
         return response()->json(['data' => DailyExamDetailsResources::collection($date_details), 'exam_ended' => $exam->ended_at, 'status' => 200]);
