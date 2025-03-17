@@ -276,7 +276,7 @@ class ApiDataSaverController extends Controller
             }
             else{
                 $exsitingStar = $new_one->star;
-                $new_one->star            = $star  > $exsitingStar  ? $star : $exsitingStar;      
+                $new_one->star            = $star  >= $exsitingStar  ? $star : $exsitingStar;      
                 $new_one->status          = "2";
             }
     
