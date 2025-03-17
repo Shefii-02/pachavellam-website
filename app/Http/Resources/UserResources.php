@@ -22,7 +22,7 @@ class UserResources extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'image' => file_exists(url('storage/users', $this->image)) ? url('storage/users', $this->image) : url('assets/images/user.png'),
+            'image' => file_exists(url('storage/users/', $this->image)) ? url('storage/users', $this->image) : url('assets/images/user.png'),
             'mobile' => $this->mobile ?? '',
             'type' => $this->type ?? 'Student',
             'status' => $this->status ?? '',

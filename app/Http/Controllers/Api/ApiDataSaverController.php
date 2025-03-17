@@ -257,17 +257,29 @@ class ApiDataSaverController extends Controller
         date_default_timezone_set('Asia/Kolkata');
 
         try {
-            $new_one = new CaDailyExamAttempt();
-            $new_one->user_id         = $request->user_id;
-            $new_one->exam_id         = $request->exam_id;
-            $new_one->right           = $request->correct;
-            $new_one->wrong           = $request->incorrect;
-            $new_one->skipped         = $request->unanswered;
-            $new_one->attend_ended_at = date('Y-m-d H:i:s');
-            $new_one->total           = ($request->correct - ($request->incorrect * 0.333));
-            $new_one->star            = $star; // Now integer
-            $new_one->summary         = $request->summary ?? '';
-            $new_one->status          = "1";
+            $new_one = DailyExamattempt::where('user_id', $request->user_id)
+                ->where('exam_id', $request->exam_id)
+                ->first();
+
+            if (!$new_one) {
+                $new_one = new CaDailyExamAttempt();
+                $new_one->user_id         = $request->user_id;
+                $new_one->exam_id         = $request->exam_id;
+                $new_one->right           = $request->correct;
+                $new_one->wrong           = $request->incorrect;
+                $new_one->skipped         = $request->unanswered;
+                $new_one->attend_ended_at = date('Y-m-d H:i:s');
+                $new_one->total           = ($request->correct - ($request->incorrect * 0.333));
+                $new_one->star            = $star;
+                $new_one->status          = "1"; 
+                $new_one->summary         = $request->summary ?? '';
+            }
+            else{
+                $exsitingStar = $new_one->star;
+                $new_one->star            = $star  > $exsitingStar  ? $star : $exsitingStar;      
+                $new_one->status          = "2";
+            }
+    
             $new_one->save();
 
             return response()->json(['message' => 'Your Mark Added Successfully', 'data' => $new_one], 200);
