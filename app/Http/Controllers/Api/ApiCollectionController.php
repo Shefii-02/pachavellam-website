@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
-use App\Models\{Bulletin, Capsule, DailyExam, DailyExamdetails, DailyExamattempt, ModelExamDetails, ModelExamAttempt, CurrentAffairs};
+use App\Models\{Bulletin, CaDailyExamAttempt, Capsule, DailyExam, DailyExamdetails, DailyExamattempt, ModelExamDetails, ModelExamAttempt, CurrentAffairs};
 use App\Models\{Banner, SpecialTab, Notification, KpscSubject, Syllabus, PrevQuestion, Pscresults, Pscnews, Timetable, Material};
 use Exception;
 use App\Models\User;
@@ -17,7 +17,7 @@ use App\Http\Resources\UserResources;
 use Illuminate\Support\Str;
 use App\Http\Resources\{BulletinResources, FeedResources, DailyExamResources, DailyExamDetailsResources, DailyExamLeaderboardResources};
 use App\Http\Resources\{ModelExamResources, ModelExamDetailsResources, ModelExamLeaderboardResources, BannerResources, PrevQyestionPapperResources};
-use App\Http\Resources\{ResultResources, SyllabusResources, SubjectCategoryResources, CaDailyExamListResources};
+use App\Http\Resources\{ResultResources, SyllabusResources, SubjectCategoryResources, CaDailyExamListResources,CADailyExamLeaderboardResources};
 
 class ApiCollectionController extends Controller
 
@@ -299,5 +299,10 @@ class ApiCollectionController extends Controller
         $exam = DailyExam::where('id', $request->id)->first();
 
         return response()->json(['data' => DailyExamDetailsResources::collection($date_details), 'exam_ended' => $exam->ended_at, 'status' => 200]);
+    }
+
+    public function CADailyExamLeaderboard(Request $request) {
+        $exam_attended = CaDailyExamAttempt::with('user')->where('exam_id', $request->exam_id)->get();
+        return response()->json(['data' => CADailyExamLeaderboardResources::collection($exam_attended), 'status' => 200]);
     }
 }

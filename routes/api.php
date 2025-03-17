@@ -49,6 +49,7 @@ Route::group(['prefix'=>'auth'], function(){
     Route::post('daily-exams', 'Api\ApiCollectionController@DailyExams');
     Route::post('daily-exam-single', 'Api\ApiCollectionController@DailyExamSingle');
     Route::post('daily-exam-leaderboard', 'Api\ApiCollectionController@DailyExamLeaderboard');
+
     
     Route::post('model-exams', 'Api\ApiCollectionController@ModelExams');
     Route::post('model-exam-single', 'Api\ApiCollectionController@ModelExamSingle');
@@ -74,7 +75,7 @@ Route::group(['prefix'=>'auth'], function(){
     Route::post('ca-daily-exams', 'Api\ApiCollectionController@CaDailyExams');
     Route::post('ca-daily-exam-single', 'Api\ApiCollectionController@CaDailyExamSingle');
 
-    
+    Route::post('ca-exam-leaderboard', 'Api\ApiCollectionController@CADailyExamLeaderboard');
     
 
     Route::post('increase-bulletin-download-count/{id}', 'Api\ApiDataSaverController@BulletInDownload');
