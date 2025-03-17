@@ -41,7 +41,7 @@ Route::group(['prefix' => 'auth'], function () {
 
 
 Route::post("app-sections", function () {
-    return response()->json([
+    $data = [
         'StoriesSection' => true,
         'BannerSection' => true,
         'SpecialSeries' => [
@@ -54,7 +54,8 @@ Route::post("app-sections", function () {
             'tab2' => true,
             'tab3' => false
         ]
-    ]);
+    ];
+    return response()->json(['data' => $data, 'status' => 200]);
 });
 
 
