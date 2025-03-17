@@ -40,7 +40,7 @@ Route::group(['prefix' => 'auth'], function () {
 });
 
 
-Route::get("app-sections", function () {
+Route::post("app-sections", function () {
     return response()->json([
         'StoriesSection' => true,
         'BannerSection' => true,
