@@ -47,4 +47,6 @@ class DailyExam extends Model
     {
         return $this->hasMany('App\Models\CaDailyExamAttempt', 'exam_id', 'id');
     }
+
+    
 }

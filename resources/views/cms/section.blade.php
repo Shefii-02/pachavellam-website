@@ -43,6 +43,12 @@
                             <i class="bi bi-house fa-fw me-2"></i>Dashboard
                         </a>
                     </li> <!-- menu item 2 -->
+
+                    <li class="nav-item">
+                        <a class="nav-link {!! active_menu('ca-daily-exam') !!} " href="{{ url('admin/kpsc/ca-daily-exam') }}">
+                            <i class="bi bi-list-task fa-fw me-2"></i>CA Daily Exam Series
+                        </a>
+                    </li>
                     <!-- menu item 21 -->
                     <li class="nav-item">
                         <a class="nav-link {!! active_menu('special-tab') !!}" href="{{ url('admin/kpsc/special-tab') }}">

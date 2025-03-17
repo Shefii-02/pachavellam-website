@@ -178,6 +178,23 @@ Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['auth']], f
         Route::get('daily-exam/date_depend_subjects', 'cms\DailyexamController@date_depend_subjects');
         Route::get('daily-exam/clear-leaderboard/{id}', 'cms\DailyexamController@clear_leaderboard');
 
+        Route::get('ca-daily-exam', 'cms\CaDailyexamController@daily_exams');
+        Route::get('ca-daily-exam/view', 'cms\CaDailyexamController@daily_exams_show');
+        Route::get('ca-daily-exam/date_based', 'cms\CaDailyexamController@daily_exams_date_based');
+        Route::post('ca-daily-exam/store', 'cms\CaDailyexamController@daily_exams_store');
+        Route::post('ca-daily-exam/edit-details', 'cms\CaDailyexamController@exam_details_update');
+        Route::get('ca-daily-exam/edit/{id}', 'cms\CaDailyexamController@daily_exams_edit');
+        Route::post('ca-daily-exam/update/{id}', 'cms\CaDailyexamController@daily_exams_update');
+        Route::get('ca-daily-exam/question-edit', 'cms\CaDailyexamController@questionEdit');
+        Route::get('ca-daily-exam/question-delete', 'cms\CaDailyexamController@questionDelete');
+        Route::post('ca-daily-exam/save-question/{id}', 'cms\CaDailyexamController@save_question');
+        Route::post('ca-daily-exam/update-question/{id}', 'cms\CaDailyexamController@update_question');
+        Route::get('ca-daily-exam/delete/{id}', 'cms\CaDailyexamController@daily_exams_delete');
+        Route::get('ca-daily-exam/delete-all/{id}', 'cms\CaDailyexamController@daily_exams_delete_all');
+        Route::get('ca-daily-exam/add-weekly-monthly-exam', 'cms\CaDailyexamController@daily_exams_delete_all');
+        Route::get('ca-daily-exam/date_depend_subjects', 'cms\CaDailyexamController@date_depend_subjects');
+        Route::get('ca-daily-exam/clear-leaderboard/{id}', 'cms\CaDailyexamController@clear_leaderboard');
+
 
 
         Route::get('model-exam', 'cms\ModelExamController@model_exams');
