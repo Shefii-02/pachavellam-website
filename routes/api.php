@@ -46,14 +46,16 @@ Route::post("app-sections", function () {
         'BannerSection' => true,
         'SpecialSeries' => [
             'tab1' => true,
-            'tab2' => true,
+            'tab2' => false,
             'tab3' => false
         ],
         'SpecialTabScreen' => [
             'tab1' => true,
             'tab2' => true,
-            'tab3' => false
-        ]
+            'tab3' => true,
+            'tab4' => true
+        ],
+        'CategoryScreen' => false
     ];
     return response()->json(['data' => $data, 'status' => 200]);
 });
