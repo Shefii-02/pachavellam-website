@@ -18,11 +18,11 @@ class UserResources extends JsonResource
     public function toArray($request): array
     {
         return [
-          
+
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'image' => $this->image == null || $this->image == '' ? url('assets/images/user.png') : url('storage/users/',$this->image),
+            'image' => file_exists(url('storage/users', $this->image)) ? url('storage/users', $this->image) : url('assets/images/user.png'),
             'mobile' => $this->mobile ?? '',
             'type' => $this->type ?? 'Student',
             'status' => $this->status ?? '',
