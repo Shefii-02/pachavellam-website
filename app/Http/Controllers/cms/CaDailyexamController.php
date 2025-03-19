@@ -13,6 +13,7 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use App\Helper\Reply;
 use App\Helper;
+use App\Models\CaDailyExamAttempt;
 use Illuminate\Support\Str;
 
 class CaDailyexamController extends Controller
@@ -240,7 +241,7 @@ class CaDailyexamController extends Controller
     {
         $exam = DailyExam::where('id', $id)->first();  
         DailyExamdetails::where('exam_id', $id)->delete();
-        DailyExamattempt::where('exam_id', $id)->delete();
+        CaDailyExamAttempt::where('exam_id', $id)->delete();
         DailyExam::where('id', $id)->delete();
 
         // DailyExam::leftJoin('kpsc_daily_exams_details', 'kpsc_daily_exams_details.exam_id', 'kpsc_daily_exams.id')->where('kpsc_daily_exams_details.exam_id', $id)->where('kpsc_daily_exams.id', $id)->delete();
@@ -251,7 +252,7 @@ class CaDailyexamController extends Controller
     public function clear_leaderboard($id)
     {
 
-        $date_based = DailyExamattempt::where('exam_id', $id)->delete();
+        $date_based = CaDailyExamAttempt::where('exam_id', $id)->delete();
 
         return redirect()->back()->with('message', 'Data deleted Successfully');
     }
