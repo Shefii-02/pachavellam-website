@@ -32,7 +32,8 @@ class CaDailyExamListResources extends JsonResource
             'ended_at' => $this->ended_at,
             'level' => $this->level,
             'status' => $this->status,
-            'day_allow' => (date('Y-m-d',strtotime($this->exam_date)) <= date('Y-m-d')),
+            // 'day_allow' => (date('Y-m-d',strtotime($this->exam_date)) <= date('Y-m-d')),
+            'day_allow' => true,
             'completed' => $this->ca_exam_attened->count() ? true : false,
             'attended' => $attempts->isNotEmpty(), // Check if the relationship has data
             'first_attempt' => $attempts->sortBy('id')->pluck('total')->first() ?? 0,
