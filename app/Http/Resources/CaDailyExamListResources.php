@@ -26,7 +26,7 @@ class CaDailyExamListResources extends JsonResource
 
         return [
             'id' => $this->id,
-            'day' => $this->examtitle,
+            'day' => intval($this->examtitle),
             'exam_date' => $this->exam_date,
             'started_at' => $this->started_at,
             'ended_at' => $this->ended_at,
