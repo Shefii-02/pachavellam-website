@@ -63,6 +63,7 @@ class PrevQuestionController extends Controller
             $name1 = Str::random(40) . '.pdf';
             $image1 = file_get_contents($request->file('qstn_file'));
             Storage::put('/public/files/question-papers/' . $name1, $image1);
+            $prevqstn->qstn_paper = 'question-papers/' . $name1;
         } else {
             $prevqstn->qstn_paper = 'question-papers/' . $name1;
         }
@@ -71,6 +72,7 @@ class PrevQuestionController extends Controller
             $name2 = Str::random(40) . '.pdf';
             $image2 = file_get_contents($request->file('ans_file'));
             Storage::put('/public/files/question-papers/' . $name2, $image2);
+            $prevqstn->ans_key = 'question-papers/' . $name2;
         } else {
             $prevqstn->ans_key = 'question-papers/' . $name2;
         }
@@ -79,6 +81,7 @@ class PrevQuestionController extends Controller
         $prevqstn->subcategory = $request->subcategory;
         $prevqstn->title = $request->title;
         $prevqstn->save();
+     
 
         return redirect()->route('adminkpsc.prev-qstn.index')->with('message', 'Data added Successfully');
     }
@@ -132,22 +135,26 @@ class PrevQuestionController extends Controller
         $prevqstn->category = $request->category;
         $prevqstn->subcategory = $request->subcategory;
         $prevqstn->title = $request->title;
+
         if ($request->hasFile('qstn_file')) {
             Storage::delete('/public/files/' . $prevqstn->qstn_paper);
             $name1 = Str::random(40) . '.pdf';
             $image1 = file_get_contents($request->file('qstn_file'));
-            Storage::put('/public/files/' . $name1, $image1);
+            Storage::put('/public/files/question-papers/' . $name1, $image1);
             $prevqstn->qstn_paper = 'question-papers/' . $name1;
         }
+ 
         if ($request->hasFile('ans_file')) {
             $name2 = Str::random(40) . '.pdf';
             Storage::delete('/public/files/' . $prevqstn->ans_key);
             $image2 = file_get_contents($request->file('ans_file'));
-            Storage::put('/public/files/' . $name2, $image2);
+            Storage::put('/public/files/question-papers/' . $name2, $image2);
             $prevqstn->ans_key = 'question-papers/' . $name2;
         }
 
+
         $prevqstn->save();
+ 
         return redirect()->route('adminkpsc.prev-qstn.index')->with('message', 'Data updated Successfully');
     }
 
@@ -162,8 +169,8 @@ class PrevQuestionController extends Controller
         //
         //
         $bnr = $prevQuestion->where('id', $id)->first();
-        Storage::delete('/public/files/' . $bnr->qstn_paper);
-        Storage::delete('/public/files/' . $bnr->ans_key);
+        Storage::delete('/public/files/question-papers/' . $bnr->qstn_paper);
+        Storage::delete('/public/files/question-papers/' . $bnr->ans_key);
 
         $bnr->delete();
 
