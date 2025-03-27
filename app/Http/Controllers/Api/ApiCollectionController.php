@@ -327,7 +327,7 @@ class ApiCollectionController extends Controller
             ],
             [
                 'title' => '🌟 Monthly Star',
-                "name" => "user user user user user user user user user user user user user user user user user user user user user",
+                "name" => "user user ",
                 "image" => "imageurl",
                 "star" => '3',
                 "Count Star" => '30',
