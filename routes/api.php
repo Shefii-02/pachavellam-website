@@ -44,7 +44,7 @@ Route::post("app-sections", function () {
     $data = [
         'StoriesSection' => true,
         'BannerSection' => true,
-        'Leaderboard' => false,
+        'RankCard' => true,
         'SpecialSeries' => [
             'tab1' => true,
             'tab2' => false,
