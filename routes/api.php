@@ -45,7 +45,7 @@ Route::post("app-sections", function () {
         'StoriesSection' => true,
         'BannerSection' => true,
         'SpecialSeries' => [
-            'tab1' => false,
+            'tab1' => true,
             'tab2' => false,
             'tab3' => false
         ],
