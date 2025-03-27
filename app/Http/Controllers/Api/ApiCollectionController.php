@@ -305,6 +305,6 @@ class ApiCollectionController extends Controller
     {
         $exam_attended = CaDailyExamAttempt::with('user')->where('exam_id', $request->exam_id)->orderBy('total', 'desc')->orderBy('created_at', 'asc')->get();
         $currentRank   = CaDailyExamAttempt::where('user_id', $request->user_id)->where('exam_id', $request->exam_id)->orderBy('total', 'desc')->orderBy('created_at', 'asc')->first();
-        return response()->json(['data' => CADailyExamLeaderboardResources::collection($exam_attended), 'currentRank' => $currentRank, 'status' => 200]);
+        return response()->json(['data' => CADailyExamLeaderboardResources::collection($exam_attended), 'currentRank' => $currentRank->id, 'status' => 200]);
     }
 }
