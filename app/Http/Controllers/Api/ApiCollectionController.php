@@ -319,20 +319,23 @@ class ApiCollectionController extends Controller
     public function RankCard(Request $request){
         $data = [
             [
-                'title' => 'Overall Campion',
+                'title' => '🏆 Overall Champion',
                 "name" => "user",
+                "image" => "imageurl",
                 "star" => '3',
                 "Count Star" => '40',
             ],
             [
-                'title' => 'Monthly Star',
+                'title' => '🌟 Monthly Star',
                 "name" => "user",
+                "image" => "imageurl",
                 "star" => '3',
                 "Count Star" => '30',
             ],
             [
-                'title' => 'Weekly Star',
+                'title' => '✨ Weekly Star',
                 "name" => "user",
+                "image" => "imageurl",
                 "star" => '3',
                 "Count Star" => '20',
             ],
