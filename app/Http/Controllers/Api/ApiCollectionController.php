@@ -17,7 +17,7 @@ use App\Http\Resources\UserResources;
 use Illuminate\Support\Str;
 use App\Http\Resources\{BulletinResources, FeedResources, DailyExamResources, DailyExamDetailsResources, DailyExamLeaderboardResources};
 use App\Http\Resources\{ModelExamResources, ModelExamDetailsResources, ModelExamLeaderboardResources, BannerResources, PrevQyestionPapperResources};
-use App\Http\Resources\{ResultResources, SyllabusResources, SubjectCategoryResources, CaDailyExamListResources,CADailyExamLeaderboardResources};
+use App\Http\Resources\{ResultResources, SyllabusResources, SubjectCategoryResources, CaDailyExamListResources, CADailyExamLeaderboardResources};
 
 class ApiCollectionController extends Controller
 
@@ -277,19 +277,20 @@ class ApiCollectionController extends Controller
     public function CaDailyExams(Request $request)
     {
         $user_id = $request->user_id;
-    
+
         $data = DailyExam::whereHas('exam_details')
-                            ->with(['ca_exam_attened' => function ($query) use ($user_id) {
-                                $query->where('user_id', $user_id);
-                            }])
-                            ->where('section', 'CA-Daily-Exam')
-                            ->where('status', 1)
-                            ->orderBy('level', 'ASC')
-                            ->get();
-    
+            ->with(['ca_exam_attened' => function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            }])
+            ->where('section', 'CA-Daily-Exam')
+            ->where('status', 1)
+            ->orderBy('level', 'ASC')
+            ->get();
+
+
         return response()->json(['data' => CaDailyExamListResources::collection($data), 'status' => 200]);
     }
-    
+
 
 
     public function CaDailyExamSingle(Request $request)
@@ -300,8 +301,10 @@ class ApiCollectionController extends Controller
         return response()->json(['data' => DailyExamDetailsResources::collection($date_details), 'exam_ended' => $exam->ended_at, 'status' => 200]);
     }
 
-    public function CADailyExamLeaderboard(Request $request) {
-        $exam_attended = CaDailyExamAttempt::with('user')->where('exam_id', $request->exam_id)->orderBy('total','desc')->orderBy('created_at','asc')->get();
-        return response()->json(['data' => CADailyExamLeaderboardResources::collection($exam_attended),'currentRank'=>2, 'status' => 200]);
+    public function CADailyExamLeaderboard(Request $request)
+    {
+        $exam_attended = CaDailyExamAttempt::with('user')->where('exam_id', $request->exam_id)->orderBy('total', 'desc')->orderBy('created_at', 'asc')->get();
+        $currentRank   = CaDailyExamAttempt::where('user_id', $request->exam_id)->where('exam_id', $request->exam_id)->orderBy('total', 'desc')->orderBy('created_at', 'asc')->first();
+        return response()->json(['data' => CADailyExamLeaderboardResources::collection($exam_attended), 'currentRank' => $currentRank, 'status' => 200]);
     }
 }
