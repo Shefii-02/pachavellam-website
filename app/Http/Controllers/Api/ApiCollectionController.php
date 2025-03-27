@@ -307,7 +307,7 @@ class ApiCollectionController extends Controller
         // $currentRank   = CaDailyExamAttempt::where('user_id', $request->user_id)->where('exam_id', $request->exam_id)->orderBy('total', 'desc')->orderBy('created_at', 'asc')->first();
         $currentRank  = null;
         foreach($exam_attended ?? [] as $key => $user){
-            if($user == $request->user_id){
+            if($user->user_id == $request->user_id){
                 $currentRank = $key+1;
             }
         }
