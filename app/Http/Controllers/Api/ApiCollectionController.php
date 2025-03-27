@@ -320,21 +320,21 @@ class ApiCollectionController extends Controller
         $data = [
             [
                 'title' => '🏆 Overall Champion',
-                "name" => "user",
+                "name" => "user user user user user user user user user user user user user user user user user user user user user",
                 "image" => "imageurl",
                 "star" => '3',
                 "Count Star" => '40',
             ],
             [
                 'title' => '🌟 Monthly Star',
-                "name" => "user",
+                "name" => "user user user user user user user user user user user user user user user user user user user user user",
                 "image" => "imageurl",
                 "star" => '3',
                 "Count Star" => '30',
             ],
             [
                 'title' => '✨ Weekly Star',
-                "name" => "user",
+                "name" => "user user user user user user user user user user user user user user user user user user user user user",
                 "image" => "imageurl",
                 "star" => '3',
                 "Count Star" => '20',
