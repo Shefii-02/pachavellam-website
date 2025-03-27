@@ -321,14 +321,14 @@ class ApiCollectionController extends Controller
             [
                 'title' => '🏆 Overall Champion',
                 "name" => "user user user user user user user user user user user user user user user user user user user user user",
-                "image" => "imageurl",
+                "image" => "https://www.pachavellam.com/assets/images/user.png",
                 "star" => '3',
                 "Count Star" => '40',
             ],
             [
                 'title' => '🌟 Monthly Star',
                 "name" => "user user ",
-                "image" => "imageurl",
+                "image" => "https://www.pachavellam.com/assets/images/user.png",
                 "star" => '3',
                 "Count Star" => '30',
             ],
