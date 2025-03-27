@@ -107,3 +107,8 @@ Route::post('ca-daily-exam-single/store', 'Api\ApiDataSaverController@CaDailyExa
 Route::post('feeds/report-post', 'Api\ApiDataSaverController@FeedReportRequest');
 Route::post('feeds/report-comment', 'Api\ApiDataSaverController@FeedReportCommentRequest');
 Route::post('chat/report-message', 'Api\ApiDataSaverController@ReportMessageRequest');
+
+
+
+Route::post('rank-card', 'Api\ApiCollectionController@RankCard');
+
