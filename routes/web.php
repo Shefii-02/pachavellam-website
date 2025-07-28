@@ -38,12 +38,12 @@ Route::get('account-settings', 'UserController@account_settings')->name('account
 Route::post('account-settings', 'UserController@account_settings_submit')->name('account-settings-submit');
 
 
-Route::get("/", function () {
-    return view("test.tab");
-});
+// Route::get("/", function () {
+//     return view("test.tab");
+// });
 
 // Route::get('/', 'HomeController@index');
-// Route::get('/', 'cms\HomeController@homepage');
+Route::get('/', 'cms\HomeController@homepage');
 
 // Route::get("new-home", function(){
 //   return view("test.new-home");
