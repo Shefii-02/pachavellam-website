@@ -12,6 +12,7 @@
     <meta property="og:image:width" content="400" />
     <meta property="og:image:height" content="400" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
+<meta name="facebook-domain-verification" content="9siigtjs84mpyftp54ynp34llx4awv" />
 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
