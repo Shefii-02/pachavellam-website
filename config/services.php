@@ -35,6 +35,14 @@ return [
         ],
     ],
           
+    'sms' => [
+        'driver' => env('SMS_DRIVER', 'log'), // log | msg91
+        'msg91' => [
+            'auth_key' => env('MSG91_AUTH_KEY'),
+            'template_id' => env('MSG91_TEMPLATE_ID'),
+        ],
+    ],
+
     'google' => [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),

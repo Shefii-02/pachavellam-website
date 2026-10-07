@@ -29,8 +29,8 @@ require __DIR__ . '/admin/teaching.php';
 require __DIR__ . '/admin/ug.php';
 
 
-Route::post('/send-otp', 'MobileNumberController@sendOTP');
-Route::post('/verify-otp', 'MobileNumberController@verifyOTP');
+Route::post('/send-otp', 'MobileNumberController@sendOTP')->middleware('throttle:20,1');
+Route::post('/verify-otp', 'MobileNumberController@verifyOTP')->middleware('throttle:20,1');
 
 Route::post('mobile-number-verification', 'MobileNumberController@mobileNoVerification');
 

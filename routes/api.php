@@ -22,6 +22,8 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('google-sign-in', 'Api\AuthController@googleSignIn');
     Route::post('signin', 'Api\AuthController@SignIn');
     Route::post('signup', 'Api\AuthController@SignUp');
+    Route::post('send-otp', 'Api\AuthController@sendOtp')->middleware('throttle:20,1');
+    Route::post('verify-otp', 'Api\AuthController@verifyOtp')->middleware('throttle:20,1');
 
     // Route::post('forget-password', 'Api\AuthController@forgetPassword');
     Route::post("forget-password", function () {

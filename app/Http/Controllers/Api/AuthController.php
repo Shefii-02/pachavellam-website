@@ -56,6 +56,51 @@ class AuthController extends Controller
         return $this->respondWithToken($token, $user);
     }
 
+    public function sendOtp(Request $request, \App\Services\OtpService $otp)
+    {
+        $data = $request->validate([
+            'country_code' => 'required|string|max:5',
+            'mobile' => 'required|string|max:12',
+        ]);
+
+        $phone = $otp->normalize($data['country_code'], $data['mobile']);
+        if (!$phone) {
+            return response()->json(['message' => 'Please enter a valid mobile number.'], 422);
+        }
+
+        $result = $otp->send($phone);
+
+        return response()->json([
+            'message' => $result['message'],
+            'resends_left' => $result['resends_left'] ?? null,
+            'retry_after' => $result['retry_after'] ?? 0,
+        ], $result['status']);
+    }
+
+    public function verifyOtp(Request $request, \App\Services\OtpService $otp)
+    {
+        $data = $request->validate([
+            'country_code' => 'required|string|max:5',
+            'mobile' => 'required|string|max:12',
+            'otp' => 'required|digits:6',
+        ]);
+
+        $phone = $otp->normalize($data['country_code'], $data['mobile']);
+        if (!$phone) {
+            return response()->json(['message' => 'Please enter a valid mobile number.'], 422);
+        }
+
+        $result = $otp->verify($phone, $data['otp']);
+        if (!$result['ok']) {
+            return response()->json(['message' => $result['message']], $result['status']);
+        }
+
+        [$user] = $otp->findOrCreateUser($phone, $data['country_code']);
+        $token = auth('api')->login($user);
+
+        return $this->respondWithToken($token, $user, 200, 'Signed in successfully');
+    }
+
     public function SignUp(Request $request)
     {
         date_default_timezone_set('Asia/Kolkata');

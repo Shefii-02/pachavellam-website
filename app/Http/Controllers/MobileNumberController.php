@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Hash;
 use Carbon\Carbon;
+use App\Services\OtpService;
 // use Kreait\Firebase\Auth;
 // use Kreait\Firebase\Exception\Auth\InvalidIdToken;
 
@@ -46,6 +47,58 @@ class MobileNumberController extends Controller
     //     }
     // }
     
+    public function sendOTP(Request $request, OtpService $otp)
+    {
+        $data = $request->validate([
+            'country_code' => 'required|string|max:5',
+            'mobile' => 'required|string|max:12',
+        ]);
+
+        $phone = $otp->normalize($data['country_code'], $data['mobile']);
+        if (!$phone) {
+            return response()->json(['status' => 'error', 'message' => 'Please enter a valid mobile number.'], 422);
+        }
+
+        $result = $otp->send($phone);
+
+        return response()->json([
+            'status' => $result['ok'] ? 'success' : 'error',
+            'message' => $result['message'],
+            'resends_left' => $result['resends_left'] ?? null,
+            'retry_after' => $result['retry_after'] ?? 0,
+        ], $result['status']);
+    }
+
+    public function verifyOTP(Request $request, OtpService $otp)
+    {
+        $data = $request->validate([
+            'country_code' => 'required|string|max:5',
+            'mobile' => 'required|string|max:12',
+            'otp' => 'required|digits:6',
+        ]);
+
+        $phone = $otp->normalize($data['country_code'], $data['mobile']);
+        if (!$phone) {
+            return response()->json(['status' => 'error', 'message' => 'Please enter a valid mobile number.'], 422);
+        }
+
+        $result = $otp->verify($phone, $data['otp']);
+        if (!$result['ok']) {
+            return response()->json(['status' => 'error', 'message' => $result['message']], $result['status']);
+        }
+
+        [$user, $isNew] = $otp->findOrCreateUser($phone, $data['country_code']);
+        auth()->login($user, true);
+        $request->session()->regenerate();
+
+        $complete = $user->name && !$isNew;
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Logged in successfully.',
+            'redirect' => $complete ? '/' : 'account-settings',
+        ]);
+    }
+
     public function mobileNoVerification(Request $request){
          $userData = $request->json('user', []);
         $phoneNumber = isset($userData['phoneNumber']) ? $userData['phoneNumber'] : null;
