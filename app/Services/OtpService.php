@@ -149,6 +149,27 @@ class OtpService
     {
         $driver = config('services.sms.driver', 'log');
 
+        if ($driver === 'smsgatewayhub') {
+            $cfg = config('services.smsgatewayhub');
+            $response = Http::timeout(15)->get('https://www.smsgatewayhub.com/api/mt/SendSMS', [
+                'APIKey' => $cfg['key'],
+                'senderid' => $cfg['senderid'],
+                'channel' => 2,
+                'DCS' => 0,
+                'flashsms' => 0,
+                'number' => ltrim($phone, '+'),
+                'text' => str_replace(['{otp}', '{minutes}'], [$otp, self::OTP_TTL_MINUTES], $cfg['message']),
+                'route' => 54,
+                'EntityId' => $cfg['entity_id'],
+                'dlttemplateid' => $cfg['template_id'],
+            ]);
+            // The gateway answers 200 even on failure; ErrorCode "000" means accepted.
+            if ($response->failed() || (string) $response->json('ErrorCode') !== '000') {
+                throw new \RuntimeException('SMSGatewayHub error: ' . $response->body());
+            }
+            return;
+        }
+
         if ($driver === 'msg91') {
             $cfg = config('services.sms.msg91');
             $response = Http::withHeaders(['authkey' => $cfg['auth_key']])

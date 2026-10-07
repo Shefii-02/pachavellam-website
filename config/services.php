@@ -36,11 +36,20 @@ return [
     ],
           
     'sms' => [
-        'driver' => env('SMS_DRIVER', 'log'), // log | msg91
+        'driver' => env('SMS_DRIVER', 'log'), // log | smsgatewayhub | msg91
         'msg91' => [
             'auth_key' => env('MSG91_AUTH_KEY'),
             'template_id' => env('MSG91_TEMPLATE_ID'),
         ],
+    ],
+
+    'smsgatewayhub' => [
+        'key'         => env('SMSGATEWAYHUB_API_KEY'),
+        'senderid'    => env('SMSGATEWAYHUB_SENDERID'),
+        'entity_id'   => env('SMSGATEWAYHUB_ENTITY_ID'),
+        'template_id' => env('SMSGATEWAYHUB_TEMPLATE_ID'),
+        // Must match the DLT-registered template text exactly. {otp} and {minutes} are substituted.
+        'message'     => env('SMSGATEWAYHUB_MESSAGE', '{otp} is your One Time Password (OTP) for login/signup at Pachavellam Education. This OTP will only be valid for {minutes} minutes. Do not share anyone'),
     ],
 
     'google' => [
