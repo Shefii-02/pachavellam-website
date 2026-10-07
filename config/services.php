@@ -36,11 +36,20 @@ return [
     ],
           
     'sms' => [
-        'driver' => env('SMS_DRIVER', 'log'), // log | smsgatewayhub | teamzo | msg91
+        'driver' => env('SMS_DRIVER', 'log'), // log | smsgatewayhub | whatsapp | teamzo | msg91
         'msg91' => [
             'auth_key' => env('MSG91_AUTH_KEY'),
             'template_id' => env('MSG91_TEMPLATE_ID'),
         ],
+    ],
+
+    // WhatsApp OTP straight through Meta's Cloud API. Set SMS_DRIVER=whatsapp to use it.
+    'whatsapp' => [
+        'token'    => env('WHATSAPP_TOKEN'),
+        'phone_id' => env('WHATSAPP_PHONE_ID'),
+        'template' => env('WHATSAPP_TEMPLATE', 'auth'),
+        'language' => env('WHATSAPP_LANGUAGE', 'en'),
+        'version'  => env('WHATSAPP_API_VERSION', 'v25.0'),
     ],
 
     // WhatsApp OTP via Teamzo. Set SMS_DRIVER=teamzo to use it.

@@ -196,6 +196,28 @@ class OtpService
     {
         $driver = config('services.sms.driver', 'log');
 
+        if ($driver === 'whatsapp') {
+            $cfg = config('services.whatsapp');
+            $response = Http::withToken($cfg['token'])->timeout(15)
+                ->post("https://graph.facebook.com/{$cfg['version']}/{$cfg['phone_id']}/messages", [
+                    'messaging_product' => 'whatsapp',
+                    'to' => ltrim($phone, '+'),
+                    'type' => 'template',
+                    'template' => [
+                        'name' => $cfg['template'],
+                        'language' => ['code' => $cfg['language']],
+                        'components' => [
+                            ['type' => 'body', 'parameters' => [['type' => 'text', 'text' => $otp]]],
+                            ['type' => 'button', 'sub_type' => 'url', 'index' => '0', 'parameters' => [['type' => 'text', 'text' => $otp]]],
+                        ],
+                    ],
+                ]);
+            if ($response->failed()) {
+                throw new \RuntimeException('WhatsApp error: ' . $response->body());
+            }
+            return;
+        }
+
         if ($driver === 'smsgatewayhub') {
             $cfg = config('services.smsgatewayhub');
             $response = Http::timeout(15)->get('https://www.smsgatewayhub.com/api/mt/SendSMS', [
