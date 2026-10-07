@@ -13,10 +13,33 @@ use App\Http\Resources\UserResources;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\JWTException;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\TokenExpiredException;
+use PHPOpenSourceSaver\JWTAuth\Exceptions\TokenInvalidException;
 
 class AuthController extends Controller
 
 {
+    /**
+     * Build the standard JWT token payload returned to clients.
+     */
+    protected function respondWithToken(string $token, User $user, int $statusCode = 200, ?string $message = null)
+    {
+        $payload = [
+            'user' => new UserResources($user),
+            'token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth('api')->factory()->getTTL() * 60,
+        ];
+
+        if ($message) {
+            $payload['message'] = $message;
+        }
+
+        return response()->json($payload, $statusCode);
+    }
+
     public function SignIn(Request $request)
     {
         date_default_timezone_set('Asia/Kolkata');
@@ -28,12 +51,9 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $token = '1234567890zyxwvutsrqponmlkjihgfedcba';
+        $token = auth('api')->login($user);
 
-        return response([
-            'user' => new UserResources($user),
-            'token' => $token
-        ], 200);
+        return $this->respondWithToken($token, $user);
     }
 
     public function SignUp(Request $request)
@@ -42,7 +62,6 @@ class AuthController extends Controller
         try {
 
             $user = $request->all();
-            $token = '1234567890zyxwvutsrqponmlkjihgfedcba';
 
             if ($user) {
                 $finduser = User::where('email', $user['email'])->first();
@@ -62,7 +81,9 @@ class AuthController extends Controller
                 $newUser->email_verified_at = null;
                 $newUser->save();
 
-                return response()->json(['message' => 'Signup in successfully', 'user' => new UserResources($newUser), 'token' => $token], 200);
+                $token = auth('api')->login($newUser);
+
+                return $this->respondWithToken($token, $newUser, 200, 'Signup in successfully');
             } else {
                 Log::info(" data error");
                 return response()->json(['message' => 'data is null'], 401);
@@ -80,7 +101,6 @@ class AuthController extends Controller
         try {
 
             $user = $request->all();
-            $token = '1234567890zyxwvutsrqponmlkjihgfedcba';
 
             if ($user) {
 
@@ -97,7 +117,9 @@ class AuthController extends Controller
                     $finduser->save();
 
                     Log::info('user existed');
-                    return response()->json(['message' => 'User signed in successfully', 'user' => new UserResources($finduser), 'token' => $token], 200);
+                    $token = auth('api')->login($finduser);
+
+                    return $this->respondWithToken($token, $finduser, 200, 'User signed in successfully');
                 } else {
 
                     Log::info('user new');
@@ -119,7 +141,9 @@ class AuthController extends Controller
                     $newUser->email_verified_at = Carbon::now();
                     $newUser->save();
 
-                    return response()->json(['message' => 'User signed in successfully', 'user' => new UserResources($newUser), 'token' => $token], 200);
+                    $token = auth('api')->login($newUser);
+
+                    return $this->respondWithToken($token, $newUser, 200, 'User signed in successfully');
                 }
             } else {
                 Log::info(" data error");
@@ -131,11 +155,48 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * Exchange a still-valid refresh token for a new access token.
+     */
+    public function refresh(Request $request)
+    {
+        try {
+            $token = auth('api')->refresh();
+            $user = auth('api')->user();
+
+            return $this->respondWithToken($token, $user);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['message' => 'Refresh token expired, please sign in again'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['message' => 'Could not refresh token'], 401);
+        }
+    }
+
+    /**
+     * Invalidate the current access token (logout).
+     */
+    public function logout(Request $request)
+    {
+        try {
+            auth('api')->logout();
+            return response()->json(['message' => 'Logged out successfully'], 200);
+        } catch (JWTException $e) {
+            return response()->json(['message' => 'Could not log out'], 500);
+        }
+    }
+
+    /**
+     * Return the currently authenticated user for the given access token.
+     */
+    public function me(Request $request)
+    {
+        return response()->json(['user' => new UserResources(auth('api')->user())], 200);
+    }
+
 
     public function updateProfile(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|integer|exists:users,id',
             'full_name' => 'required|string|max:255',
             'mobile' => 'required|string|max:15',
             'password' => 'nullable|string|min:6',
@@ -143,7 +204,7 @@ class AuthController extends Controller
         ]);
 
         try {
-            $user = User::find($request->user_id);
+            $user = auth('api')->user();
 
             if (!$user) {
                 return response()->json(['message' => 'User not found'], 404);
@@ -197,15 +258,17 @@ class AuthController extends Controller
 
     public function deleteMyaccount(Request $request)
     {
-        $finduser = User::where('id', $request->user_id)->first();
+        $userId = auth('api')->id();
+        $finduser = User::find($userId);
 
         try {
             if ($finduser) {
-                ModelExamAttempt::where('user_id', $request->user_id)->delete();
-                DailyExamattempt::where('user_id', $request->user_id)->delete();
-                CapsuleComment::where('user_id', $request->user_id)->delete();
-                CapsuleLike::where('user_id', $request->user_id)->delete();
-                User::where('id', $request->user_id)->delete();
+                ModelExamAttempt::where('user_id', $userId)->delete();
+                DailyExamattempt::where('user_id', $userId)->delete();
+                CapsuleComment::where('user_id', $userId)->delete();
+                CapsuleLike::where('user_id', $userId)->delete();
+                auth('api')->logout();
+                $finduser->delete();
                 return response()->json(['message' => 'Your Account Deleted'], 200);
             } else {
                 return response()->json(['message' => 'Data Not Found, Contact Our Team'], 400);

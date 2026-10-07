@@ -14,28 +14,28 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
-
-
-
-
 
 Route::group(['prefix' => 'auth'], function () {
     Route::post('google-sign-in', 'Api\AuthController@googleSignIn');
     Route::post('signin', 'Api\AuthController@SignIn');
     Route::post('signup', 'Api\AuthController@SignUp');
 
-    Route::post('update-profile', 'Api\AuthController@UpdateProfile');
-
-    Route::post('delete-myaccount', 'Api\AuthController@deleteMyaccount');
-
     // Route::post('forget-password', 'Api\AuthController@forgetPassword');
-
-
     Route::post("forget-password", function () {
         return response()->json(['data' => 'Email Sended Successfully sended"', 'status' => 200]);
+    });
+
+    Route::middleware('auth:api')->group(function () {
+        Route::post('refresh', 'Api\AuthController@refresh');
+        Route::post('logout', 'Api\AuthController@logout');
+        Route::get('me', 'Api\AuthController@me');
+        Route::post('update-profile', 'Api\AuthController@UpdateProfile');
+        Route::post('delete-myaccount', 'Api\AuthController@deleteMyaccount');
+        Route::post('device-tokens', 'Api\DeviceTokenController@register');
+        Route::delete('device-tokens', 'Api\DeviceTokenController@destroy');
     });
 });
 

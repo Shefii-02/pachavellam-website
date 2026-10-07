@@ -8,15 +8,15 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
-use Laravel\Sanctum\HasApiTokens;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Spatie\Permission\Traits\HasRoles;
 
 
 
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
-   use HasApiTokens, HasFactory, Notifiable, HasRoles;
+   use HasFactory, Notifiable, HasRoles;
     /**
      * The attributes that are mass assignable.
      *
@@ -98,5 +98,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(RoleUser::class, 'user_id');
     }
-   
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
+    }
 }

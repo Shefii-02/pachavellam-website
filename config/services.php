@@ -41,4 +41,8 @@ return [
         'redirect' => env('APP_MODE', false) ? 'http://127.0.0.1:8000/auth/google/callback' : 'https://www.pachavellam.com/auth/google/callback',
     ],
 
+    'chat' => [
+        'internal_secret' => env('CHAT_PUSH_INTERNAL_SECRET'),
+    ],
+
 ];

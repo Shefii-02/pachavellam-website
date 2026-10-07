@@ -21,6 +21,11 @@ return Application::configure(basePath: dirname(__DIR__))
             Route::middleware('web')
                 ->namespace('App\Http\Controllers')
                 ->group(base_path('routes/web.php'));
+
+            Route::middleware('internal.secret')
+                ->prefix('internal')
+                ->namespace('App\Http\Controllers')
+                ->group(base_path('routes/internal.php'));
         },
     )
     ->withMiddleware(function (Middleware $middleware) {
@@ -28,7 +33,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'internal.secret' => \App\Http\Middleware\VerifyInternalSecret::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
