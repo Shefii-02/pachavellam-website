@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['auth']], function () {
+Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area']], function () {
     Route::group(['prefix' => 'ug-pg', 'as' => 'ug-pg.'], function () {
         Route::get('/', 'ug_pg\HomeController@dashboard');
         Route::get('university', 'ug_pg\HomeController@university');

@@ -37,6 +37,8 @@ return [
           
     'sms' => [
         'driver' => env('SMS_DRIVER', 'log'), // log | smsgatewayhub | whatsapp | teamzo | msg91
+        // Store the plain OTP in otp_logs for the admin list. Leave off in production.
+        'log_plain_otp' => env('OTP_LOG_PLAIN', false),
         'msg91' => [
             'auth_key' => env('MSG91_AUTH_KEY'),
             'template_id' => env('MSG91_TEMPLATE_ID'),

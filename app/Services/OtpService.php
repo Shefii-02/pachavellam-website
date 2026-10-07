@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\OtpLog;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
@@ -62,6 +63,7 @@ class OtpService
             $otp === null ? $this->teamzoSend($phone) : $this->deliver($phone, $otp);
         } catch (\Throwable $e) {
             Log::error('OTP delivery failed: ' . $e->getMessage());
+            $this->record($phone, null, 'failed', $e->getMessage());
             return ['ok' => false, 'status' => 502, 'message' => 'Could not send OTP. Please try again.'];
         }
 
@@ -70,6 +72,8 @@ class OtpService
             'hash' => $otp === null ? null : Hash::make($otp),
             'attempts' => 0,
         ], now()->addMinutes(self::OTP_TTL_MINUTES));
+
+        $this->record($phone, $otp, 'sent');
 
         $sends++;
         Cache::put($this->key('sends', $phone), $sends, now()->addMinutes(self::LOCK_MINUTES));
@@ -114,6 +118,8 @@ class OtpService
         Cache::forget($this->key('sends', $phone));
         Cache::forget($this->key('lock', $phone));
 
+        $this->updateLog($phone, 'sent', ['status' => 'verified', 'verified_at' => now()]);
+
         return ['ok' => true, 'status' => 200, 'message' => 'OTP verified.'];
     }
 
@@ -133,6 +139,7 @@ class OtpService
                 $user->mobile_verified_at = Carbon::now();
                 $user->save();
             }
+            $this->attachUser($phone, $user);
             return [$user, false];
         }
 
@@ -146,8 +153,57 @@ class OtpService
         $user->mobile_verified_at = Carbon::now();
         $user->filled_column = 0;
         $user->save();
+        $this->attachUser($phone, $user);
 
         return [$user, true];
+    }
+
+    protected function userExists(string $phone): bool
+    {
+        $variants = [$phone, ltrim($phone, '+')];
+        foreach ([4, 3, 2, 1] as $len) {   // longest country-code prefix that leaves a plausible number
+            $number = substr($phone, 1 + $len);
+            if (strlen($number) >= 6 && strlen($number) <= 12) {
+                $variants[] = $number;
+            }
+        }
+        return User::whereIn('mobile', $variants)->exists();
+    }
+
+    protected function attachUser(string $phone, User $user): void
+    {
+        $this->updateLog($phone, null, ['user_id' => $user->id]);
+    }
+
+    /** Update the newest log row for this number; logging must never break sign-in. */
+    protected function updateLog(string $phone, ?string $onlyStatus, array $values): void
+    {
+        try {
+            OtpLog::where('phone', $phone)
+                ->when($onlyStatus, fn ($q) => $q->where('status', $onlyStatus))
+                ->latest('id')->first()?->update($values);
+        } catch (\Throwable $e) {
+            Log::warning('OTP log update failed: ' . $e->getMessage());
+        }
+    }
+
+    /** Audit trail for the admin OTP list. Never lets logging break sign-in. */
+    protected function record(string $phone, ?string $otp, string $status, ?string $error = null): void
+    {
+        try {
+            OtpLog::create([
+                'phone' => $phone,
+                'driver' => config('services.sms.driver', 'log'),
+                'is_new_user' => !$this->userExists($phone),
+                'otp' => $otp !== null && config('services.sms.log_plain_otp') ? $otp : null,
+                'status' => $status,
+                'error' => $error ? mb_substr($error, 0, 500) : null,
+                'ip' => request()->ip(),
+                'expires_at' => now()->addMinutes(self::OTP_TTL_MINUTES),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('OTP log write failed: ' . $e->getMessage());
+        }
     }
 
     protected function providerOwnsOtp(): bool

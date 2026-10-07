@@ -16,10 +16,11 @@ class Authenticate extends Middleware
     {
         if (! $request->expectsJson()) {
             // return route('sign-in.index');
-           if($request->is('admin') || $request->is('admin/*') || $request->is('kpsc/cms'))
-            return route('sign-in');
-            
-            return route('sign-in');
+            if ($request->is('admin') || $request->is('admin/*')) {
+                return route('admin.login');
+            }
+
+            return url('sign-in');
         }
     }
 }

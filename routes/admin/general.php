@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['auth']], function () {
+Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area']], function () {
     Route::get('/', 'admin\AdminController@dashboard')->name('admin.index');
     Route::get('dashboard', 'admin\AdminController@dashboard');
 
@@ -20,6 +20,11 @@ Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['auth']], f
 
 
 
+
+        Route::get('otp-logs', 'General\SignInLogController@otpLogs');
+        Route::get('otp-logs/delete/{id}', 'General\SignInLogController@otpLogDelete');
+        Route::get('google-signins', 'General\SignInLogController@googleSignIns');
+        Route::get('apple-signins', 'General\SignInLogController@appleSignIns');
 
         Route::get('users', 'General\UserController@users');
         Route::post('users', 'General\UserController@users_store');

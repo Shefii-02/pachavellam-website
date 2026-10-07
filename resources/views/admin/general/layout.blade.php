@@ -48,6 +48,22 @@
 					</a>
 				</li>
 				
+				<li class="nav-item" >
+					<a class="nav-link {!! active_menu("otp-logs") !!} "  href="{{admin_general('otp-logs')}}">
+						<i class="bi bi-phone fa-fw me-2"></i>OTP Logs
+					</a>
+				</li>
+				<li class="nav-item" >
+					<a class="nav-link {!! active_menu("google-signins") !!} "  href="{{admin_general('google-signins')}}">
+						<i class="bi bi-google fa-fw me-2"></i>Google Sign Ins
+					</a>
+				</li>
+				<li class="nav-item" >
+					<a class="nav-link {!! active_menu("apple-signins") !!} "  href="{{admin_general('apple-signins')}}">
+						<i class="bi bi-apple fa-fw me-2"></i>Apple Sign Ins
+					</a>
+				</li>
+
 				<!-- menu item 2 -->
 				<li class="nav-item" >
 					<a class="nav-link {!! active_menu("feedback") !!} "  href="{{admin_general('feedback')}}">

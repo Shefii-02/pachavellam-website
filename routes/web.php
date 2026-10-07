@@ -22,6 +22,7 @@ Route::get("app", function () {
 // });
 
 
+require __DIR__ . '/admin/auth.php';
 require __DIR__ . '/admin/general.php';
 require __DIR__ . '/admin/kpsc.php';
 require __DIR__ . '/admin/student.php';
