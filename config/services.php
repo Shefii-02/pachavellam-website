@@ -36,11 +36,20 @@ return [
     ],
           
     'sms' => [
-        'driver' => env('SMS_DRIVER', 'log'), // log | smsgatewayhub | msg91
+        'driver' => env('SMS_DRIVER', 'log'), // log | smsgatewayhub | teamzo | msg91
         'msg91' => [
             'auth_key' => env('MSG91_AUTH_KEY'),
             'template_id' => env('MSG91_TEMPLATE_ID'),
         ],
+    ],
+
+    // WhatsApp OTP via Teamzo. Set SMS_DRIVER=teamzo to use it.
+    'teamzo' => [
+        'base_url'      => env('TEAMZO_BASE_URL'),
+        'chat_token'    => env('TEAMZO_CHAT_TOKEN'),   // the {wa-chat-token} in the URL path
+        'api_token'     => env('TEAMZO_API_TOKEN'),    // sent as Authorization: Bearer
+        'service'       => env('TEAMZO_SERVICE', 'login'),
+        'variable_text' => env('TEAMZO_VARIABLE_TEXT', 'Pachavellam'),
     ],
 
     'smsgatewayhub' => [
@@ -49,7 +58,7 @@ return [
         'entity_id'   => env('SMSGATEWAYHUB_ENTITY_ID'),
         'template_id' => env('SMSGATEWAYHUB_TEMPLATE_ID'),
         // Must match the DLT-registered template text exactly. {otp} and {minutes} are substituted.
-        'message'     => env('SMSGATEWAYHUB_MESSAGE', '{otp} is your One Time Password (OTP) for login/signup at Pachavellam Education. This OTP will only be valid for {minutes} minutes. Do not share anyone'),
+        'message'     => env('SMSGATEWAYHUB_MESSAGE', '{otp} is your One Time Password (OTP) for login/signup at BookMyTeacher By Pachavellam Education.This OTP will only be valid for {minutes} minutes. Do not share anyone'),
     ],
 
     'google' => [

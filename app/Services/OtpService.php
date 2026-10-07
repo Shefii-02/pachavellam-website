@@ -56,17 +56,18 @@ class OtpService
             return $this->locked(self::LOCK_MINUTES * 60);
         }
 
-        $otp = (string) random_int(100000, 999999);
+        $otp = $this->providerOwnsOtp() ? null : (string) random_int(100000, 999999);
 
         try {
-            $this->deliver($phone, $otp);
+            $otp === null ? $this->teamzoSend($phone) : $this->deliver($phone, $otp);
         } catch (\Throwable $e) {
             Log::error('OTP delivery failed: ' . $e->getMessage());
             return ['ok' => false, 'status' => 502, 'message' => 'Could not send OTP. Please try again.'];
         }
 
+        // With Teamzo the code lives at the provider; we only track wrong attempts.
         Cache::put($this->key('code', $phone), [
-            'hash' => Hash::make($otp),
+            'hash' => $otp === null ? null : Hash::make($otp),
             'attempts' => 0,
         ], now()->addMinutes(self::OTP_TTL_MINUTES));
 
@@ -99,7 +100,11 @@ class OtpService
             return ['ok' => false, 'status' => 429, 'message' => 'Too many wrong attempts. Please request a new OTP.'];
         }
 
-        if (!Hash::check($otp, $entry['hash'])) {
+        $valid = $entry['hash'] === null
+            ? $this->teamzoVerify($phone, $otp)
+            : Hash::check($otp, $entry['hash']);
+
+        if (!$valid) {
             $entry['attempts']++;
             Cache::put($this->key('code', $phone), $entry, now()->addMinutes(self::OTP_TTL_MINUTES));
             return ['ok' => false, 'status' => 422, 'message' => 'Invalid OTP.'];
@@ -143,6 +148,48 @@ class OtpService
         $user->save();
 
         return [$user, true];
+    }
+
+    protected function providerOwnsOtp(): bool
+    {
+        return config('services.sms.driver') === 'teamzo';
+    }
+
+    protected function teamzoRequest()
+    {
+        $cfg = config('services.teamzo');
+        $base = rtrim($cfg['base_url'], '/') . '/api/v1/' . $cfg['chat_token'];
+
+        return [Http::timeout(15)->acceptJson()->withToken($cfg['api_token']), $base];
+    }
+
+    /** Teamzo (WhatsApp) generates and delivers the OTP itself. */
+    protected function teamzoSend(string $phone): void
+    {
+        [$http, $base] = $this->teamzoRequest();
+        $response = $http->post($base . '/otp/send', [
+            'phone' => ltrim($phone, '+'),
+            'service' => config('services.teamzo.service'),
+            'reference_id' => (string) \Illuminate\Support\Str::uuid(),
+            'variables' => ['text' => config('services.teamzo.variable_text')],
+        ]);
+
+        if ($response->failed() || $response->json('success') === false) {
+            throw new \RuntimeException('Teamzo send error: ' . $response->body());
+        }
+    }
+
+    protected function teamzoVerify(string $phone, string $otp): bool
+    {
+        try {
+            [$http, $base] = $this->teamzoRequest();
+            $response = $http->post($base . '/otp/verify', ['phone' => ltrim($phone, '+'), 'otp' => $otp]);
+        } catch (\Throwable $e) {
+            Log::error('Teamzo verify failed: ' . $e->getMessage());
+            return false;
+        }
+
+        return $response->successful() && $response->json('success') !== false;
     }
 
     protected function deliver(string $phone, string $otp): void
