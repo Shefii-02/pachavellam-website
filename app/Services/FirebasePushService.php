@@ -71,4 +71,41 @@ class FirebasePushService
             return null;
         }
     }
+
+    /**
+     * Rich send for Android, iOS and web at once (up to 500 tokens per call).
+     * Returns ['delivered' => n, 'failed' => n, 'invalid' => [tokens to forget]] or null when nothing could be attempted.
+     */
+    public function sendRich(array $tokens, string $title, string $body, array $data = [], ?string $image = null, ?string $webLink = null): ?array
+    {
+        $messaging = $this->messaging();
+        if (!$messaging || empty($tokens)) {
+            return null;
+        }
+
+        $notification = array_filter(['title' => $title, 'body' => $body, 'image' => $image]);
+        $message = CloudMessage::new()
+            ->withNotification($notification)
+            ->withData(array_map('strval', $data))
+            ->withAndroidConfig(['priority' => 'high', 'notification' => ['channel_id' => 'pachavellam_default', 'sound' => 'default']])
+            ->withApnsConfig(['headers' => ['apns-priority' => '10'], 'payload' => ['aps' => ['sound' => 'default', 'mutable-content' => 1]]])
+            ->withWebPushConfig(array_filter(['headers' => ['Urgency' => 'high'], 'fcm_options' => $webLink ? ['link' => $webLink] : null]));
+
+        $out = ['delivered' => 0, 'failed' => 0, 'invalid' => []];
+        foreach (array_chunk($tokens, 500) as $chunk) {
+            try {
+                $report = $messaging->sendMulticast($message, $chunk);
+                $out['delivered'] += $report->successes()->count();
+                $out['failed'] += $report->failures()->count();
+                foreach ([...$report->invalidTokens(), ...$report->unknownTokens()] as $item) {
+                    $out['invalid'][] = $item->target()->value();
+                }
+            } catch (\Throwable $e) {
+                Log::error('FirebasePushService: sendRich failed', ['error' => $e->getMessage()]);
+                $out['failed'] += count($chunk);
+            }
+        }
+
+        return $out;
+    }
 }

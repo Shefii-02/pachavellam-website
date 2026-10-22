@@ -24,6 +24,9 @@ class ModelExamController extends Controller
 {
     public function model_exams()
     {
+        if (!request()->filled('session') && !request()->boolean('legacy')) {
+            return redirect(url('admin/exam/kpsc/series/omr'));   // sessions first
+        }
         $exam_titles = DailyExam::where('section', 'Model Exam')->groupBy('examtitle')->get('examtitle');
         // $exam_subjects = DailyExam::groupBy('subject')->get('subject');
         $exam_subjects = KpscSubject::where('status', 'show')->orderby('position')->get();
@@ -56,6 +59,8 @@ class ModelExamController extends Controller
         }
 
         $new_one  = new DailyExam();
+        $new_one->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;   // session (free / paid)
+        $new_one->free_access = $request->boolean('free_access');
         $new_one->section    = "Model Exam";
         $new_one->exam_date  =  date('Y-m-d', strtotime($request->exam_date));
         $new_one->started_at =  date('Y-m-d H:i:s', strtotime($request->exam_started));
@@ -114,6 +119,8 @@ class ModelExamController extends Controller
         $new_one->ended_at   = date('Y-m-d H:i:s', strtotime($request->exam_ended));
         $new_one->examtitle  = $examtitle;
         $new_one->category   = $request->category;
+        $new_one->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;
+        $new_one->free_access = $request->boolean('free_access');
 
         try {
             $new_one->save();

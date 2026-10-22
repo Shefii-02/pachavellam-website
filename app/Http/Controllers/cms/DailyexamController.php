@@ -19,6 +19,9 @@ class DailyexamController extends Controller
 {
     public function daily_exams()
     {
+        if (!request()->filled('session') && !request()->boolean('legacy')) {
+            return redirect(url('admin/exam/kpsc/series/daily'));   // sessions first
+        }
         $exam_titles = DailyExam::where('section', 'Daily Exam')->groupBy('examtitle')->get('examtitle');
         // $exam_subjects = DailyExam::groupBy('subject')->get('subject');
         $exam_subjects = KpscSubject::where('status', 'show')->orderby('position')->get();
@@ -52,6 +55,8 @@ class DailyexamController extends Controller
         $new_one->ended_at = date('Y-m-d H:i:s', strtotime($request->exam_ended));
         $new_one->subject = $request->subject;
         $new_one->examtitle = $request->examtitle;
+        $new_one->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;
+        $new_one->free_access = $request->boolean('free_access');
         $new_one->status = 0;
 
         try {
@@ -72,6 +77,8 @@ class DailyexamController extends Controller
                 $new_one->ended_at = date('Y-m-d H:i:s', strtotime($request->exam_ended));
                 $new_one->subject = $request->subject;
                 $new_one->examtitle = $request->examtitle;
+        $new_one->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;
+        $new_one->free_access = $request->boolean('free_access');
 
                 try {
                     $new_one->save();
@@ -241,6 +248,8 @@ class DailyexamController extends Controller
         $new_two->ended_at = date('Y-m-d H:i:s', strtotime($request->exam_ended));
         $new_two->subject = $request->subject;
         $new_two->examtitle = $request->examtitle;
+        $new_two->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;
+        $new_two->free_access = $request->boolean('free_access');
         $new_two->status    = $request->has('status') ? 1 : 0;
         $new_two->save();
 

@@ -141,8 +141,21 @@ class CaDailyexamController extends Controller
     public function daily_exams_edit($id)
     {
         $exam_detail = DailyExam::where('id', $id)->first() ?? abort('404');
-        $examDays = DailyExam::where('section', 'CA-Daily-Exam')->pluck('level');
-        return view('cms.ca-exam.daily-exam-edit', compact('exam_detail','examDays'));
+        $season = $exam_detail->season_id ? \App\Models\CaSeason::find($exam_detail->season_id) : null;
+
+        // numbers already used by the same kind of exam in the same season
+        $takenSlots = DailyExam::where('section', 'CA-Daily-Exam')
+            ->where('season_id', $exam_detail->season_id)
+            ->where('exam_kind', $exam_detail->exam_kind)
+            ->where('id', '!=', $exam_detail->id)
+            ->pluck('slot_no');
+
+        $sources = \Illuminate\Support\Facades\DB::table('kpsc_ca_exam_sources as s')
+            ->join('kpsc_daily_exams as e', 'e.id', '=', 's.source_exam_id')
+            ->where('s.exam_id', $exam_detail->id)
+            ->select('e.slot_no', 'e.exam_date', 's.question_count')->orderBy('e.slot_no')->get();
+
+        return view('cms.ca-exam.daily-exam-edit', compact('exam_detail', 'season', 'takenSlots', 'sources'));
     }
 
 
@@ -202,17 +215,49 @@ class CaDailyexamController extends Controller
 
     public function daily_exams_update($id, Request $request)
     {
-        $new_two = DailyExam::where('id', $request->id)
+        $exam = DailyExam::where('id', $id)
             ->where('section', 'CA-Daily-Exam')
             ->first() ?? abort(404);
 
-        $new_two->exam_date = date('Y-m-d', strtotime($request->exam_started));
-        $new_two->started_at = date('Y-m-d H:i:s', strtotime($request->exam_started));
-        $new_two->level = $request->level;
-        $new_two->status    = $request->has('status') ? 1 : 0;
-        $new_two->save();
+        $request->validate([
+            'exam_started' => 'required|date',
+            'exam_ended' => 'nullable|date',
+            'slot_no' => 'nullable|integer|min:1|max:9999',
+            'exam_title' => 'nullable|string|max:255',
+            'period_start' => 'nullable|date',
+            'period_end' => 'nullable|date|after_or_equal:period_start',
+        ]);
 
-        return redirect('admin/kpsc/ca-daily-exam/view')->with('message', 'Data Updated Successfully');
+        // exams of a season are numbered per season and kind (Day 1, Day 2 ... / Weekend 1 ...)
+        $slot = (int) ($request->slot_no ?: ($exam->slot_no ?: $request->level));
+        if ($exam->season_id) {
+            $clash = DailyExam::where('section', 'CA-Daily-Exam')->where('season_id', $exam->season_id)
+                ->where('exam_kind', $exam->exam_kind)->where('slot_no', $slot)->where('id', '!=', $exam->id)->exists();
+            if ($clash) {
+                return back()->withInput()->withErrors(['slot_no' => 'That number is already used in this season.']);
+            }
+        }
+
+        $exam->exam_date = date('Y-m-d', strtotime($request->exam_started));
+        $exam->started_at = date('Y-m-d H:i:s', strtotime($request->exam_started));
+        $exam->ended_at = $request->filled('exam_ended') ? date('Y-m-d H:i:s', strtotime($request->exam_ended)) : $exam->ended_at;
+        $exam->slot_no = $slot;
+        $exam->level = $slot;
+        $exam->examtitle = (string) $slot;
+        if ($request->filled('exam_title')) {
+            $exam->exam_title = $request->exam_title;
+        }
+        if ($exam->exam_kind && $exam->exam_kind !== 'daily') {
+            $exam->period_start = $request->period_start ?: null;
+            $exam->period_end = $request->period_end ?: null;
+        }
+        $exam->status = $request->has('status') ? 1 : 0;
+        $exam->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;   // session (free / paid)
+        $exam->free_access = $request->boolean('free_access');
+        $exam->save();
+
+        return redirect($exam->season_id ? kpsc_cms('ca-daily-exam/seasons/' . $exam->season_id) : kpsc_cms('ca-daily-exam'))
+            ->with('message', 'Exam updated successfully');
     }
 
 
@@ -242,6 +287,7 @@ class CaDailyexamController extends Controller
         $exam = DailyExam::where('id', $id)->first();  
         DailyExamdetails::where('exam_id', $id)->delete();
         CaDailyExamAttempt::where('exam_id', $id)->delete();
+        \Illuminate\Support\Facades\DB::table('kpsc_ca_exam_sources')->where('exam_id', $id)->orWhere('source_exam_id', $id)->delete();
         DailyExam::where('id', $id)->delete();
 
         // DailyExam::leftJoin('kpsc_daily_exams_details', 'kpsc_daily_exams_details.exam_id', 'kpsc_daily_exams.id')->where('kpsc_daily_exams_details.exam_id', $id)->where('kpsc_daily_exams.id', $id)->delete();

@@ -13,6 +13,8 @@ class DeviceTokenController extends Controller
         $request->validate([
             'token' => 'required|string|max:255',
             'platform' => 'required|string|in:android,ios,web',
+            'device_name' => 'nullable|string|max:120',
+            'app_version' => 'nullable|string|max:30',
         ]);
 
         DeviceToken::updateOrCreate(
@@ -20,6 +22,8 @@ class DeviceTokenController extends Controller
             [
                 'user_id' => auth('api')->id(),
                 'platform' => $request->platform,
+                'device_name' => $request->device_name,
+                'app_version' => $request->app_version,
                 'last_seen_at' => now(),
             ]
         );

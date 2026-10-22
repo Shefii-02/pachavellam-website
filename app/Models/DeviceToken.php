@@ -10,6 +10,8 @@ class DeviceToken extends Model
         'user_id',
         'token',
         'platform',
+        'device_name',
+        'app_version',
         'last_seen_at',
     ];
 

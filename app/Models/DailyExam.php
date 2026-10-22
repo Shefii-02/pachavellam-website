@@ -2,14 +2,22 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsActivity;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class DailyExam extends Model
 {
+    use LogsActivity;
     use HasFactory;
 
     protected $table = 'kpsc_daily_exams';
+
+    public function season()
+    {
+        return $this->belongsTo(CaSeason::class, 'season_id');
+    }
 
     public function exam_details()
     {

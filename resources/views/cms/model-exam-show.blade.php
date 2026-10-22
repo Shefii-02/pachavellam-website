@@ -82,10 +82,13 @@
                                                 data-title="{{ $date_list->examtitle }}"
                                                 data-subject="{{ $date_list->subject }}"
                                                 data-category = "{{ $date_list->category }}"
+                                                data-session="{{ $date_list->series_season_id }}"
+                                                data-free="{{ $date_list->free_access ? 1 : 0 }}"
                                                 class="btn btn-info mb-2 exam_details_edit btn-sm float-left">
                                                 <i class="bi bi-pencil"></i>
                                                 Edit Exam Details
                                             </a>
+                                            <a href="{{ url('admin/kpsc/exam-tools/' . $date_list->id) }}" class="btn btn-sm btn-success mb-2 float-left"><i class="bi bi-sliders"></i> Settings &amp; courses</a>
                                             <a href="{{ url('admin/kpsc/model-exam/delete/' . $date_list->id) }}"
                                                 class="btn btn-sm btn-danger mb-2 float-left">
                                                 <i class="bi bi-x"></i>
@@ -164,6 +167,27 @@
                                     <label class="form-label">Exam Title</label>
                                     <input type="text" name="examtitle" id="examtitle_edit" class="form-control"
                                         required autocomplete="off">
+                                </div>
+
+                                @php
+                                    $omrSessions = \App\Models\ExamSeason::where('exam_id', \App\Models\CompetitiveExam::where('slug', 'kpsc')->value('id'))->where('kind', 'omr')->where('status', '!=', 'archived')->orderByDesc('id')->get();
+                                    $omrAcc = app(\App\Services\SeasonAccess::class);
+                                @endphp
+                                <div class="col-md-12 mt-2">
+                                    <label class="form-label">Session (season)</label>
+                                    <select name="series_season_id" id="series_season_edit" class="form-control">
+                                        <option value="">No session</option>
+                                        @foreach ($omrSessions as $se)
+                                            <option value="{{ $se->id }}">{{ $se->title }} - {{ $omrAcc->isPaid($se) ? 'Paid ₹' . rtrim(rtrim(number_format($omrAcc->effectivePrice($se), 2), '0'), '.') : 'Free' }}</option>
+                                        @endforeach
+                                    </select>
+                                    <div class="form-text"><a href="{{ url('admin/exam/kpsc/series/omr') }}" target="_blank">Create / manage sessions</a></div>
+                                </div>
+                                <div class="col-md-12 mt-2">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" role="switch" name="free_access" id="free_access_edit" value="1">
+                                        <label class="form-check-label" for="free_access_edit">Free access - open for everyone even when its session is paid</label>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-12 mt-2">
@@ -254,6 +278,8 @@
                 $('#questionpaper').attr('href', questionpaper)
                 $('#answerkey').attr('href', answerkey)
                 $('#category_edit').val(category);
+                $('#series_season_edit').val($(this).data('session') || '');
+                $('#free_access_edit').prop('checked', String($(this).data('free')) === '1');
 
 
                 $('#exam_details').modal('show')

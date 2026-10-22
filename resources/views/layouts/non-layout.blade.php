@@ -88,7 +88,8 @@
     </script>
     
   
-  </head>
+  @include('partials.global-hide')
+</head>
   <body oncopy="return false" oncut="return false"  onselectstart="return false">
     <div class="header-area " id="headerArea">
     <div class="container h-100 mt-2 mb-3 d-flex align-items-center justify-content-between">

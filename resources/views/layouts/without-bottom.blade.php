@@ -87,7 +87,8 @@
       gtag('config', 'G-TBNJK6JTCL');
     </script>
     
-  </head>
+  @include('partials.global-hide')
+</head>
   <body oncopy="return false" oncut="return false"  onselectstart="return false">
     
     @yield('header-tab')

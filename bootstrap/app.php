@@ -29,12 +29,17 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        // request log for Dev Tools (api logs + daily analytics)
+        $middleware->appendToGroup('web', \App\Http\Middleware\LogRequest::class);
+        $middleware->appendToGroup('api', \App\Http\Middleware\LogRequest::class);
+
         $middleware->alias([
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'admin.area' => \App\Http\Middleware\EnsureAdminArea::class,
+            'staff.can' => \App\Http\Middleware\StaffCan::class,
+            'season.access' => \App\Http\Middleware\EnsureSeasonAccess::class,
             'internal.secret' => \App\Http\Middleware\VerifyInternalSecret::class,
         ]);
     })

@@ -10,9 +10,9 @@ Route::post('kpsc/daily-exam/forget-password', 'cms\HomeController@daily_exam_fo
 Route::group(['middleware' => ['auth']], function () {
     Route::get('kpsc/register', 'LoginController@register_new');
     Route::post('kpsc/register', 'LoginController@register_submit');
-    Route::get('kpsc/daily-exam/{date}/{id}', 'cms\HomeController@get_date_based_questions_new');
-    Route::get('kpsc/daily-exam-new/{date}/{id}', 'cms\HomeController@get_date_based_questions');
-    Route::post('kpsc/daily-exam-store-result/{date}/{id}', 'cms\HomeController@store_exam_results');
+    Route::get('kpsc/daily-exam/{date}/{id}', 'cms\HomeController@get_date_based_questions_new')->middleware('season.access');
+    Route::get('kpsc/daily-exam-new/{date}/{id}', 'cms\HomeController@get_date_based_questions')->middleware('season.access');
+    Route::post('kpsc/daily-exam-store-result/{date}/{id}', 'cms\HomeController@store_exam_results')->middleware('season.access');
 });
 
 Route::group(['prefix' => 'kpsc', 'as' => 'kpsc', 'middleware' => ['auth']], function () {
@@ -25,11 +25,11 @@ Route::group(['prefix' => 'kpsc', 'as' => 'kpsc', 'middleware' => ['auth']], fun
 Route::group(['prefix' => 'kpsc', 'as' => 'kpsc'], function () {
 
 
-    Route::get('daily-exam', 'cms\HomeController@get_daily_exam_dates');
+    Route::get('daily-exam', fn () => redirect(url('kpsc/daily-exams'), 301));   // renamed: /kpsc/daily-exams
 
-    Route::get('model-exam', 'cms\HomeController@get_model_exam_dates');
-    Route::get('model-exam/{date}/{id}', 'cms\HomeController@get_model_date_based_questions');
-    Route::post('model-exam/store-result/{id}', 'cms\HomeController@store_model_exam_results');
+    Route::get('model-exam', fn () => redirect(url('kpsc/omr-exams'), 301));   // renamed: /kpsc/omr-exams
+    Route::get('model-exam/{date}/{id}', 'cms\HomeController@get_model_date_based_questions')->middleware('season.access');
+    Route::post('model-exam/store-result/{id}', 'cms\HomeController@store_model_exam_results')->middleware('season.access');
     Route::get('model-exam/{date}/{id}/leaderboard', 'cms\HomeController@model_exam_leaderboard');
     Route::get('model-exam/{date}/{id}/answerkey', 'cms\HomeController@model_exam_answerkey');
 

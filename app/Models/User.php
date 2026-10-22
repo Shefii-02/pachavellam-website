@@ -16,6 +16,25 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements JWTSubject
 {
+    protected static function booted(): void
+    {
+        // the sales team sees every new student in the bell (and in New joins)
+        static::created(function (self $u) {
+            // joined through a friend's link (website cookie, or ref_code / X-Referral-Code sent by the apps)? Never let this break a sign up.
+            if ($u->type === 'Student' && !app()->runningInConsole()) {
+                try {
+                    app(\App\Services\ReferralService::class)->attach($u);
+                } catch (\Throwable $e) {
+                    report($e);
+                }
+            }
+            if ($u->type === 'Student') {
+                \App\Services\StaffNotifier::push('new_join', ($u->name ?: 'A new student') . ' joined',
+                    trim(($u->mobile ? 'Mobile ' . $u->mobile : 'No mobile yet') . ($u->email ? ' · ' . $u->email : '')), url('admin/new-joins'), null, $u->id);
+            }
+        });
+    }
+
    use HasFactory, Notifiable, HasRoles;
     /**
      * The attributes that are mass assignable.
@@ -92,6 +111,36 @@ class User extends Authenticatable implements JWTSubject
       public function getProfilePhotoUrlAttribute()
     {
         return $this->image; 
+    }
+
+    /** Competitive exams this student is interested in (student_exam_interests). */
+    public function examInterests()
+    {
+        return $this->belongsToMany(CompetitiveExam::class, 'student_exam_interests', 'user_id', 'exam_id')
+            ->withPivot('source')->withTimestamps();
+    }
+
+    /** Exam categories this student marked as favourite (student_favourite_categories). */
+    public function favouriteCategories()
+    {
+        return $this->belongsToMany(ExamCategory::class, 'student_favourite_categories', 'user_id', 'category_id')->withTimestamps();
+    }
+
+    /** Courses the student can open right now. */
+    public function activeAdmissions()
+    {
+        return CourseAdmission::with('course.exam:id,slug,short_name,name,color')->where('user_id', $this->id)->where('status', 'active')
+            ->where(fn ($q) => $q->whereNull('valid_until')->orWhere('valid_until', '>', now()))->orderByDesc('admitted_at')->get();
+    }
+
+    /** Profile picture address: a full url (Google), a stored name (users/...), or null. */
+    public function photoUrl(): ?string
+    {
+        if (!$this->image) {
+            return null;
+        }
+
+        return preg_match('#^https?://#', $this->image) ? $this->image : \Illuminate\Support\Facades\Storage::url(str_contains($this->image, '/') ? $this->image : 'users/' . $this->image);
     }
 
     public function role()

@@ -55,6 +55,10 @@
                                         placeholder="Enter Youtube link">
 
                                 </div>
+                                <div class="col-md-2 mb-2">
+                                    <label class="form-label">Chat</label>
+                                    <select name="chat_mode" class="form-control"><option value="off">Off</option><option value="always">On</option></select>
+                                </div>
                                 <div classs="col-md-2  mb-2">
                                     <button class="btn btn-success prev-btn mb-0 mt-3"><i class="bi bi-check me-1"></i>
                                         Submit</button>
@@ -82,6 +86,7 @@
                                 <th scope="col" class="border-0">Category</th>
                                 <th scope="col" class="border-0">Title</th>
                                 <th scope="col" class="border-0">Redirect</th>
+                                <th scope="col" class="border-0">Chat</th>
                                 <th scope="col" class="border-0">Position</th>
                                 <th scope="col" class="border-0">Status</th>
                                 <th scope="col" class="border-0 rounded-end">Action</th>
@@ -111,6 +116,7 @@
                                     <td><a
                                             href="https://youtu.be/{{ $videos->redirection }}">https://youtu.be/{{ $videos->redirection }}</a>
                                     </td>
+                                    <td>@if (($videos->chat_mode ?? 'off') === 'always')<span class="badge bg-success text-white">On</span>@else<span class="badge bg-secondary text-white">Off</span>@endif</td>
                                     <td>{{ $videos->position }}</td>
                                     <td>
                                         @if ($videos->status == 1)

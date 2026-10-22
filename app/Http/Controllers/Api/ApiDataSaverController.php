@@ -11,6 +11,8 @@ use Exception;
 
 class ApiDataSaverController extends Controller
 {
+    use \App\Http\Controllers\Api\Concerns\GuardsSeasons;
+
     public function BulletInDownload($id)
     {
         $bulletin = Bulletin::find($id);
@@ -79,6 +81,9 @@ class ApiDataSaverController extends Controller
 
     public function DailyExamSingleStore(Request $request)
     {
+        if ($locked = $this->seasonLock($request->exam_id)) {
+            return $locked;
+        }
 
 
         $validator = Validator::make($request->all(), [
@@ -242,6 +247,9 @@ class ApiDataSaverController extends Controller
 
     public function CaDailyExamStore(Request $request)
     {
+        if ($locked = $this->seasonLock($request->exam_id)) {
+            return $locked;
+        }
         $validator = Validator::make($request->all(), [
             'exam_id' => 'required',
             'user_id' => 'required',

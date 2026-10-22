@@ -18,6 +18,21 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::get('exams', 'Api\ExamInterestController@exams');
+
+// the website's pages as JSON for the apps (a student's token is optional: with it, locks and purchases are known)
+Route::prefix('app')->group(function () {
+    Route::get('home', 'Api\AppCatalogController@home');
+    Route::get('exams/{slug}', 'Api\AppCatalogController@exam')->where('slug', '[a-z0-9-]+');
+    Route::get('exams/{slug}/series/{series}', 'Api\AppCatalogController@series')->where('slug', '[a-z0-9-]+')->where('series', 'daily-exams|omr-exams|gk-exams|ca-exams|special-exams');
+    Route::get('seasons/{id}', 'Api\AppCatalogController@season')->whereNumber('id');
+    Route::get('ranking', 'Api\AppCatalogController@ranking');
+    Route::get('stories', 'Api\AppCatalogController@stories');
+    Route::get('articles/{id}', 'Api\AppCatalogController@article')->whereNumber('id');
+    Route::get('announcements/{id}', 'Api\AppCatalogController@announcement')->whereNumber('id');
+    Route::get('classes/{uid}/chat', 'Api\ClassChatApiController@messages')->where('uid', '[a-z0-9]{8,14}')->middleware('throttle:90,1');
+});
+
 Route::group(['prefix' => 'auth'], function () {
     Route::post('google-sign-in', 'Api\AuthController@googleSignIn');
     Route::post('signin', 'Api\AuthController@SignIn');
@@ -36,8 +51,19 @@ Route::group(['prefix' => 'auth'], function () {
         Route::get('me', 'Api\AuthController@me');
         Route::post('update-profile', 'Api\AuthController@UpdateProfile');
         Route::post('delete-myaccount', 'Api\AuthController@deleteMyaccount');
+        Route::get('referral', 'ReferralController@show');
+        Route::post('seasons/{id}/buy', 'Api\AppCatalogController@seasonBuy')->whereNumber('id')->middleware('throttle:20,1');
+        Route::get('my-courses', 'Api\AppCatalogController@myCourses');
+        Route::get('account-summary', 'Api\AppCatalogController@account');
+        Route::post('classes/{uid}/chat', 'Api\ClassChatApiController@send')->where('uid', '[a-z0-9]{8,14}')->middleware('throttle:20,1');
+        Route::get('my-courses/{id}', 'Api\AppCatalogController@myCourse')->whereNumber('id');
+        Route::post('referral/apply', 'ReferralController@applyApi')->middleware('throttle:10,1');
         Route::post('device-tokens', 'Api\DeviceTokenController@register');
         Route::delete('device-tokens', 'Api\DeviceTokenController@destroy');
+
+        // exams the student is interested in
+        Route::get('interests', 'Api\ExamInterestController@mine');
+        Route::post('interests', 'Api\ExamInterestController@sync');
     });
 });
 
@@ -93,6 +119,26 @@ Route::post('game-levels', 'Api\ApiCollectionController@GameLevels');
 
 Route::post('refferal-friends', 'Api\ApiCollectionController@refferalFriends');
 
+// course catalogue for every exam type (published courses), filterable by exam and category
+Route::post('exam-course-categories', 'Api\ExamCourseController@categories');
+Route::post('exam-courses', 'Api\ExamCourseController@index');
+Route::post('exam-course-single', 'Api\ExamCourseController@single');
+// does this coupon work for this course, and what would the student pay? (read only - nothing is used up)
+Route::post('exam-coupon-check', 'Api\ExamCouponController@check')->middleware(['auth:api', 'throttle:30,1']);
+
+// joining a course: payment (Razorpay / PhonePe), status, and the student's courses
+Route::middleware(['auth:api', 'throttle:30,1'])->group(function () {
+    Route::post('course-checkout', 'Api\CoursePaymentController@checkout');
+    Route::post('course-payment-link', 'Api\CoursePaymentController@paymentLink');
+    Route::post('course-payment-verify', 'Api\CoursePaymentController@verify');
+    Route::post('course-payment-status', 'Api\CoursePaymentController@status');
+    Route::post('my-course-admissions', 'Api\CoursePaymentController@mine');
+});
+// called by the gateways themselves (no login; every call is checked by signature)
+Route::post('payments/razorpay/webhook', 'Api\CoursePaymentController@razorpayWebhook');
+Route::post('payments/phonepe/callback', 'Api\CoursePaymentController@phonepeCallback');
+Route::match(['get', 'post'], 'payments/phonepe/return/{ref}', 'Api\CoursePaymentController@phonepeReturn');
+Route::post('ca-seasons', 'Api\ApiCollectionController@CaSeasons');
 Route::post('ca-daily-exams', 'Api\ApiCollectionController@CaDailyExams');
 Route::post('ca-daily-exam-single', 'Api\ApiCollectionController@CaDailyExamSingle');
 

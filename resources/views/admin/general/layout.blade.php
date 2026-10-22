@@ -72,17 +72,19 @@
 				</li>
 				
 				<!-- menu item 2 -->
-				<li class="nav-item" >
+{{-- not built yet: homepage-tab --}}
+{{--<li class="nav-item" >
 					<a class="nav-link {!! active_menu("homepage-tab") !!} "  href="{{admin_general('homepage-tab')}}">
 						<i class="bi bi-house-door fa-fw me-2"></i>Homepage Tab
 					</a>
-				</li>
+				</li>--}}
                 <!-- menu item 2 -->
-                <li class="nav-item">
+{{-- not built yet: kpsc-tab --}}
+{{--<li class="nav-item">
                     <a class="nav-link {!! active_menu("kpsc-tab") !!}"  href="{{admin_general('kpsc-tab')}}">
                         <i class="bi bi-lightbulb fa-fw me-2"></i>Kpsc Tab
                     </a>
-                </li>
+                </li>--}}
                 <!-- menu item 2 -->
                 <li class="nav-item">
                     <a class="nav-link {!! active_menu("role") !!}"  href="{{ admin_general('role') }}">
@@ -98,11 +100,12 @@
                 </li>
                 
                 <!-- menu item 4 -->
-                <li class="nav-item">
+{{-- not built yet: about-us --}}
+{{--<li class="nav-item">
                     <a class="nav-link {!! active_menu("about-us") !!}"  href="{{admin_general('about-us')}}">
                         <i class="bi bi-person-badge fa-fw me-2"></i>About us
                     </a>
-                </li>
+                </li>--}}
                 <!-- menu item 4 -->
                 <li class="nav-item">
                     <a class="nav-link {!! active_menu("pages") !!}"  href="{{admin_general('pages')}}">
@@ -110,11 +113,23 @@
                     </a>
                 </li>
               	<!-- Menu item 18 -->
-				<li class="nav-item"> <a class="nav-link" href="{{admin_general('faq')}}"><i class="fas fa-question fa-fw me-2"></i>Faq</a></li>
+				{{-- not built yet: faq --}}
 				
 				<!-- Menu item 17 -->
-				<li class="nav-item"> <a class="nav-link" href="{{admin_general('contact-db')}}"><i class="bi bi-dice-6 fa-fw me-2"></i>Contact Database</a></li> 
+				<li class="nav-item"> <a class="nav-link {!! active_menu('contact-db') !!}" href="{{admin_general('contact-db')}}"><i class="bi bi-dice-6 fa-fw me-2"></i>Contact Database</a></li> 
                 
+				@if (auth()->user() && auth()->user()->type === 'Admin')
+				<li class="nav-item mt-3 px-3 text-uppercase small text-muted">Exams &amp; courses</li>
+				<li class="nav-item"><a class="nav-link {!! active_menu('exam-types') !!}" href="{{admin_general('exam-types')}}"><i class="bi bi-bullseye fa-fw me-2"></i>Exam Types</a></li>
+				<li class="nav-item"><a class="nav-link {!! active_menu('features') !!}" href="{{admin_general('features')}}"><i class="bi bi-toggles fa-fw me-2"></i>Course Features</a></li>
+				@endif
+
+				<!-- Dev tools -->
+				<li class="nav-item mt-3 px-3 text-uppercase small text-muted">Dev Tools</li>
+				<li class="nav-item"><a class="nav-link" href="{{admin_general('logs')}}"><i class="bi bi-bug fa-fw me-2"></i>Error Logs</a></li>
+				<li class="nav-item"><a class="nav-link" href="{{admin_general('dev-tools/api-logs')}}"><i class="bi bi-hdd-network fa-fw me-2"></i>API Logs</a></li>
+				<li class="nav-item"><a class="nav-link" href="{{admin_general('dev-tools/analytics')}}"><i class="bi bi-bar-chart-line fa-fw me-2"></i>Daily Analytics</a></li>
+
 				<!-- Menu item 17 -->
 				<li class="nav-item"> <a class="nav-link" href="{{admin_general('sever-cache-clear')}}"><i class="bi bi-arrow-repeat fa-fw me-2"></i>Clear Server Cache</a></li> 
                 
@@ -275,7 +290,7 @@
 								</li>
 
 								<!-- Links -->
-								<li><a class="dropdown-item" href="{{url('profile')}}"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
+								<li><a class="dropdown-item" href="{{url('admin/profile')}}"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
 								<li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
 								<li><a class="dropdown-item bg-danger-soft-hover" href="{{url('sign-out')}}"><i class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
 								<li> <hr class="dropdown-divider"></li>

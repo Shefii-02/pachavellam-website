@@ -69,6 +69,7 @@
                                     </select>
                                 </div>
 
+                                @include('cms._exam-session', ['kind' => 'daily', 'examRow' => null])
                             </div>
                         </div>
                         <div class="text-center mt-4">

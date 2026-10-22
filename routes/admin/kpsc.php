@@ -10,10 +10,15 @@ Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area
 
         Route::get('/', 'cms\DashboardController@dashboard');
 
-        Route::get('banner-slider/delete/{id}', 'cms\BannerController@delete')->name('banner-slider.delete');
-        Route::post('banner-slider/update-slider', 'cms\BannerController@update_slider');
+        Route::get('interested-students', 'student\ExamStudentController@index')->defaults('exam', 'kpsc');
+        Route::get('interested-students/export', 'student\ExamStudentController@export')->defaults('exam', 'kpsc');
 
-        Route::resource('banner-slider', 'cms\BannerController');
+
+
+        // Stories moved to the main sidebar (admin/stories). The edit route stays because a few older
+        // KPSC pages still call it from their (copy-pasted) edit scripts.
+        Route::get('banner-slider', fn () => redirect(url('admin/stories')));
+        Route::get('banner-slider/{banner_slider}/edit', 'cms\BannerController@edit')->name('banner-slider.edit');
 
         Route::get('notifications/delete/{id}', 'cms\NotificationController@delete')->name('notifications.delete');
         Route::post('notifications/update-notify', 'cms\NotificationController@update_notify');
@@ -74,10 +79,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area
         Route::resource('material', 'cms\MaterialController');
 
 
-        Route::get('capsule/delete/{id}', 'cms\CapsuleController@delete')->name('capsule.delete');
-        Route::post('capsule/update-capsule', 'cms\CapsuleController@update_capsule');
-
-        Route::resource('capsule', 'cms\CapsuleController');
+        // Capsule moved to the main sidebar (admin/capsule)
+        Route::get('capsule', fn () => redirect(url('admin/capsule')));
 
         Route::get('psc-results/delete/{id}', 'cms\PscresultsController@delete')->name('psc-results.delete');
         Route::post('psc-results/update-pscresults', 'cms\PscresultsController@update_pscresults');
@@ -161,6 +164,12 @@ Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area
 
         Route::get('today-bucket/delete/{id}', 'cms\TodayBucketController@delete')->name('daily-buckets.delete');
 
+        // settings shared by the Daily Exam, OMR Exam and CA Daily Exam series: free / premium, subjects, exam types, categories, courses
+        Route::get('exam-tools/{id}', 'cms\ExamToolsController@show')->whereNumber('id');
+        Route::post('exam-tools/{id}', 'cms\ExamToolsController@save')->whereNumber('id');
+        Route::get('exam-tools/{id}/library', 'cms\ExamToolsController@library')->whereNumber('id');
+        Route::post('exam-tools/{id}/library', 'cms\ExamToolsController@addFromLibrary')->whereNumber('id');
+
         Route::get('daily-exam', 'cms\DailyexamController@daily_exams');
         Route::get('daily-exam/view', 'cms\DailyexamController@daily_exams_show');
         Route::get('daily-exam/date_based', 'cms\DailyexamController@daily_exams_date_based');
@@ -178,8 +187,21 @@ Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area
         Route::get('daily-exam/date_depend_subjects', 'cms\DailyexamController@date_depend_subjects');
         Route::get('daily-exam/clear-leaderboard/{id}', 'cms\DailyexamController@clear_leaderboard');
 
-        Route::get('ca-daily-exam', 'cms\CaDailyexamController@daily_exams');
-        Route::get('ca-daily-exam/view', 'cms\CaDailyexamController@daily_exams_show');
+        // Current Affairs daily exams, in seasons
+        Route::get('ca-daily-exam', 'cms\CaSeasonController@index');
+        Route::get('ca-daily-exam/view', fn () => redirect(kpsc_cms('ca-daily-exam')));
+        Route::get('ca-daily-exam/seasons/create', 'cms\CaSeasonController@create');
+        Route::post('ca-daily-exam/seasons', 'cms\CaSeasonController@store');
+        Route::get('ca-daily-exam/seasons/{id}', 'cms\CaSeasonController@show')->whereNumber('id');
+        Route::get('ca-daily-exam/seasons/{id}/edit', 'cms\CaSeasonController@edit')->whereNumber('id');
+        Route::post('ca-daily-exam/seasons/{id}', 'cms\CaSeasonController@update')->whereNumber('id');
+        Route::delete('ca-daily-exam/seasons/{id}', 'cms\CaSeasonController@destroy')->whereNumber('id');
+        Route::get('ca-daily-exam/seasons/{id}/exams/create', 'cms\CaSeasonController@examCreate')->whereNumber('id');
+        Route::post('ca-daily-exam/seasons/{id}/exams', 'cms\CaSeasonController@examStore')->whereNumber('id');
+        Route::get('ca-daily-exam/seasons/{id}/build', 'cms\CaSeasonController@build')->whereNumber('id');
+        Route::get('ca-daily-exam/seasons/{id}/build/preview', 'cms\CaSeasonController@buildPreview')->whereNumber('id');
+        Route::post('ca-daily-exam/seasons/{id}/build', 'cms\CaSeasonController@buildStore')->whereNumber('id');
+        Route::post('ca-daily-exam/exams/{examId}/publish', 'cms\CaSeasonController@togglePublish')->whereNumber('examId');
         Route::get('ca-daily-exam/date_based', 'cms\CaDailyexamController@daily_exams_date_based');
         Route::post('ca-daily-exam/store', 'cms\CaDailyexamController@daily_exams_store');
         Route::post('ca-daily-exam/edit-details', 'cms\CaDailyexamController@exam_details_update');

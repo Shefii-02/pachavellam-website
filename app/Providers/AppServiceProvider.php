@@ -17,6 +17,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->singleton(\App\Services\SeasonAccess::class);
         //
     }
 
@@ -25,6 +26,29 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // the main admin sidebar lists one tab per exam type, on every page that uses the layout
+        \Illuminate\Support\Facades\View::composer('admin.main-layout', function ($view) {
+            $view->with('examTabs', \App\Models\CompetitiveExam::active()->get());
+        });
+
+        // staff sign-ins go to the activity log
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Login::class, function ($e) {
+            if ($e->user && $e->user->type !== 'Student') {
+                \App\Services\ActivityLogger::record('login', 'Session', 'Signed in');
+            }
+        });
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Logout::class, function ($e) {
+            if ($e->user && $e->user->type !== 'Student') {
+                \App\Services\ActivityLogger::record('logout', 'Session', 'Signed out');
+            }
+        });
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Failed::class, function ($e) {
+            $u = $e->user;
+            if ($u && $u->type !== 'Student') {
+                \App\Services\ActivityLogger::record('login_failed', 'Session', 'Wrong password for ' . ($u->email ?: $u->name));
+            }
+        });
+
         //
         $category_paid  = CategoryPaid::where('status',1)->orderby('position')->get();
         $category_free  = CategoryFree::where('status',1)->orderby('position')->get();

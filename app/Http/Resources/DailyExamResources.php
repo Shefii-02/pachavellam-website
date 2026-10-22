@@ -26,6 +26,9 @@ class DailyExamResources extends JsonResource
             'ended_at' => $this->ended_at,
             'examtitle' => $this->examtitle,
             'status' => $this->status,
+            'season_id' => $this->series_season_id,
+            'locked' => (bool) app(\App\Services\SeasonAccess::class)->lockedSeason(auth('api')->user(), $this->resource),
+            'free_access' => (bool) $this->free_access,
         ];
     }
 }

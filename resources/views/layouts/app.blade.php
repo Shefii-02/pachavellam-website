@@ -28,6 +28,7 @@
 
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 
+@include('partials.global-hide')
 </head>
 
 <body>

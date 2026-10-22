@@ -12,7 +12,7 @@
                 <!-- Select option -->
                 <div class="col-md-6">
                     <a class="btn btn-sm btn-primary me-1 float-end" href="{{ kpsc_cms('ca-daily-exam/view') }}"><i
-                            class="bi bi-plus me-1"></i>View CA Daily Exam's</a>
+                            class="bi bi-plus me-1"></i>View CA Exams</a>
                     <span class="js-choice "></span>
                 </div>
             </div>

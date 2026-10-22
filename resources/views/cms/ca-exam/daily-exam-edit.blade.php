@@ -10,7 +10,8 @@
                 </div>
                 <!-- Select option -->
                 <div class="col-md-6">
-                    <a class="btn btn-sm btn-primary me-1 float-end" href="{{ kpsc_cms('ca-daily-exam/view') }}"><i
+                    <a class="btn btn-sm btn-success me-1 float-end" href="{{ url('admin/kpsc/exam-tools/' . $exam_detail->id) }}"><i class="bi bi-sliders me-1"></i>Settings, courses &amp; library</a>
+                    <a class="btn btn-sm btn-primary me-1 float-end" href="{{ $season ? kpsc_cms('ca-daily-exam/seasons/' . $season->id) : kpsc_cms('ca-daily-exam') }}"><i
                             class="bi bi-arrow-left me-1"></i>Back</a>
                     <span class="js-choice "></span>
                 </div>
@@ -29,23 +30,58 @@
                         @csrf
                         <div class="form-group border-bottom mb-2 p-3 bg-light">
                             <div class="row">
-                                <div class="col-md-4 mt-2">
-                                    <label class="form-label">Exam Title</label>
-                                    <select name="level" class="form-control" required autocomplete="off">
-                                        @for ($i = 1; $i <= 100; $i++)
-                                            @if (!$examDays->contains($i) || $i == $exam_detail->level)
-                                                <option value="{{ $i }}" {{ $i == $exam_detail->level ? 'selected' : '' }}>Day {{ $i }}</option>
-                                            @endif
-                                        @endfor
-                                    </select>
+                                @php
+                                    $kind = $exam_detail->exam_kind ?: 'daily';
+                                    $isDaily = $kind === 'daily';
+                                @endphp
+                                <div class="col-12">
+                                    <span class="badge bg-info text-white">{{ \App\Models\CaSeason::KINDS[$kind] ?? $kind }} exam</span>
+                                    @if ($season)
+                                        <a href="{{ kpsc_cms('ca-daily-exam/seasons/' . $season->id) }}" class="ms-1">{{ $season->name }}</a>
+                                    @endif
+                                    @if ($sources->isNotEmpty())
+                                        <div class="small text-muted mt-1">Questions copied from:
+                                            {{ $sources->map(fn ($s) => 'Day ' . $s->slot_no . ' (' . $s->question_count . ')')->implode(', ') }}
+                                            @if ($season)· <a href="{{ kpsc_cms('ca-daily-exam/seasons/' . $season->id . '/build?kind=' . $kind . '&exam_id=' . $exam_detail->id) }}">add more from daily exams</a>@endif
+                                        </div>
+                                    @elseif (!$isDaily && $season)
+                                        <div class="small mt-1"><a href="{{ kpsc_cms('ca-daily-exam/seasons/' . $season->id . '/build?kind=' . $kind . '&exam_id=' . $exam_detail->id) }}"><i class="bi bi-magic"></i> Pull questions from the daily exams</a></div>
+                                    @endif
                                 </div>
 
-                                <div class="col-md-4 mt-2">
-                                    <label class="form-label">Exam Started At</label>
-                                    <input class="form-control" value="{{ $exam_detail->started_at }}" required
-                                        type="datetime-local" name="exam_started" placeholder="">
+                                <div class="col-md-2 mt-2">
+                                    <label class="form-label">{{ $isDaily ? 'Day' : 'Number' }}</label>
+                                    <input type="number" min="1" name="slot_no" required class="form-control"
+                                        value="{{ old('slot_no', $exam_detail->slot_no ?: $exam_detail->level) }}">
+                                    @error('slot_no')<div class="text-danger small">{{ $message }}</div>@enderror
                                 </div>
+                                <div class="col-md-4 mt-2">
+                                    <label class="form-label">Title</label>
+                                    <input type="text" name="exam_title" class="form-control" value="{{ old('exam_title', $exam_detail->exam_title) }}" placeholder="Day {{ $exam_detail->slot_no ?: $exam_detail->level }}">
+                                </div>
+                                <div class="col-md-3 mt-2">
+                                    <label class="form-label">Starts at</label>
+                                    <input class="form-control" value="{{ old('exam_started', \Carbon\Carbon::parse($exam_detail->started_at)->format('Y-m-d\TH:i')) }}" required
+                                        type="datetime-local" name="exam_started">
+                                </div>
+                                <div class="col-md-3 mt-2">
+                                    <label class="form-label">Ends at</label>
+                                    <input class="form-control" value="{{ old('exam_ended', $exam_detail->ended_at ? \Carbon\Carbon::parse($exam_detail->ended_at)->format('Y-m-d\TH:i') : '') }}"
+                                        type="datetime-local" name="exam_ended">
+                                </div>
+                                @unless ($isDaily)
+                                    <div class="col-md-3 mt-2">
+                                        <label class="form-label">Covers from</label>
+                                        <input type="date" name="period_start" class="form-control" value="{{ old('period_start', $exam_detail->period_start) }}">
+                                    </div>
+                                    <div class="col-md-3 mt-2">
+                                        <label class="form-label">Covers until</label>
+                                        <input type="date" name="period_end" class="form-control" value="{{ old('period_end', $exam_detail->period_end) }}">
+                                        @error('period_end')<div class="text-danger small">{{ $message }}</div>@enderror
+                                    </div>
+                                @endunless
 
+                                @include('cms._exam-session', ['kind' => 'ca', 'examRow' => $exam_detail])
 
                                 <div class="col-md-6 mt-2">
                                     <div class="form-check form-switch">
@@ -168,7 +204,7 @@
                                         </div>
                                         <div class="col-md-12 mt-2">
                                             <label class="form-label">Explanation</label>
-                                            <textarea class="form-control" id="explanation" autocomplete="off" type="text" name="explanation"
+                                            <textarea class="form-control my-editor" id="explanation" autocomplete="off" type="text" name="explanation"
                                                 placeholder="Enter Explanation"></textarea>
                                         </div>
                                     </div>
@@ -208,6 +244,31 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
+
+            // every box of the "Create Exam Question" window is an editor with an image button (upload or pick from the file manager)
+            function questionEditors(scope) {
+                if (typeof CKEDITOR === 'undefined') { return; }
+                $(scope).find('textarea').each(function () {
+                    var id = $(this).attr('id');
+                    if (!id || CKEDITOR.instances[id]) { return; }
+                    CKEDITOR.replace(id, {
+                        filebrowserUploadUrl: "{{ route('ckeditor.upload', ['_token' => csrf_token()]) }}",
+                        filebrowserUploadMethod: 'form',
+                        height: 100,
+                        filebrowserBrowseUrl: "{{ asset('ckeditor/filemanager/dialog.php') }}?type=2&editor=ckeditor&fldr=",
+                        filebrowserImageBrowseUrl: "{{ asset('ckeditor/filemanager/dialog.php') }}?type=1&editor=ckeditor&fldr=",
+                        toolbar: [
+                            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'] },
+                            { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Blockquote'] },
+                            { name: 'insert', items: ['Image', 'Table', 'HorizontalRule', 'SpecialChar'] }
+                        ]
+                    });
+                });
+            }
+            $('#addQuestion').on('shown.bs.modal', function () { questionEditors(this); });
+            $('#addQuestion form').on('submit', function () {
+                if (typeof CKEDITOR !== 'undefined') { for (var k in CKEDITOR.instances) { CKEDITOR.instances[k].updateElement(); } }
+            });
 
             $(".add_new_banner").click(function() {
                 $(".new-banner-section").fadeToggle(1000);

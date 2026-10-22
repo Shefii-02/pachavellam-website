@@ -52,6 +52,11 @@ class AdminLoginController extends Controller
 
     public function logout(Request $request)
     {
+        // viewing the panel as a staff member: signing out returns the super admin to the admin dashboard
+        if ($back = \App\Http\Controllers\Staff\ImpersonationController::returnToAdmin($request)) {
+            return $back;
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

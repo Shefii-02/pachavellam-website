@@ -47,6 +47,31 @@ Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area
         Route::get('permission/delete/{id}', 'General\PermissionController@permission_delete');
         Route::post('permission/updating', 'General\PermissionController@permission_updating');
 
+        Route::group(['prefix' => 'dev-tools'], function () {
+            Route::get('api-logs', 'General\DevToolController@apiLogs');
+            Route::get('analytics', 'General\DevToolController@analytics');
+            Route::get('prune', 'General\DevToolController@prune');
+        });
+
+        // exam types and course features (Admin only - checked in the controllers). Coupons moved to admin/coupons.
+        Route::get('exam-types', 'General\ExamTypeController@index');
+        Route::get('exam-types/create', 'General\ExamTypeController@create');
+        Route::post('exam-types', 'General\ExamTypeController@store');
+        Route::get('exam-types/{id}/edit', 'General\ExamTypeController@edit')->whereNumber('id');
+        Route::put('exam-types/{id}', 'General\ExamTypeController@update')->whereNumber('id');
+        Route::delete('exam-types/{id}', 'General\ExamTypeController@destroy')->whereNumber('id');
+
+        Route::get('features', 'General\FeatureController@index');
+        Route::get('features/create', 'General\FeatureController@create');
+        Route::post('features', 'General\FeatureController@store');
+        Route::get('features/{id}/edit', 'General\FeatureController@edit')->whereNumber('id');
+        Route::put('features/{id}', 'General\FeatureController@update')->whereNumber('id');
+        Route::delete('features/{id}', 'General\FeatureController@destroy')->whereNumber('id');
+
+
+        Route::get('contact-db', 'General\ContactDbController@index');
+        Route::get('contact-db/delete/{id}', 'General\ContactDbController@destroy');
+
         Route::get('sever-cache-clear', 'General\UserController@sever_cache_clear');
 
         Route::get('pages', 'General\UserController@pages');

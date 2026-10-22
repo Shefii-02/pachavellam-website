@@ -55,7 +55,7 @@
                         <!-- Single Trending Post-->
                         <div class="col-md-3 col-6 ">
                             <div class=" specialvideos">
-                                    <a target="_new" href="https://youtu.be/{{$videos->redirection}}">
+                                    <a href="{{ $videos->url }}">
                                         <div style="background-image:url('https://img.youtube.com/vi/{{$videos->redirection}}/0.jpg'); height:152px; background-size:100%;
                                                      background-repeat:no-repeat;" class="card catagory-card">
                                             <span   style="transition-duration: 500ms;

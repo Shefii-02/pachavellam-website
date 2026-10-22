@@ -49,7 +49,8 @@ class UserController extends Controller
     }
     public function users_delete($id){
 
-        User::where('id',$id)->delete();
+        // only admin staff may be removed from this screen, never students/admins
+        User::where('id',$id)->where('type','Admin Staff')->delete();
         return redirect()->back()->with('message','Data deleted Successfully');
     }
     public function users_updating(Request $request){
@@ -77,7 +78,6 @@ class UserController extends Controller
         \Artisan::call('cache:clear');
         \Artisan::call('route:clear');
         \Artisan::call('view:clear');
-        \Artisan::call('migrate');
         return redirect()->back()->with('message','Server cache cleared');
 
     }

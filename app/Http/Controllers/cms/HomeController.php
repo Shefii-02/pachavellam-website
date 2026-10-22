@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\cms;
 
+use Illuminate\Support\Facades\DB;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\View;
@@ -51,24 +53,122 @@ use Carbon\Carbon;
 class HomeController extends Controller
 {
    
+    /** The exam series cards the staff ticked in admin/home-exams (shared by the web home page and the app API). */
+    public function homeSeriesCards(): array
+    {
+        // exam series the staff ticked in admin/home-exams: one card each (active season + its newest exams)
+        $homeSeries = [];
+        if (\Illuminate\Support\Facades\Schema::hasTable('home_exam_series')) {
+            $ticked = \Illuminate\Support\Facades\DB::table('home_exam_series')->where('show_home', true)->orderBy('position')->orderBy('id')->get();
+            if ($ticked->count()) {
+                $pc = app(\App\Http\Controllers\PublicCatalogController::class);
+                $features = \App\Models\ExamFeature::where('status', 1)->orderBy('position')->get();
+                $exams = \App\Models\CompetitiveExam::where('status', 1)->whereIn('id', $ticked->pluck('exam_id'))->get()->keyBy('id');
+                $cards = [];
+                $featureOf = ['daily-exams' => 'daily-exams', 'omr-exams' => 'omr-exams', 'gk-exams' => 'gk-exams', 'ca-exams' => 'premium-daily-ca', 'special-exams' => 'special-exams'];
+                foreach ($ticked as $t) {
+                    $ex = $exams[$t->exam_id] ?? null;
+                    if (!$ex || !isset($featureOf[$t->series])) {
+                        continue;
+                    }
+                    $cards[$ex->id] = $cards[$ex->id] ?? collect($pc->provide($ex, $features))->keyBy('slug');
+                    $card = $cards[$ex->id][$featureOf[$t->series]] ?? null;
+                    if ($card && (count($card->seasons) || count($card->items))) {   // empty series are skipped
+                        $card->badge = $ex->short_name ?: $ex->name;
+                        $card->all = url($ex->slug . '/' . $t->series);
+                        $card->accent = $ex->color ?: '#0a8f5b';
+                        $card->examSlug = $ex->slug;
+                        $homeSeries[] = $card;
+                    }
+                }
+            }
+        }
+
+        return $homeSeries;
+    }
+
     public function homepage(){
     
         $banner         = Banner::where('status',1)->orderby('position')->get();
-        $noftify        = Notification::orderby('created_at','desc')->get();
-        $whatsnew       = WhatsNew::where('status',1)->orderby('position')->get();
-        $specialtab     = SpecialTab::where('status',1)->orderby('position')->get();
+        // banners, what's new, announcements, articles, notifications: the shared content (shown for every exam type on the home page)
+        $live = fn ($kind) => \App\Models\ContentItem::ofKind($kind)->live()
+            ->where(fn ($q) => $q->whereNull('starts_at')->orWhere('starts_at', '<=', today()))->where(fn ($q) => $q->whereNull('ends_at')->orWhere('ends_at', '>=', today()));
+        $noftify        = $live('notification')->orderByDesc('published_at')->orderByDesc('id')->limit(10)->get();
+        $announcements  = $live('announcement')->with('exams:id,short_name,name,color')->orderByDesc('is_pinned')->orderByDesc('published_at')->orderByDesc('id')->limit(8)->get();
+        $whatsnew       = $live('whats_new')->orderBy('position')->get();
+        $specialtab     = $live('banner')->orderBy('position')->get();
         $ourvideos      = Ourvideos::where('status',1)->orderby('position')->get();
         $category_paid  = CategoryPaid::where('status',1)->orderby('position')->get();
         // $category_free  = CategoryFree::where('status',1)->orderby('position')->get();
         $category_free  = KpscSubject::where('status','show')->where('type','parent')->orderby('position')->get();
-        $specialvideos  = SpecialVideo::where('status',1)->whereNull('section')->orderby('position')->get();
-        $psc_news       = Pscnews::where('status',1)->orderby('id','desc')->limit(10)->get();
+        $specialvideos  = \App\Models\ContentItem::homeVideos();
+        $psc_news       = \App\Models\ContentItem::ofKind('article')->live()->with('exams:id,short_name,name,color')->orderByDesc('published_at')->orderByDesc('id')->limit(8)->get();
         
         date_default_timezone_set('Asia/Kolkata');
         
         $next_exam = DailyExam::where('section','Daily Exam')->where('ended_at','>',date('Y-m-d H:i:s'))->where('status',1)->orderby('started_at')->first();
         
-        return view('kpsc.index',compact('banner', 'noftify', 'whatsnew', 'specialtab', 'ourvideos', 'category_free', 'category_paid','specialvideos','psc_news','next_exam'));
+        // stories (picture strip), exam types and the newest published courses
+        // exam types are the tabs of "What are you preparing for?", their top categories (with sub category names) the cards
+        $examTypes = \App\Models\CompetitiveExam::where('status', 1)->orderBy('position')
+            ->with(['categories' => fn ($q) => $q->whereNull('parent_id')->where('status', 1)->orderBy('position')->orderBy('id')->with(['children' => fn ($c) => $c->where('status', 1)])])->get();
+        // upcoming live classes first (soonest first), then the latest recorded ones
+        $classQ = fn () => \App\Models\ContentItem::ofKind('promo_class')->live()->with('exams:id,short_name,name,color');
+        $upcoming = $classQ()->where('mode', 'live')->where('scheduled_at', '>=', now())->orderBy('scheduled_at')->limit(12)->get();
+        $freeClasses = $upcoming->concat($classQ()->whereNotIn('id', $upcoming->pluck('id'))->orderByDesc('scheduled_at')->orderByDesc('id')->limit(12 - $upcoming->count())->get())->values();
+        $newCourses = \App\Models\ExamCourse::with('exam:id,short_name,name,color')->where('status', 'published')->where('slug', 'not like', 'series-%')->orderByDesc('id')->limit(8)->get();
+
+        // website numbers, founder note, team and FAQs (managed under Website content), and live counters
+        $site = fn ($kind) => \App\Models\ContentItem::ofKind($kind)->live()->orderBy('position')->orderBy('id');
+        $stats = $site('stat')->get();
+        $founder = $site('founder')->first();
+        $team = $site('team_member')->get();
+        $faqs = $site('faq')->get();
+        $liveTests = \App\Models\CourseExam::where('status', 'published')->where('start_at', '>=', now())->count()
+            + (\Illuminate\Support\Facades\Schema::hasTable('kpsc_daily_exams') ? DB::table('kpsc_daily_exams')->where('status', 1)->where('ended_at', '>', now())->count() : 0);
+        $mockTests = \App\Models\CourseExam::where('status', 'published')->count()
+            + (\Illuminate\Support\Facades\Schema::hasTable('kpsc_daily_exams') ? DB::table('kpsc_daily_exams')->where('status', 1)->count() : 0);
+        $pyqCount = \Illuminate\Support\Facades\Schema::hasTable('prev_questionpaper') ? DB::table('prev_questionpaper')->count() : 0;
+        $liveClassCount = $upcoming->count();
+
+        // "Try out our live experience": upcoming (or live now) free classes and free tests with a countdown;
+        // when nothing is scheduled the latest recorded classes / open tests are shown as "available now"
+        $liveSoon = $classQ()->where('mode', 'live')->where('scheduled_at', '>=', now()->subHours(2))->orderBy('scheduled_at')->limit(12)->get();
+        $liveClasses = ($liveSoon->count() ? $liveSoon : $classQ()->orderByDesc('scheduled_at')->orderByDesc('id')->limit(8)->get())
+            ->map(fn ($c) => (object) [
+                'title' => $c->title, 'by' => $c->exams->pluck('short_name')->filter()->implode(', '), 'url' => $c->publicUrl(),
+                'thumb' => $c->image ? Storage::url('files/' . $c->image) : (($v = \App\Services\ClassSource::youtubeId((string) $c->link_url)) ? 'https://img.youtube.com/vi/' . $v . '/hqdefault.jpg' : null),
+                'starts' => $c->mode === 'live' ? $c->scheduled_at : null, 'ends' => $c->mode === 'live' && $c->scheduled_at ? $c->scheduled_at->copy()->addHours(2) : null,
+                'exams' => $c->exams->pluck('id')->all(), 'tag' => $c->mode === 'live' ? 'Live class' : 'Recorded class',
+            ]);
+        $freeTests = \App\Models\CourseExam::with('course:id,slug,title')->where('status', 'published')->where('is_paid', false)
+            ->where(fn ($q) => $q->whereNull('end_at')->orWhere('end_at', '>=', now()))->whereNotNull('start_at')->where('start_at', '<=', now()->addDays(15))
+            ->orderBy('start_at')->limit(12)->get()
+            ->map(fn ($t) => (object) ['title' => $t->title, 'by' => $t->course->title ?? '', 'url' => url('tests/' . $t->id), 'thumb' => null,
+                'starts' => $t->start_at, 'ends' => $t->end_at, 'exams' => [$t->exam_id], 'tag' => ($t->duration_minutes ? $t->duration_minutes . ' min · ' : '') . 'Free test']);
+        if (\Illuminate\Support\Facades\Schema::hasTable('kpsc_daily_exams')) {
+            $kpscId = $examTypes->firstWhere('slug', 'kpsc')?->id;
+            $freeTests = $freeTests->concat(DailyExam::where('section', 'Daily Exam')->where('status', 1)->where('ended_at', '>', now())->orderBy('started_at')->limit(8)->get()
+                ->map(fn ($d) => (object) ['title' => $d->examtitle ?: 'Daily exam', 'by' => 'Kerala PSC daily exam', 'url' => url('kpsc/daily-exam/' . $d->exam_date . '/' . $d->id), 'thumb' => null,
+                    'starts' => $d->started_at ? \Illuminate\Support\Carbon::parse($d->started_at) : null, 'ends' => $d->ended_at ? \Illuminate\Support\Carbon::parse($d->ended_at) : null, 'exams' => array_filter([$kpscId]), 'tag' => 'Daily exam']));
+        }
+        $freeTests = $freeTests->sortBy(fn ($t) => $t->starts ? $t->starts->timestamp : 0)->values();
+
+        // capsules (image or short note cards, managed under Home page content > Capsule), newest first
+        $capsules = Capsule::with('exams:id')->where('status', 1)->orderByDesc('position')->orderByDesc('id')->limit(16)->get();
+
+        // associate partners, our key points, FAQs by group
+        $partners = $site('partner')->get();
+        $keyPoints = $site('key_point')->get();
+        $faqGroups = $faqs->groupBy(fn ($f) => isset(\App\Models\ContentItem::FAQ_GROUPS[$f->type]) ? $f->type : 'general');
+        $primeFeatures = \App\Http\Controllers\PrimeController::FEATURES;
+
+        $rankRows = app(\App\Services\StudentProgress::class)->publicBoard(null, 20);
+
+        $homeSeries = $this->homeSeriesCards();
+
+        return view('kpsc.index',compact('homeSeries', 'rankRows', 'banner', 'noftify', 'whatsnew', 'specialtab', 'ourvideos', 'category_free', 'category_paid','specialvideos','psc_news','next_exam','examTypes','newCourses','announcements','freeClasses','stats','founder','team','faqs','liveTests','mockTests','pyqCount','liveClassCount',
+            'liveClasses', 'freeTests', 'partners', 'keyPoints', 'faqGroups', 'primeFeatures', 'capsules'));
     }
     
     public function homepage_new(){
@@ -79,7 +179,7 @@ class HomeController extends Controller
         $ourvideos      = Ourvideos::where('status',1)->orderby('position')->get();
         $category_paid  = CategoryPaid::where('status',1)->orderby('position')->get();
         $category_free  = KpscSubject::where('status','show')->orderby('position')->get();
-        $specialvideos  = SpecialVideo::where('status',1)->whereNull('section')->orderby('position')->get();
+        $specialvideos  = \App\Models\ContentItem::homeVideos();
         $psc_news       = Pscnews::where('status',1)->orderby('id','desc')->limit(10)->get();
         
         date_default_timezone_set('Asia/Kolkata');
@@ -364,14 +464,14 @@ class HomeController extends Controller
     }
 
     public function prev_qstn_ans(){
-         $title = 'Psc Prev Qstn Paper & Ans Key';
+         $title = 'Psc PYQ Paper & Ans Key';
         $redirection = url('kpsc');
         $prev_type = PrevQuestion::groupBy('category')->get('category'); 
         return view('kpsc.psc-question-answer',compact('prev_type','title','redirection'));
     }
 
     public function prev_qstn_ans_sub_category($sub){
-         $title = 'Psc Prev Qstn Paper & Ans Key';
+         $title = 'Psc PYQ Paper & Ans Key';
         $redirection = url('kpsc');
         $category = str_replace('-',' ',$sub);
         $prev_type = PrevQuestion::where('category',$category)->groupBy('subcategory')->get('subcategory'); 
@@ -380,7 +480,7 @@ class HomeController extends Controller
 
     public function prev_qstn_ans_list($category,$sub_category){
        
-         $title = 'Psc Prev Qstn Paper & Ans Key';
+         $title = 'Psc PYQ Paper & Ans Key';
         $redirection = url('kpsc');
          $category = remove_slug($category);
         $sub_category = remove_slug($sub_category);
@@ -416,7 +516,7 @@ class HomeController extends Controller
     public function psc_special_videos(){
          $title = 'Special Videos';
         $redirection = url('kpsc');
-        $spcl_video = SpecialVideo::whereNull('section')->get();
+        $spcl_video = \App\Models\ContentItem::homeVideos();
         return view('kpsc.psc-special-video-list',compact('spcl_video','title','redirection'));
     }
 
@@ -1033,7 +1133,7 @@ class HomeController extends Controller
         $redirection    = url('kpsc');
         $subject_dtls   = KpscSubject::where('slug_name',$category_name)->first();
        
-        $spcl_video = SpecialVideo::where('category',$subject_dtls->id)->whereNull('section')->get(); 
+        $spcl_video = \App\Models\ContentItem::homeVideos((int) $subject_dtls->id); 
         return view('kpsc.psc-special-video-list',compact('spcl_video','title','redirection'));
         
     }
@@ -1044,7 +1144,7 @@ class HomeController extends Controller
         $subject_dtls       = KpscSubject::where('slug_name',$category_name)->first();
         $sub_subject_dtls   = KpscSubject::where('slug_name',$sub_category)->where('parent_id',$subject_dtls->id)->first();
         
-        $spcl_video = SpecialVideo::where('category',$sub_subject_dtls->id)->whereNull('section')->get(); 
+        $spcl_video = \App\Models\ContentItem::homeVideos((int) $sub_subject_dtls->id); 
         return view('kpsc.psc-special-video-list',compact('spcl_video','title','redirection'));
     }
     public function  subject_related_study_notes($category_name){

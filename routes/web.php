@@ -24,10 +24,16 @@ Route::get("app", function () {
 
 require __DIR__ . '/admin/auth.php';
 require __DIR__ . '/admin/general.php';
+require __DIR__ . '/admin/exam.php';
+require __DIR__ . '/admin/profile.php';
 require __DIR__ . '/admin/kpsc.php';
 require __DIR__ . '/admin/student.php';
 require __DIR__ . '/admin/teaching.php';
 require __DIR__ . '/admin/ug.php';
+require __DIR__ . '/admin/rrb.php';
+require __DIR__ . '/admin/ssc.php';
+require __DIR__ . '/admin/ugc_net.php';
+require __DIR__ . '/admin/ktet.php';
 
 
 Route::post('/send-otp', 'MobileNumberController@sendOTP')->middleware('throttle:20,1');
@@ -71,6 +77,9 @@ Route::get("sign-in", function () {
 
 
 Route::get("sign-out", function () {
+    if ($back = \App\Http\Controllers\Staff\ImpersonationController::returnToAdmin(request())) {
+        return $back;
+    }
     \Auth::logout();
     return redirect()->back();
 })->name('sign-out');
@@ -136,8 +145,8 @@ Route::post('sign-in', 'cms\HomeController@daily_exam_user_login')->name('sign-i
 Route::post('sign-up', 'cms\HomeController@daily_exam_user_register')->name('sign-up-store');
 
 
-Route::get('/kpsc', 'cms\HomeController@homepage');
-Route::get('/kpsc/home', 'cms\HomeController@homepage');
+Route::get('/kpsc', fn () => app(\App\Http\Controllers\PublicCatalogController::class)->exam('kpsc'));   // the KPSC exam type page (was the home page)
+Route::get('/kpsc/home', fn () => redirect(url('kpsc'), 301));   // KPSC home = the KPSC exam type page, like every other exam type
 
 require __DIR__ . '/kpsc.php';
 require __DIR__ . '/ug.php';
@@ -153,4 +162,96 @@ Route::get('contact-us', function () {
 
 Route::get('faq', function () {
     return view('cms.faq');
+});
+
+
+Route::get('firebase-messaging-sw.js', function () {
+    $cfg = json_encode(config('firebase.web.config'));
+    $js = "importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js','https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');\n"
+        . "firebase.initializeApp($cfg);\nconst messaging = firebase.messaging();\n"
+        . "self.addEventListener('notificationclick', function (e) { e.notification.close(); var u = (e.notification.data && (e.notification.data.FCM_MSG && e.notification.data.FCM_MSG.data ? e.notification.data.FCM_MSG.data.landing_url : e.notification.data.landing_url)) || '/'; e.waitUntil(clients.openWindow(u)); });\n";
+    return response($js, 200, ['Content-Type' => 'application/javascript', 'Service-Worker-Allowed' => '/']);
+});
+Route::post('push/web-token', function (\Illuminate\Http\Request $r) {
+    abort_unless(auth()->check(), 401);
+    $r->validate(['token' => 'required|string|max:255']);
+    \App\Models\DeviceToken::updateOrCreate(['token' => $r->token], ['user_id' => auth()->id(), 'platform' => 'web', 'device_name' => substr((string) $r->userAgent(), 0, 120), 'last_seen_at' => now()]);
+    return response()->json(['ok' => true]);
+})->middleware('throttle:30,1');
+Route::get('announcements', 'PublicCatalogController@announcements');
+Route::get('announcements/{id}', 'PublicCatalogController@announcement')->whereNumber('id');
+Route::get('banners', 'PublicCatalogController@banners');
+Route::get('achievements', fn () => redirect('stories'));
+Route::get('stories', 'PublicCatalogController@stories');
+Route::get('stories-feed', 'PublicCatalogController@storiesFeed');
+Route::get('notifications-feed', 'PublicCatalogController@feed');
+// bottom bar tabs: Exams, Courses, Learn (open to everyone) and Profile (signed in); choosing an exam / favourite asks to sign in, then finishes the choice
+Route::get('exams', 'StudentHubController@exams');
+Route::get('courses', 'StudentHubController@courses');
+Route::get('learn', 'StudentHubController@learn');
+Route::middleware(['auth', 'throttle:60,1'])->group(function () {
+    Route::match(['get', 'post'], 'exams/interest/{id}', 'StudentHubController@interest')->whereNumber('id');
+    Route::match(['get', 'post'], 'exams/favourite/{id}', 'StudentHubController@favourite')->whereNumber('id');
+    Route::get('my-account', 'StudentHubController@account');
+    Route::get('my-account/trend', 'StudentHubController@trend');
+    Route::get('my-courses/{id}', 'MyCourseController@show')->whereNumber('id');   // a bought course, tab by tab
+    Route::post('my-account/referral', 'ReferralController@apply')->middleware('throttle:10,1');
+    Route::post('my-account/profile','StudentHubController@updateProfile');
+    Route::post('my-account/password', 'StudentHubController@updatePassword');
+});
+Route::get('r/{code}', 'ReferralController@landing')->where('code', '[A-Za-z0-9]{4,12}');   // refer & earn link, shared from My account
+Route::get('free-classes', 'PublicCatalogController@freeClasses');
+Route::get('free-classes/{id}', 'PublicCatalogController@freeClassById')->whereNumber('id');   // old numeric links go to the random-id address
+Route::get('free-classes/{uid}', 'PublicCatalogController@freeClass')->where('uid', '(?=[0-9]*[a-z])[a-z0-9]{8,10}');
+Route::get('player/{uid}/chat', 'ClassChatController@messages')->where('uid', '[a-z0-9]{8,14}')->middleware('throttle:90,1');
+Route::post('player/{uid}/chat', 'ClassChatController@send')->where('uid', '[a-z0-9]{8,14}')->middleware(['auth', 'throttle:20,1']);
+Route::get('watch/{vid}', 'PublicCatalogController@watch')->where('vid', '[a-z0-9]{8,14}');
+Route::get('player/{uid}', 'PublicCatalogController@player')->where('uid', '[a-z0-9]{8,14}');
+Route::get('articles', 'PublicCatalogController@articles');
+Route::get('articles/{id}', 'PublicCatalogController@article')->whereNumber('id');
+Route::get('courses/{slug}', 'PublicCatalogController@course');
+// exam type pages live at /kpsc, /rrb ... (the old /exam/kpsc address redirects there)
+Route::get('exam/{slug}', fn ($slug) => redirect(url($slug), 301));
+
+// Prime: landing page of the paid courses; buying needs a signed in student (the sign in page brings them back here)
+Route::get('prime', 'PrimeController@index');
+Route::get('prime/buy/{id}', 'PrimeController@buy')->whereNumber('id')->middleware(['auth', 'throttle:20,1']);
+Route::post('counselling', 'Content\CounsellingController@store')->middleware('throttle:5,1');
+
+// Payment links: a student pays for one course on a web page (sent on WhatsApp, or opened from the website / apps)
+Route::get('pay/{token}', 'Finance\PayLinkPageController@show')->where('token', '[A-Za-z0-9]{40}');
+Route::post('pay/{token}/start', 'Finance\PayLinkPageController@start')->where('token', '[A-Za-z0-9]{40}')->middleware('throttle:20,1');
+Route::post('pay/{token}/verify', 'Finance\PayLinkPageController@verify')->where('token', '[A-Za-z0-9]{40}')->middleware('throttle:30,1');
+Route::get('pay/{token}/status', 'Finance\PayLinkPageController@status')->where('token', '[A-Za-z0-9]{40}')->middleware('throttle:60,1');
+
+// builder exams on the website: instructions (open to all), then the test, result, solutions and the student's own list / analysis
+Route::get('tests/{id}', 'TestController@show')->whereNumber('id');
+Route::middleware('auth')->group(function () {
+    Route::get('tests/{id}/sign-in', fn ($id) => redirect(url('tests/' . (int) $id)))->whereNumber('id');   // guest: sign in, then back to the test
+    Route::post('tests/{id}/start', 'TestController@start')->whereNumber('id')->middleware('throttle:20,1');
+    Route::get('tests/attempt/{id}', 'TestController@play')->whereNumber('id');
+    Route::post('tests/attempt/{id}/save', 'TestController@save')->whereNumber('id')->middleware('throttle:120,1');
+    Route::get('tests/attempt/{id}/result', 'TestController@result')->whereNumber('id');
+    Route::get('tests/attempt/{id}/solutions', 'TestController@solutions')->whereNumber('id');
+    Route::post('tests/attempt/{id}/rate', 'TestController@rate')->whereNumber('id')->middleware('throttle:10,1');
+    Route::post('tests/{id}/report', 'TestController@report')->whereNumber('id')->middleware('throttle:20,1');
+    Route::get('my-tests', 'TestController@mine');
+    Route::get('my-tests/analysis', 'TestController@analysis');
+});
+
+// a season (session) of an exam series: what it holds, its price, Buy
+Route::get('seasons/{id}', 'SeasonController@show')->whereNumber('id');
+Route::get('seasons/{id}/buy', 'SeasonController@buy')->whereNumber('id')->middleware(['auth', 'throttle:20,1']);
+
+// exam series of an exam type: /kpsc/daily-exams, /rrb/omr-exams, /ssc/gk-exams, /kpsc/ca-exams
+foreach (['daily-exams', 'omr-exams', 'gk-exams', 'ca-exams', 'special-exams'] as $seriesPage) {
+    Route::get('{examSlug}/' . $seriesPage, fn (\Illuminate\Http\Request $r, $examSlug) => app(\App\Http\Controllers\PublicCatalogController::class)->series($r, $examSlug, $seriesPage))->where('examSlug', '[a-z0-9-]+');
+}
+
+// /{exam type slug}: the landing page of an exam type. Every route above wins first, so only addresses nothing else uses get here.
+Route::fallback(function (\Illuminate\Http\Request $request) {
+    $slug = trim($request->path(), '/');
+    abort_unless($request->isMethod('GET') && preg_match('/^[a-z0-9-]+$/', $slug) && \App\Models\CompetitiveExam::where('slug', $slug)->where('status', 1)->exists(), 404);
+
+    return app(\App\Http\Controllers\PublicCatalogController::class)->exam($slug);
 });

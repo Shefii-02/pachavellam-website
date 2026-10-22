@@ -79,7 +79,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-NHXSBF6');</script>
 <!-- End Google Tag Manager -->
 
-  </head>
+  @include('partials.global-hide')
+</head>
   <body oncopy="return false" oncut="return false"  onselectstart="return false">
    
    

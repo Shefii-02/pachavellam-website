@@ -10,6 +10,7 @@
                 </div>
                 <!-- Select option -->
                 <div class="col-md-6">
+                    <a class="btn btn-sm btn-success me-1 float-end" href="{{ url('admin/kpsc/exam-tools/' . $exam_detail->id) }}"><i class="bi bi-sliders me-1"></i>Settings, courses &amp; library</a>
                     <a class="btn btn-sm btn-primary me-1 float-end" href="{{ kpsc_cms('daily-exam/view') }}"><i
                             class="bi bi-plus me-1"></i>Back</a>
                     <span class="js-choice "></span>
@@ -68,6 +69,7 @@
                                     </select>
                                 </div>
 
+                                @include('cms._exam-session', ['kind' => 'daily', 'examRow' => $exam_detail])
                                 <div class="col-md-6 mt-2">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" name="status"
@@ -189,7 +191,7 @@
                                         </div>
                                         <div class="col-md-12 mt-2">
                                             <label class="form-label">Explanation</label>
-                                            <textarea class="form-control" id="explanation" autocomplete="off" type="text" name="explanation"
+                                            <textarea class="form-control my-editor" id="explanation" autocomplete="off" type="text" name="explanation"
                                                 placeholder="Enter Explanation"></textarea>
                                         </div>
                                     </div>
@@ -229,6 +231,31 @@
 @section('scripts')
     <script>
         $(document).ready(function() {
+
+            // every box of the "Create Exam Question" window is an editor with an image button (upload or pick from the file manager)
+            function questionEditors(scope) {
+                if (typeof CKEDITOR === 'undefined') { return; }
+                $(scope).find('textarea').each(function () {
+                    var id = $(this).attr('id');
+                    if (!id || CKEDITOR.instances[id]) { return; }
+                    CKEDITOR.replace(id, {
+                        filebrowserUploadUrl: "{{ route('ckeditor.upload', ['_token' => csrf_token()]) }}",
+                        filebrowserUploadMethod: 'form',
+                        height: 100,
+                        filebrowserBrowseUrl: "{{ asset('ckeditor/filemanager/dialog.php') }}?type=2&editor=ckeditor&fldr=",
+                        filebrowserImageBrowseUrl: "{{ asset('ckeditor/filemanager/dialog.php') }}?type=1&editor=ckeditor&fldr=",
+                        toolbar: [
+                            { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript', '-', 'RemoveFormat'] },
+                            { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Blockquote'] },
+                            { name: 'insert', items: ['Image', 'Table', 'HorizontalRule', 'SpecialChar'] }
+                        ]
+                    });
+                });
+            }
+            $('#addQuestion').on('shown.bs.modal', function () { questionEditors(this); });
+            $('#addQuestion form').on('submit', function () {
+                if (typeof CKEDITOR !== 'undefined') { for (var k in CKEDITOR.instances) { CKEDITOR.instances[k].updateElement(); } }
+            });
 
             $(".add_new_banner").click(function() {
                 $(".new-banner-section").fadeToggle(1000);

@@ -22,6 +22,8 @@ use App\Http\Resources\{ResultResources, SyllabusResources, SubjectCategoryResou
 class ApiCollectionController extends Controller
 
 {
+    use \App\Http\Controllers\Api\Concerns\GuardsSeasons;
+
     public function BulletIn(Request $request)
     {
         $bulletin = Bulletin::orderBy('month_year', 'DESC')->orderBy('issue', 'DESC')->get();
@@ -31,7 +33,8 @@ class ApiCollectionController extends Controller
     public function FeedList(Request $request)
     {
         $user_id = $request->user_id;
-        $capsule_list = Capsule::with('author', 'comments', 'comments.author', 'likes')->orderby('created_at', 'desc')->get();
+        // each capsule is shown for the exam types ticked on it; apps that do not say which exam default to KPSC
+        $capsule_list = Capsule::forExam($request->input('exam', 'kpsc'))->with('author', 'comments', 'comments.author', 'likes')->orderby('created_at', 'desc')->get();
         return response()->json([
             'data' => FeedResources::collection($capsule_list)->additional(['user_id' => $user_id]),
             'status' => 200
@@ -65,6 +68,9 @@ class ApiCollectionController extends Controller
     }
     public function DailyExamSingle(Request $request)
     {
+        if ($locked = $this->seasonLock($request->exam_id)) {
+            return $locked;
+        }
         $date_details = DailyExamdetails::where('exam_id', $request->exam_id)->get();
         $exam = DailyExam::where('id', $request->exam_id)->first();
 
@@ -84,6 +90,9 @@ class ApiCollectionController extends Controller
     }
     public function ModelExamSingle(Request $request)
     {
+        if ($locked = $this->seasonLock($request->exam_id)) {
+            return $locked;
+        }
         $date_details = ModelExamDetails::where('exam_id', $request->exam_id)->get();
         return response()->json(['data' => ModelExamDetailsResources::collection($date_details), 'status' => 200]);
     }
@@ -164,7 +173,8 @@ class ApiCollectionController extends Controller
 
     public function Stories(Request $request)
     {
-        $stories         = Banner::where('status', 1)->orderBy('created_at', 'DESC')->get();
+        // each story is shown for the exam types ticked on it; apps that do not say which exam default to KPSC
+        $stories         = Banner::forExam($request->input('exam', 'kpsc'))->where('status', 1)->orderBy('created_at', 'DESC')->get();
 
         return response()->json(['data' => BannerResources::collection($stories), 'status' => 200]);
     }
@@ -278,23 +288,67 @@ class ApiCollectionController extends Controller
     {
         $user_id = $request->user_id;
 
-        $data = DailyExam::whereHas('exam_details')
+        $query = DailyExam::whereHas('exam_details')
             ->with(['ca_exam_attened' => function ($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             }])
             ->where('section', 'CA-Daily-Exam')
-            ->where('status', 1)
-            ->orderBy('level', 'ASC')
-            ->get();
+            ->where('status', 1);
 
+        if ($request->filled('season_id')) {
+            // one season, every kind of exam in it (daily, weekly, weekend, ...)
+            $query->where('season_id', $request->season_id)
+                ->whereHas('season', fn ($s) => $s->whereIn('status', ['active', 'completed']))
+                ->orderBy('exam_date')->orderBy('slot_no');
+        } else {
+            // apps that do not know about seasons: the default season's daily exams, as before
+            $default = \App\Models\CaSeason::where('is_featured', 1)->whereIn('status', ['active', 'completed'])->value('id');
+            $query->where(function ($w) use ($default) {
+                $w->whereNull('season_id')
+                    ->orWhere(fn ($x) => $x->where('season_id', $default)->where('exam_kind', 'daily'));
+            })->orderBy('level', 'ASC');
+        }
 
-        return response()->json(['data' => CaDailyExamListResources::collection($data), 'status' => 200]);
+        return response()->json(['data' => CaDailyExamListResources::collection($query->get()), 'status' => 200]);
+    }
+
+    /** POST api/ca-seasons : seasons the app can show (active + completed), default season first. */
+    public function CaSeasons(Request $request)
+    {
+        $seasons = \App\Models\CaSeason::whereIn('status', ['active', 'completed'])
+            ->orderByDesc('is_featured')->orderBy('position')->orderByDesc('id')->get();
+
+        $counts = DailyExam::where('section', 'CA-Daily-Exam')->where('status', 1)->whereIn('season_id', $seasons->pluck('id'))
+            ->whereHas('exam_details')
+            ->selectRaw('season_id, exam_kind, COUNT(*) as c')->groupBy('season_id', 'exam_kind')->get()->groupBy('season_id');
+
+        return response()->json([
+            'data' => $seasons->map(fn ($s) => [
+                'id' => $s->id,
+                'name' => $s->name,
+                'slug' => $s->slug,
+                'description' => $s->description,
+                'cover_image' => $s->cover_image ? url('storage/' . $s->cover_image) : null,
+                'status' => $s->status,
+                'schedule_type' => $s->schedule_type,
+                'starts_on' => optional($s->starts_on)->toDateString(),
+                'ends_on' => optional($s->ends_on)->toDateString(),
+                'tags' => $s->tags ?? [],
+                'is_current' => (bool) $s->is_featured,
+                'ongoing' => $s->isOngoing(),
+                'exam_counts' => ($counts[$s->id] ?? collect())->pluck('c', 'exam_kind'),
+            ])->values(),
+            'status' => 200,
+        ]);
     }
 
 
 
     public function CaDailyExamSingle(Request $request)
     {
+        if ($locked = $this->seasonLock($request->id)) {
+            return $locked;
+        }
         $date_details = DailyExamdetails::where('exam_id', $request->id)->inRandomOrder()->get();
         $exam = DailyExam::where('id', $request->id)->first();
 

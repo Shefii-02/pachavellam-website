@@ -1,295 +1,5 @@
-@extends('layouts.web-layout')
-@section('content')
-    <!-- **************** MAIN CONTENT START **************** -->
-
-
-    <!-- Sidebar START -->
-    <nav class="navbar sidebar navbar-expand-xl navbar-dark bg-dark">
-
-        <!-- Navbar brand for xl START -->
-        <div class="d-flex align-items-center">
-            <a class="navbar-brand" href="{{ url('admin/dashboard') }}">
-                <img class="navbar-brand-item" src="{{ url('images/logo-2.png') }}" alt="">
-            </a>
-        </div>
-        <!-- Navbar brand for xl END -->
-
-        <div class="offcanvas offcanvas-start flex-row custom-scrollbar h-100" style="    overflow-y: auto;"
-            data-bs-backdrop="true" tabindex="-1" id="offcanvasSidebar">
-            <div class="offcanvas-body sidebar-content d-flex flex-column bg-dark">
-
-                <!-- Sidebar menu START -->
-                <ul class="navbar-nav flex-column" id="navbar-sidebar">
-
-                    <!-- Menu item 1 -->
-                    <li class="nav-item">
-                        <a href="{{ url('admin/dashboard') }}" class="nav-link  {!! active_menu('dashboard') !!}">
-                            <i class="bi bi-house-door-fill fa-fw me-2"></i>Dashboard
-                        </a>
-                    </li>
-
-                    @can('kpsc Tab')
-                        <!-- menu item 2 -->
-                        <li class="nav-item">
-                            <a class="nav-link {!! active_menu('') !!} " href="{{ url('admin/kpsc/') }}">
-                                <i class="bi bi-1-circle-fill fa-fw me-2"></i>Kpsc
-                            </a>
-                        </li>
-                    @endcan
-                    @can('ug-pg Tab')
-                        <!-- menu item 2 -->
-                        {{-- <li class="nav-item">
-                    <a class="nav-link {!! active_menu("notifications") !!}"  href="{{ug_pg_cms('/')}}">
-                        <i class="bi bi-2-circle-fill fa-fw me-2"></i>UG - PG
-                    </a>
-                </li> --}}
-                    @endcan
-                    @can('1-12 Tab')
-                        <!-- menu item 2 -->
-                        <!--<li class="nav-item">-->
-                        <!--    <a class="nav-link {!! active_menu('notifications') !!}"  href="{{ url('primary/') }}">-->
-                        <!--        <i class="bi bi-basket fa-fw me-2"></i>1 - 12 Class-->
-                        <!--    </a>-->
-                        <!--</li>-->
-                    @endcan
-                    @can('Institution Tab')
-                        <!-- menu item 3 -->
-                        <!--<li class="nav-item">-->
-                        <!--    <a class="nav-link {!! active_menu('whats-new') !!}"  href="{{ url('institution') }}">-->
-                        <!--        <i class="bi bi-basket fa-fw me-2"></i>Institution-->
-                        <!--    </a>-->
-                        <!--</li>-->
-                    @endcan
-                    @can('Teachers Tab')
-                        <!-- menu item 4 -->
-                        {{-- <li class="nav-item">
-                    <a class="nav-link {!! active_menu("teaching-tab") !!}"  href="{{teaching_cms('/')}}">
-                        <i class="bi bi-3-circle-fill fa-fw me-2"></i>Teaching
-                    </a>
-                </li> --}}
-                    @endcan
-                    @can('Students Tab')
-                        <!-- menu item 5 -->
-                        <li class="nav-item">
-                            <a class="nav-link {!! active_menu('students-tab') !!}" href="{{ url('admin/students') }}">
-                                <i class="bi bi-4-circle-fill fa-fw me-2"></i>Students
-                            </a>
-                        </li>
-                    @endcan
-                    @can('General Setting Tab')
-                        <!-- menu item 6 -->
-                        <li class="nav-item">
-                            <a class="nav-link {!! active_menu('special-videos') !!}" href="{{ url('admin/general') }}">
-                                <i class="bi bi-5-circle-fill fa-fw me-2"></i>General
-                            </a>
-                        </li>
-                    @endcan
-
-                </ul>
-                <!-- Sidebar menu end -->
-
-                <!-- Sidebar footer START -->
-                <div class="px-3 mt-auto pt-3">
-                    <div class="d-flex align-items-center justify-content-between text-primary-hover">
-
-                        <a class="h5 mb-0 text-body" href="{{ url('admin') }}" data-bs-toggle="tooltip"
-                            data-bs-placement="top" title="Home">
-                            <i class="bi bi-house"></i>
-                        </a>
-
-                        @can('General Setting Tab')
-                            <a class="h5 mb-0 text-body" href="{{ url('admin/general') }}" data-bs-toggle="tooltip"
-                                data-bs-placement="top" title="Settings">
-                                <i class="bi bi-gear-fill"></i>
-                            </a>
-                        @endcan
-                        <a class="h5 mb-0 text-body" href="{{ url('sign-out') }}" data-bs-toggle="tooltip"
-                            data-bs-placement="top" title="Sign out">
-                            <i class="bi bi-power"></i>
-                        </a>
-                    </div>
-                </div>
-                <!-- Sidebar footer END -->
-
-            </div>
-        </div>
-    </nav>
-    <!-- Sidebar END -->
-
-    <!-- Page content START -->
-    <div class="page-content">
-
-        <!-- Top bar START -->
-        <nav class="top-bar navbar-light border-bottom py-0 py-xl-3">
-            <div class="container-fluid p-0">
-                <div class="d-flex align-items-center w-100">
-
-                    <!-- Logo START -->
-                    <div class="d-flex align-items-center d-xl-none">
-                        <a class="navbar-brand" href="index-2.html">
-                            <img class="light-mode-item navbar-brand-item h-60px" src="{{ url('images/logo.png') }}"
-                                alt="">
-                            <img class="dark-mode-item navbar-brand-item h-60px" src="{{ url('images/logo-2.png') }}"
-                                alt="">
-                        </a>
-                    </div>
-                    <!-- Logo END -->
-
-                    <!-- Toggler for sidebar START -->
-                    <div class="navbar-expand-xl sidebar-offcanvas-menu">
-                        <button class="navbar-toggler me-auto" type="button" data-bs-toggle="offcanvas"
-                            data-bs-target="#offcanvasSidebar" aria-controls="offcanvasSidebar" aria-expanded="false"
-                            aria-label="Toggle navigation" data-bs-auto-close="outside">
-                            <i class="bi bi-text-right fa-fw h2 lh-0 mb-0 rtl-flip" data-bs-target="#offcanvasMenu"> </i>
-                        </button>
-                    </div>
-                    <!-- Toggler for sidebar END -->
-
-                    <!-- Top bar left -->
-                    <div class="navbar-expand-lg ms-auto ms-xl-0  d-none d-md-block">
-
-                        <!-- Toggler for menubar START -->
-                        <button class="navbar-toggler ms-auto " type="button" data-bs-toggle="collapse"
-                            data-bs-target="#navbarTopContent" aria-controls="navbarTopContent" aria-expanded="false"
-                            aria-label="Toggle navigation">
-                            <span class="navbar-toggler-animation">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </span>
-                        </button>
-                        <!-- Toggler for menubar END -->
-
-                        <!-- Topbar menu START -->
-                        <div class="collapse navbar-collapse w-100" id="navbarTopContent">
-                            <!-- Top search START -->
-                            <div class="nav my-3 my-xl-0 flex-nowrap align-items-center">
-                                <div class="nav-item w-100">
-
-                                </div>
-                            </div>
-                            <!-- Top search END -->
-                        </div>
-                        <!-- Topbar menu END -->
-                    </div>
-                    <!-- Top bar left END -->
-
-                    <!-- Top bar right START -->
-                    <div class="ms-xl-auto">
-                        <ul class="navbar-nav flex-row align-items-center">
-
-                            <!-- Notification dropdown START -->
-                            <li class="nav-item ms-2 ms-md-3 dropdown">
-                                @can('Notification Section')
-                                    <!-- Notification button -->
-                                    <a class="btn btn-light btn-round mb-0" href="#" role="button"
-                                        data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="outside">
-                                        <i class="bi bi-bell fa-fw"></i>
-                                    </a>
-                                    <!-- Notification dote -->
-                                    <span class="notif-badge animation-blink"></span>
-                                @endcan
-                                <!-- Notification dropdown menu START -->
-                                {{-- <div class="dropdown-menu dropdown-animation dropdown-menu-end dropdown-menu-size-md p-0 shadow-lg border-0">
-								<div class="card bg-transparent">
-									<div class="card-header bg-transparent border-bottom py-4 d-flex justify-content-between align-items-center">
-										<h6 class="m-0">Notifications <span class="badge bg-danger bg-opacity-10 text-danger ms-2">2 new</span></h6>
-										<a class="small" href="#">Clear all</a>
-									</div>
-									<div class="card-body p-0">
-										<ul class="list-group list-unstyled list-group-flush">
-											<!-- Notif item -->
-											<li>
-												<a href="#" class="list-group-item-action border-0 border-bottom d-flex p-3">
-													<div class="me-3">
-														<div class="avatar avatar-md">
-															<img class="avatar-img rounded-circle" src="https://www.pachavellam.com/assets/images/favicon.png" alt="avatar">
-														</div>
-													</div>
-													<div>
-														<p class="text-body small m-0">Congratulate <b>Joan Wallace</b> for graduating from <b>Microverse university</b></p>
-														<u class="small">Say congrats</u>
-													</div>
-												</a>
-											</li>
-
-										
-
-											
-										</ul>
-									</div>
-									<!-- Button -->
-									<div class="card-footer bg-transparent border-0 py-3 text-center position-relative">
-										<a href="#" class="stretched-link">See all incoming activity</a>
-									</div>
-								</div>
-							</div> --}}
-                                <!-- Notification dropdown menu END -->
-                            </li>
-                            <!-- Notification dropdown END -->
-
-                            <!-- Profile dropdown START -->
-                            <li class="nav-item ms-2 ms-md-3 dropdown">
-                                <!-- Avatar -->
-                                <a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button"
-                                    data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                    <img class="avatar-img rounded-circle"
-                                        src="{{ asset('storage/users/' . Auth::user()->image) }}" alt="avatar">
-                                </a>
-
-                                <!-- Profile dropdown START -->
-                                <ul class="dropdown-menu dropdown-animation dropdown-menu-end shadow pt-3"
-                                    aria-labelledby="profileDropdown">
-                                    <!-- Profile info -->
-                                    <li class="px-3">
-                                        <div class="d-flex align-items-center">
-                                            <!-- Avatar -->
-                                            <div class="avatar me-3">
-                                                <img class="avatar-img rounded-circle shadow"
-                                                    src="{{ asset('storage/users/' . Auth::user()->image) }}"
-                                                    alt="avatar">
-                                            </div>
-                                            <div>
-                                                <a class="h6 mt-2 mt-sm-0" href="#">{{ Auth::user()->name }}</a>
-                                                <p class="small m-0">{{ Auth::user()->email }}</p>
-                                            </div>
-                                        </div>
-                                        <hr>
-                                    </li>
-
-                                    <!-- Links -->
-                                    <li><a class="dropdown-item" href="{{ url('profile') }}"><i
-                                                class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
-                                    <li><a class="dropdown-item" href="#"><i
-                                                class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
-                                    <li><a class="dropdown-item bg-danger-soft-hover" href="{{ url('sign-out') }}"><i
-                                                class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
-                                    <li>
-                                        <hr class="dropdown-divider">
-                                    </li>
-
-                                    <!-- Dark mode switch START -->
-                                    <li>
-                                        <div class="modeswitch-wrap" id="darkModeSwitch">
-                                            <div class="modeswitch-item">
-                                                <div class="modeswitch-icon"></div>
-                                            </div>
-                                            <span>Dark mode</span>
-                                        </div>
-                                    </li>
-                                    <!-- Dark mode switch END -->
-                                </ul>
-                                <!-- Profile dropdown END -->
-                            </li>
-                            <!-- Profile dropdown END -->
-                        </ul>
-                    </div>
-                    <!-- Top bar right END -->
-                </div>
-            </div>
-        </nav>
-        <!-- Top bar END -->
+@extends('admin.main-layout')
+@section('main')
         @can('Dashboard View')
             <!-- Page main content START -->
             <div class="page-content-wrapper border">
@@ -425,7 +135,7 @@
                                             <div>
                                                 <div class="d-flex">
                                                     <h2 class="purecounter mb-0 fw-bold" data-purecounter-start="0"
-                                                        data-purecounter-end="1845" data-purecounter-delay="200">0</h2>
+                                                        data-purecounter-end="{{ $stats['students'] }}" data-purecounter-delay="200">0</h2>
                                                     <span class="mb-0 h2 ms-1"></span>
                                                 </div>
                                                 <span class="mb-0 h6 fw-light">Students</span>
@@ -439,6 +149,123 @@
                             </div>
                         </div>
                         <!-- Counter boxes END -->
+                        <!-- Live overview START -->
+                        @can('General Setting Tab')
+                            @php $maxReq = max(1, $days->max(fn ($d) => $d['api'] + $d['web'])); @endphp
+                            <div class="row g-3 mb-4">
+                                @foreach ([
+                                    ['App users today', number_format($stats['app_users']), 'bi-phone', 'admin/general/dev-tools/analytics'],
+                                    ['API requests today', number_format($stats['api_requests']), 'bi-hdd-network', 'admin/general/dev-tools/api-logs'],
+                                    ['API errors today', number_format($stats['api_errors']), 'bi-exclamation-triangle', 'admin/general/dev-tools/api-logs?status=5xx'],
+                                    ['Website visitors today', number_format($stats['web_visitors']), 'bi-globe', 'admin/general/dev-tools/analytics'],
+                                    ['Bandwidth today', format_bytes($stats['bytes']), 'bi-cloud-arrow-down', 'admin/general/dev-tools/analytics'],
+                                    ['New sign ups today', number_format($stats['new_users_today']), 'bi-person-plus', 'admin/students/student-list'],
+                                ] as [$label, $value, $icon, $link])
+                                    <div class="col-6 col-lg-4 col-xl-2">
+                                        <a href="{{ url($link) }}" class="text-reset">
+                                            <div class="card card-body border h-100 p-3">
+                                                <div class="text-muted small"><i class="bi {{ $icon }} me-1"></i>{{ $label }}</div>
+                                                <div class="h4 mb-0 {{ $label === 'API errors today' && $stats['api_errors'] > 0 ? 'text-danger' : '' }}">{{ $value }}</div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-lg-7">
+                                    <div class="card border h-100">
+                                        <div class="card-header border-bottom"><h5 class="mb-0">Requests, last 7 days</h5></div>
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-end justify-content-between" style="height:160px;gap:8px">
+                                                @foreach ($days as $d)
+                                                    @php $total = $d['api'] + $d['web']; @endphp
+                                                    <div class="text-center flex-fill" title="App {{ $d['api'] }} · Web {{ $d['web'] }} · {{ format_bytes($d['bytes']) }}">
+                                                        <div class="small text-muted">{{ $total }}</div>
+                                                        <div class="d-flex flex-column justify-content-end" style="height:120px">
+                                                            <div class="bg-primary" style="height:{{ round($d['api'] / $maxReq * 100) }}%;min-height:{{ $d['api'] ? 2 : 0 }}px"></div>
+                                                            <div class="bg-info" style="height:{{ round($d['web'] / $maxReq * 100) }}%;min-height:{{ $d['web'] ? 2 : 0 }}px"></div>
+                                                        </div>
+                                                        <div class="small">{{ $d['label'] }}</div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                            <div class="small text-muted mt-2">
+                                                <span class="badge bg-primary">&nbsp;</span> App (API)
+                                                <span class="badge bg-info ms-2">&nbsp;</span> Website
+                                                <a class="float-end" href="{{ url('admin/general/dev-tools/analytics') }}">Full analytics →</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-5">
+                                    <div class="card border h-100">
+                                        <div class="card-header border-bottom d-flex justify-content-between">
+                                            <h5 class="mb-0">Latest server errors</h5>
+                                            <a href="{{ url('admin/general/logs') }}" class="small">Error logs →</a>
+                                        </div>
+                                        <div class="card-body p-0">
+                                            <ul class="list-group list-group-flush">
+                                                @forelse ($recentErrors as $e)
+                                                    <li class="list-group-item small">
+                                                        <span class="badge bg-danger">{{ $e->status }}</span>
+                                                        <span class="badge bg-secondary">{{ $e->method }}</span>
+                                                        <span style="word-break:break-all">{{ $e->path }}</span>
+                                                        <div class="text-muted">{{ $e->created_at->diffForHumans() }}@if ($e->error) · {{ \Illuminate\Support\Str::limit($e->error, 60) }}@endif</div>
+                                                    </li>
+                                                @empty
+                                                    <li class="list-group-item text-muted small">No server errors recorded.</li>
+                                                @endforelse
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endcan
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-lg-5">
+                                <div class="card border h-100">
+                                    <div class="card-header border-bottom"><h5 class="mb-0">Exam categories</h5></div>
+                                    <div class="card-body">
+                                        <div class="row g-2">
+                                            @foreach ($categoryCounts as $label => [$count, $link])
+                                                <div class="col-6">
+                                                    <a href="{{ $link }}" class="text-reset">
+                                                        <div class="border rounded p-3">
+                                                            <div class="text-muted small">{{ $label }}</div>
+                                                            <div class="h4 mb-0">{{ $count }}</div>
+                                                        </div>
+                                                    </a>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-7">
+                                <div class="card border h-100">
+                                    <div class="card-header border-bottom d-flex justify-content-between">
+                                        <h5 class="mb-0">Newest users</h5>
+                                        <a href="{{ url('admin/students/student-list') }}" class="small">All users →</a>
+                                    </div>
+                                    <div class="card-body table-responsive p-0">
+                                        <table class="table table-sm align-middle mb-0">
+                                            <tbody>
+                                                @foreach ($recentUsers as $u)
+                                                    <tr>
+                                                        <td>{{ $u->name ?: '—' }}<div class="small text-muted">{{ $u->email ?: $u->mobile }}</div></td>
+                                                        <td><span class="badge bg-secondary">{{ $u->type }}</span></td>
+                                                        <td class="small text-muted text-nowrap">{{ $u->created_at?->diffForHumans() }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Live overview END -->
 
                         {{-- <div id="ChartPayout"></div> --}}
                         <!--<div class="row">-->
@@ -482,13 +309,6 @@
             </div>
             <!-- Chart and Ticket END -->
         @endcan
-        <!-- Top listed Cards START -->
-
-
-        {{-- //////////end --}}
-    </div>
-    <!-- Page main content END -->
-    </div>
 @endsection
 
 

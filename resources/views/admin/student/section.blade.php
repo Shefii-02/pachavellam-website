@@ -44,10 +44,48 @@
 				</li>
 				<!-- menu item 2 -->
 				<li class="nav-item">
-					<a class="nav-link {!! active_menu("our-videos") !!}"  href="{{student_cms('student-list')}}">
-						<i class="bi bi-basket fa-fw me-2"></i>Student List
+					<a class="nav-link {!! active_menu("student-list") !!}"  href="{{student_cms('student-list')}}">
+						<i class="bi bi-people fa-fw me-2"></i>Student List
 					</a>
 				</li>
+				<li class="nav-item">
+					<a class="nav-link {!! active_menu("analytics") !!}" href="{{student_cms('analytics')}}">
+						<i class="bi bi-graph-up-arrow fa-fw me-2"></i>Analytics
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link {!! active_menu("exams") !!}" href="{{student_cms('exams')}}">
+						<i class="bi bi-bullseye fa-fw me-2"></i>Exams &amp; Interests
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link {!! active_menu("referrals") !!}" href="{{student_cms('referrals')}}">
+						<i class="bi bi-gift fa-fw me-2"></i>Refer &amp; earn
+					</a>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link {!! active_menu("platforms") !!}" href="{{student_cms('platforms')}}">
+						<i class="bi bi-phone-fill fa-fw me-2"></i>iOS / Android / Web
+					</a>
+				</li>
+
+				<!-- Quick segments: ready-made filters of the student list -->
+				<li class="nav-item mt-3 px-3 text-uppercase small text-muted">Segments</li>
+				@foreach ([
+					['Active (last month)', 'activity=active_30', 'bi-lightning-charge'],
+					['Not active 3 months', 'activity=inactive_90', 'bi-moon'],
+					['Never active', 'activity=never', 'bi-person-dash'],
+					['Mobile number filled', 'mobile=with', 'bi-phone'],
+					['No mobile number', 'mobile=without', 'bi-phone-vibrate'],
+					['Mobile verified', 'mobile=verified', 'bi-patch-check'],
+					['Joined last 30 days', 'from=' . now()->subDays(30)->toDateString(), 'bi-person-plus'],
+				] as [$segLabel, $segQuery, $segIcon])
+				<li class="nav-item">
+					<a class="nav-link" href="{{ student_cms('student-list') }}?{{ $segQuery }}">
+						<i class="bi {{ $segIcon }} fa-fw me-2"></i>{{ $segLabel }}
+					</a>
+				</li>
+				@endforeach
 			
             </ul>
 			<!-- Sidebar menu end -->
@@ -203,7 +241,7 @@
 								</li>
 
 								<!-- Links -->
-								<li><a class="dropdown-item" href="{{url('profile')}}"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
+								<li><a class="dropdown-item" href="{{url('admin/profile')}}"><i class="bi bi-person fa-fw me-2"></i>Edit Profile</a></li>
 								<li><a class="dropdown-item" href="#"><i class="bi bi-info-circle fa-fw me-2"></i>Help</a></li>
 								<li><a class="dropdown-item bg-danger-soft-hover" href="{{url('sign-out')}}"><i class="bi bi-power fa-fw me-2"></i>Sign Out</a></li>
 								<li> <hr class="dropdown-divider"></li>

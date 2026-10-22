@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "pachavellam-web",
+      "runtimeExecutable": "php",
+      "runtimeArgs": ["-S", "127.0.0.1:8010", "-t", "public", "vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php"],
+      "port": 8010
+    }
+  ]
+}

@@ -179,9 +179,11 @@
     <!-- End Google Tag Manager -->
 
 
+@include('partials.global-hide')
 </head>
 
 <body>
+@include('admin.partials.impersonation-banner')
     <main>
         @yield('content')
     </main>
@@ -319,6 +321,7 @@
         });
     });
 </script>
+@include('admin.media._boot')
 @yield('scripts')
 
 <!-- Google Tag Manager (noscript) -->

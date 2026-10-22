@@ -362,7 +362,7 @@
                                         <!-- prevButton -->
                                         <a class="pagination-previous btn btn-warning text-light rounded "
                                             v-on:click="prev();" :disabled="questionIndex < 1">
-                                            Previous Question
+                                            PYQ
                                         </a>
 
                                         <!-- prevButton -->

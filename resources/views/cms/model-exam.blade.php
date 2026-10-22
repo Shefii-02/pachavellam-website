@@ -56,6 +56,8 @@
                                     <input type="input" name="examtitle" class="form-control" required autocomplete="off">
                                 </div>
 
+                                @include('cms._exam-session', ['kind' => 'omr', 'examRow' => null])
+
                                 <div class="col-md-6 mt-2">
                                     <label class="form-label">Category</label>
                                     <select name="category" class="form-control" required autocomplete="off">

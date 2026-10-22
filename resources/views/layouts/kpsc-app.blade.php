@@ -2,15 +2,11 @@
 <html lang="en">
 
 <head>
-    <title>Pachavellam Education :: @yield('title')</title>
+    @include('partials.seo')
     <link rel="icon" href="{{ url('assets/images/favicon.png') }}" type="image/png" sizes="20x20" />
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ url('assets/images/favicon.png') }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta property="og:image" content="{{ url('assets/images/favicon.png') }}" />
-    <meta property="og:image:type" content="image/png" />
-    <meta property="og:image:width" content="400" />
-    <meta property="og:image:height" content="400" />
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 <meta name="facebook-domain-verification" content="9siigtjs84mpyftp54ynp34llx4awv" />
 
@@ -20,18 +16,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="description"
-        content="മത്സര പരീക്ഷകൾക്ക് തയ്യാറെടുക്കുന്ന ഉദ്യോഗാർത്ഥികൾക്ക് പഠിച്ചിരിക്കേണ്ട അറിവുകൾ, ആവശ്യമായ നിർദ്ദേശങ്ങൾ, വാർത്തകൾ, സിലബസുകൾ ഇതെല്ലാം നിങ്ങൾക്കിനി പച്ചവെള്ളംപോലെ.." />
-    <meta name="keywords" content="Top Education,PSC Class Free,Free Class,Psc Class " />
     <meta name="p:domain_verify" content="598bc9f4edd54f0eba823b41efe4ac49" />
-    <link rel="canonical" href="https://www.pachavellam.com/" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+    <!-- Bootstrap Icons (bi bi-* classes used on the home page, cards, bell and bottom bar) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <!-- Stylesheet-->
-    <link rel="stylesheet" href="/psc/style.css?v=1.1.5">
+    <link rel="stylesheet" href="/psc/style.css?v=1.1.6">
     <link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 480px)"
         href="/mobile2.css?v=1.1" />
 
+    @include('partials.theme')
     @yield('styles')
     <style>
         /* width */
@@ -103,6 +98,7 @@
     </script>
 
 
+@include('partials.global-hide')
 </head>
 
 <body oncopya="return false" oncuta="return false" onselectstarta="return false">
@@ -113,6 +109,8 @@
 
     @yield('content')
 
+
+    @include('partials.site-footer')
 
     <div id="mobileB">
 
@@ -127,29 +125,6 @@
 
     </div>
 
-    @if (bottom_navbar('kpsc'))
-        <!-- Footer Nav-->
-        <div class="footer-nav-area" id="footerNav">
-            <div class="newsten-footer-nav h-100">
-                <ul class="h-100 d-flex align-items-center justify-content-between">
-                    <li class="active"><a href="{{ url('/') }}"><i
-                                class="lni lni-home text-dark"></i><small>Home</small></a> </li>
-
-                    <li><a href="{{ url('kpsc/feed') }}"><i class="lni lni-heart text-dark"></i> <small>Feed</small></a>
-                    </li>
-
-                    <!--<li><a href="{{ url('kpsc/daily-bucket') }}"><i class="lni lni-book text-dark"></i> <small>Roaring 40's</small></a> </li>-->
-
-                    <li><a href="{{ url('kpsc/psc-daily-current-affairs') }}"><i class="lni lni-comments text-dark"></i>
-                            <small>C A</small></a> </li>
-
-                    <li><a href="{{ url('kpsc/psc-bulletin') }}"><i class="lni lni-book text-dark"></i> <small>Psc
-                                Bulletin</small></a> </li>
-
-                </ul>
-            </div>
-        </div>
-    @endif
 
 
 
@@ -218,6 +193,8 @@
     });
 </script>
 @stack('custom-scripts')
+@include('partials.web-push')
+@include('partials.bottom-nav')
 
 
 

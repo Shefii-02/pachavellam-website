@@ -22,7 +22,7 @@ Created: 5 Apr 2020
         2.7.0 Apex Charts CSS
     3.0 Template Mixins
         3.1.0 Flex
-        3.2.0 Miscellaneous        
+        3.2.0 Miscellaneous
     4.0 Template Variables
     5.0 Template Responsive
     6.0 Main Styles
@@ -308,7 +308,7 @@ textarea:invalid {
 
 .card {
   border-color: #e6e6e6;
-  border-radius: 0.5rem; 
+  border-radius: 0.5rem;
   margin-bottom: 10px;
 }
   .card .card-body {
@@ -458,14 +458,14 @@ textarea:invalid {
       @media only screen and (min-width: 992px) and (max-width: 1199px) {
         .preview-hero-area .preview-content-wrapper .demo-title {
           font-size: 2rem; }
-          
-       
+
+
       }
       @media only screen and (min-width: 768px) and (max-width: 991px) {
         .preview-hero-area .preview-content-wrapper .demo-title {
-          font-size: 2.25rem; } 
-         
-          
+          font-size: 2.25rem; }
+
+
       }
       @media only screen and (max-width: 767px) {
         .preview-hero-area .preview-content-wrapper .demo-title {
@@ -505,8 +505,8 @@ textarea:invalid {
         font-size: 14px; } }
     @media only screen and (max-width: 767px) {
       .features-area ul li {
-        font-size: 14px; } 
-        
+        font-size: 14px; }
+
         .single-hero-slide {
             height:150px !important;
              background-repeat: no-repeat;
@@ -554,7 +554,7 @@ textarea:invalid {
   -webkit-transition-duration: 500ms;
   -o-transition-duration: 500ms;
   transition-duration: 500ms;
-  background-color: #ffffff;
+  /* background-color: #ffffff; */
   width: 100%;
   height: 65px;
   position: fixed;
@@ -562,7 +562,8 @@ textarea:invalid {
   left: 0;
   right: 0;
   z-index: 1000;
-  box-shadow: 0 2px 12px rgba(116, 119, 148, 0.175); }
+  /* box-shadow: 0 2px 12px rgba(116, 119, 148, 0.175); */
+ }
 
 .search-form {
   position: relative;
@@ -925,7 +926,7 @@ textarea:invalid {
 .hero-slides {
   position: relative;
   z-index: 1; }
-  
+
   .hero-slides .single-hero-slide .background-shape .circle2 {
     -webkit-transition-duration: 1500ms;
     -o-transition-duration: 1500ms;
@@ -1068,7 +1069,7 @@ textarea:invalid {
       text-transform: capitalize;
       line-height: 1;
       color: #797494;
-      height: 100%; 
+      height: 100%;
       display: flex;
       flex-direction: column;
     }
@@ -2655,20 +2656,21 @@ textarea:invalid {
   background-color: #0C153B; }
   [data-theme="dark"] body {
     background-color: #0C153B; }
-  [data-theme="dark"] p {
+  /* :where() keeps these defaults weak, so a component's own colour (e.g. .hm-card) still wins in dark mode */
+  :where([data-theme="dark"]) p {
     color: rgba(255, 255, 255, 0.7); }
   [data-theme="dark"] #preloader {
     background-color: #0C153B; }
-  [data-theme="dark"] a,
-  [data-theme="dark"] a:hover,
-  [data-theme="dark"] a:focus {
+  :where([data-theme="dark"]) a,
+  :where([data-theme="dark"]) a:hover,
+  :where([data-theme="dark"]) a:focus {
     color: #ffffff; }
-  [data-theme="dark"] h1,
-  [data-theme="dark"] h2,
-  [data-theme="dark"] h3,
-  [data-theme="dark"] h4,
-  [data-theme="dark"] h5,
-  [data-theme="dark"] h6 {
+  :where([data-theme="dark"]) h1,
+  :where([data-theme="dark"]) h2,
+  :where([data-theme="dark"]) h3,
+  :where([data-theme="dark"]) h4,
+  :where([data-theme="dark"]) h5,
+  :where([data-theme="dark"]) h6 {
     color: rgba(255, 255, 255, 0.8); }
   [data-theme="dark"] .header-area {
     background-color: #0C153B;
@@ -2885,10 +2887,10 @@ textarea:invalid {
     }
     .categoey-card img{
       max-width: 70px !important;
-      max-height: 70px !important;  
+      max-height: 70px !important;
       margin-bottom: 10px;
     }
-   
+
     .categoey-card{
       margin-top: 10px;
       margin-bottom: 10px;
@@ -2899,25 +2901,25 @@ textarea:invalid {
       text-overflow: ellipsis;
       display: -webkit-box;
       -webkit-line-clamp: 2; /* number of lines to show */
-              line-clamp: 2; 
+              line-clamp: 2;
       -webkit-box-orient: vertical;
     }
     .gradient{
         /*background: linear-gradient(-45deg, #ca5f5f, #34bd3e, #23d5ab, #23a6d5);*/
        background:#212529;
     }
-    
+
 
     .gradient2{
         background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-        
+
     }
-    
+
     .gradient3{
         background: linear-gradient(-45deg, #878c8d, #459582, #7fae33,#585388);
-       
+
     }
-    
+
     .gradient,.gradient2,.gradient3{
         background-size: 400% 400%;
         animation: gradient 10s ease infinite;
@@ -2927,7 +2929,7 @@ textarea:invalid {
         width:100%;
          margin-bottom: 10px;
     }
-    
+
     @keyframes gradient {
         0% {
             background-position: 0% 50%;
@@ -2943,6 +2945,5 @@ textarea:invalid {
     ins.adsbygoogle[data-ad-status="unfilled"] {
         display: none !important;
     }
-        
-    
-    
+
+

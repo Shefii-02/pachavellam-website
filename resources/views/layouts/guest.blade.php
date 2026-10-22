@@ -15,7 +15,8 @@
 
         <!-- Scripts -->
         <script src="{{ mix('js/app.js') }}" defer></script>
-    </head>
+    @include('partials.global-hide')
+</head>
     <body>
         <div class="font-sans text-gray-900 antialiased">
             {{ $slot }}

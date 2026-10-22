@@ -57,6 +57,7 @@
 	  100% { transform: rotate(360deg); }
 	}
 	</style>    
+@include('partials.global-hide')
 </head>
     <body>
 

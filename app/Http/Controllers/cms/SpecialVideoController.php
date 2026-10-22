@@ -16,6 +16,8 @@ class SpecialVideoController extends Controller
      */
     public function index()
     {
+        return redirect(url('admin/content/free-classes?exam=kpsc'))->with('message', 'Special videos are now Free classes - same list, with folders.');
+
         //
         $spcl_videos = SpecialVideo::leftJoin('kpsc_subjects', 'kpsc_subjects.id', 'special_videos.category')->whereNull('section')->select('special_videos.*', 'kpsc_subjects.subject_title')->orderby('position')->get();
         // $category =  SpecialVideo::select('category')->distinct('category')->get();
@@ -57,6 +59,7 @@ class SpecialVideoController extends Controller
         $spcl_videos->category = $request->category;
         $spcl_videos->redirection = $this->getYouTubeVideoId($request->input('redirection'));
         $spcl_videos->status = 1;
+        $spcl_videos->chat_mode = $request->input('chat_mode') === 'always' ? 'always' : 'off';
         $spcl_videos->save();
         $spcl_videos->position = $spcl_videos->id;
         $spcl_videos->save();
@@ -120,6 +123,13 @@ class SpecialVideoController extends Controller
                             <input class="form-control" name="position" type="text" value="' . $ourvideos->position . '" placeholder="Showing Position" >
                         </div>
                         <div class="col-lg-12">
+                            <label class="form-label">Chat</label>
+                            <select class="form-control" name="chat_mode" >
+                                <option value="off"' . (($ourvideos->chat_mode ?? 'off') === 'off' ? ' selected' : '') . '>Off</option>
+                                <option value="always"' . (($ourvideos->chat_mode ?? 'off') === 'always' ? ' selected' : '') . '>On</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-12">
                             <label class="form-label">Status</label>
                             <select class="form-control" name="status" >
                                 <option value="1">Show</option>
@@ -153,6 +163,7 @@ class SpecialVideoController extends Controller
         $our_videos->category = $request->category;
         $our_videos->redirection = $this->getYouTubeVideoId($request->input('redirection'));
         $our_videos->status = $request->status;
+        $our_videos->chat_mode = $request->input('chat_mode') === 'always' ? 'always' : 'off';
         $our_videos->position = $request->position;
         $our_videos->save();
 

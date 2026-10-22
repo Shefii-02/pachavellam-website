@@ -62,7 +62,7 @@
       <li><a href="{{url('kpsc/psc-syllabus')}}"><i class="lni lni-files text-dark"></i>Syllabus</a></li>
       <!--<li><a href="{{url('kpsc/psc-material')}}"><i class="lni lni-bolt text-dark"></i>Material</a></li>-->
       <li><a href="{{url('kpsc/psc-bulletin')}}"><i class="lni lni-book text-dark"></i>Bulletin</a></li>
-      <li><a href="{{url('kpsc/prev-qstn-ans')}}"><i class="lni lni-folder text-dark"></i>Prev Qstn & Ans</a></li>
+      <li><a href="{{url('kpsc/prev-qstn-ans')}}"><i class="lni lni-folder text-dark"></i>PYQ & Ans</a></li>
       <li><a href="{{url('kpsc/time-table')}}"><i class="lni lni-target text-dark"></i>Time Table</a></li>
       <li><a href="{{url('kpsc/psc-results')}}"><i class="lni lni-book text-dark"></i>Results</a></li>
       <!--<li><a href="{{url('kpsc/notify')}}"><i class="lni lni-alarm text-dark"></i>Notify</a></li>-->

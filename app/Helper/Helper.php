@@ -146,9 +146,30 @@ if (!function_exists('active_menu')) {
      function active_menu($url)
      {
 
-          if (request()->segment(3) == $url)
+          $segment = request()->segment(3);
+
+          // the module's own dashboard page has no 3rd segment (e.g. /admin/rrb)
+          if ($url === 'dashboard' && $segment === null)
 
                return 'active';
+
+          if ($segment !== null && $segment == $url)
+
+               return 'active';
+     }
+}
+
+if (!function_exists('active_module')) {
+     /** Highlights a tab of the main admin sidebar by the module in /admin/<module>. */
+     function active_module($module)
+     {
+          $segment = request()->segment(2);
+
+          if ($module === 'dashboard') {
+               return ($segment === null || $segment === 'dashboard') ? 'active' : '';
+          }
+
+          return $segment === $module ? 'active' : '';
      }
 }
 
@@ -176,5 +197,42 @@ if (!function_exists('DateTimeFormat')) {
                return false;
           }
           return date('d-M-Y h:i:a', strtotime($date));
+     }
+}
+
+if (!function_exists('format_bytes')) {
+     function format_bytes($bytes)
+     {
+          $bytes = (float) $bytes;
+          foreach (['B', 'KB', 'MB', 'GB', 'TB'] as $unit) {
+               if ($bytes < 1024 || $unit === 'TB') {
+                    return round($bytes, $unit === 'B' ? 0 : 2) . ' ' . $unit;
+               }
+               $bytes /= 1024;
+          }
+     }
+}
+
+
+if (!function_exists('active_exam_menu')) {
+     /** Highlights a sidebar item of the common exam pages: admin/exam/{exam}/{page}. 'dashboard' = the exam's home. */
+     function active_exam_menu($page)
+     {
+          $segment = request()->segment(4);
+
+          if ($page === 'dashboard') {
+               return ($segment === null && request()->segment(2) === 'exam') ? 'active' : '';
+          }
+
+          return $segment === $page ? 'active' : '';
+     }
+}
+
+
+if (!function_exists('admin_coupons')) {
+     /** Coupon pages live at admin/coupons (main sidebar). */
+     function admin_coupons($path = '')
+     {
+          return url('admin/coupons' . ($path !== '' ? '/' . ltrim($path, '/') : ''));
      }
 }
