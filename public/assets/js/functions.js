@@ -87,33 +87,15 @@ var ThemeColor = function () {
 
 var e = {
     init: function () {
-        e.preLoader(),
-        e.megaMenu(),
-        e.stickyHeader(),
-        e.tinySlider(),
-        e.stickyBar(),
-        e.toolTipFunc(),
-        e.popOverFunc(),
-        e.backTotop(),
-        e.lightBox(),
-        e.enableIsotope(),
-        e.choicesSelect(),
-        e.aosFunc(),
-        e.dashboardChart(),
-        e.earningChart(),
-        e.earningChart2(),
-        e.trafficChart(),
-        e.activeChart(),
-        e.activeChart2(),
-        e.reviewChart(),
-        e.quill(),
-        e.stepper(),
-        e.videoPlyr(),
-        e.darkMode(),
-        e.pricing(),
-        e.stickyElement(),
-        e.overlayScrollbars();
-        
+        // Each feature runs on its own: inner admin pages have widgets (charts, choices, quill, ...) whose
+        // missing libraries used to throw and stop everything after them, including the light / dark switch.
+        // Dark mode goes first so the switch always works.
+        ['darkMode', 'preLoader', 'megaMenu', 'stickyHeader', 'tinySlider', 'stickyBar', 'toolTipFunc',
+         'popOverFunc', 'backTotop', 'lightBox', 'enableIsotope', 'choicesSelect', 'aosFunc', 'dashboardChart',
+         'earningChart', 'earningChart2', 'trafficChart', 'activeChart', 'activeChart2', 'reviewChart', 'quill',
+         'stepper', 'videoPlyr', 'pricing', 'stickyElement', 'overlayScrollbars'].forEach(function (name) {
+            try { e[name](); } catch (err) { if (window.console) console.warn('functions.js: ' + name + ' failed', err); }
+        });
     },
     isVariableDefined: function (el) {
         return typeof !!el && (el) != 'undefined' && el != null;
