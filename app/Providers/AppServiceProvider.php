@@ -36,6 +36,30 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Unnamed routes inside a group that has `as` inherit the bare group prefix as their name
+        // (admingeneral, adminkpsc., ...), so dozens of routes share one name and `route:cache` fails.
+        // Keep the name on the last route using it (the one route() resolves today), clear it on the rest.
+        $this->app->booted(function () {
+            $routes = \Illuminate\Support\Facades\Route::getRoutes();
+            $last = [];
+
+            foreach ($routes->getRoutes() as $i => $route) {
+                if ($name = $route->getName()) {
+                    $last[$name] = $i;
+                }
+            }
+
+            foreach ($routes->getRoutes() as $i => $route) {
+                if (($name = $route->getName()) && $last[$name] !== $i) {
+                    $action = $route->getAction();
+                    unset($action['as']);
+                    $route->setAction($action);
+                }
+            }
+
+            $routes->refreshNameLookups();
+        });
+
         // the main admin sidebar lists one tab per exam type, on every page that uses the layout
         \Illuminate\Support\Facades\View::composer('admin.main-layout', function ($view) {
             $view->with('examTabs', \App\Models\CompetitiveExam::active()->get());
