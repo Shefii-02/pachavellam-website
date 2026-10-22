@@ -38,7 +38,7 @@ return new class extends Migration
             $t->timestamp('started_at')->nullable();
             $t->timestamp('submitted_at')->nullable();
             $t->timestamps();
-            $t->index(['course_exam_id', 'status', 'attempt_no', 'score']);
+            $t->index(['course_exam_id', 'status', 'attempt_no', 'score'], 'cea_exam_status_attempt_score_idx');
             $t->index(['user_id', 'course_exam_id']);
             $t->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
             $t->foreign('course_exam_id')->references('id')->on('course_exams')->cascadeOnDelete();
