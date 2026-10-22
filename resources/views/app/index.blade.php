@@ -6,6 +6,7 @@
     <!-- Favicon -->
 	<link rel="shortcut icon" href="https://www.pachavellam.com/assets/images/favicon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta property="og:image" content="https://www.pachavellam.com/assets/images/favicon.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="400" />

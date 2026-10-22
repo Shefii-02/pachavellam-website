@@ -7,6 +7,7 @@
     <!-- Favicon -->
 	<link rel="shortcut icon" href="{{url('assets/images/favicon.png')}}">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta property="og:image" content="{{url('assets/images/favicon.png')}}" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="400" />
@@ -24,6 +25,8 @@
         <link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 480px)" href="/mobile2.css?v=1.1" />
     <!-- Stylesheet-->
     <link rel="stylesheet" href="/psc/style.css?v=1.1.3">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    @include('partials.theme')
     @yield('styles')
     <style>
       /* width */

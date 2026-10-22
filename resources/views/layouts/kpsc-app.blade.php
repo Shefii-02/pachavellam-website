@@ -7,6 +7,7 @@
     <!-- Favicon -->
     <link rel="shortcut icon" href="{{ url('assets/images/favicon.png') }}">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="csrf-token" content="{{ csrf_token() }}" />
 <meta name="facebook-domain-verification" content="9siigtjs84mpyftp54ynp34llx4awv" />
 

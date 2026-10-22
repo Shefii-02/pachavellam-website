@@ -7,6 +7,7 @@
     <!-- Favicon -->
 	<link rel="shortcut icon" href="{{url('assets/images/favicon.png')}}">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta property="og:image" content="{{url('assets/images/favicon.png')}}" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="400" />
@@ -28,6 +29,8 @@
     <!-- Stylesheet-->
     <link rel="stylesheet" href="/psc/style.css?v=1.1.3">
      <link rel="stylesheet" type="text/css" media="only screen and (max-device-width: 480px)" href="/mobile2.css?v=1.1" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    @include('partials.theme')
     @yield('styles')
     <style>
       /* width */
@@ -96,6 +99,7 @@
      
       <!-- Logo-->
       <div class="logo-wrapper"><a href="/"><img src="{{url('images/logo.png')}}" alt=""></a></div>
+      <button type="button" class="pv-theme-btn ms-auto me-2" data-theme-toggle aria-label="Switch light or dark mode"><i class="bi bi-moon-stars-fill"></i><i class="bi bi-sun-fill"></i></button>
       <!-- Search Form-->
       <div class="search-form">
       

@@ -8,6 +8,7 @@
       <div class="page-heading">
         <h1 class="mb-0 h6">{{$title ?? "Pachavellam UG-PG "}}</h1>
       </div>
+      <button type="button" class="pv-theme-btn ms-auto me-2" data-theme-toggle aria-label="Switch light or dark mode"><i class="bi bi-moon-stars-fill"></i><i class="bi bi-sun-fill"></i></button>
       <!-- Search Form-->
       <div class="search-form"></div>
     </div>

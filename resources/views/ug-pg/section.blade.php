@@ -40,6 +40,7 @@
       <div class="navbar--toggler" id="newstenNavbarToggler"><span></span><span></span><span></span><span></span></div>
       <!-- Logo-->
       <div class="logo-wrapper"><a href="/"><img src="{{url('images/logo.png')}}" alt=""></a></div>
+      <button type="button" class="pv-theme-btn ms-auto me-2" data-theme-toggle aria-label="Switch light or dark mode"><i class="bi bi-moon-stars-fill"></i><i class="bi bi-sun-fill"></i></button>
       <!-- Search Form-->
       <div class="search-form"></div>
         <!-- Top bar right START -->
