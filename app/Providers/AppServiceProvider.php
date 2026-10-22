@@ -18,6 +18,16 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(\App\Services\SeasonAccess::class);
+
+        // migrations tolerate tables / columns / indexes that were created by hand
+        $this->app->bind('db.schema', function ($app) {
+            $schema = $app['db']->connection()->getSchemaBuilder();
+            $schema->blueprintResolver(
+                fn ($table, $callback, $prefix) => new \App\Support\SafeBlueprint($table, $callback, $prefix)
+            );
+
+            return $schema;
+        });
         //
     }
 
@@ -50,9 +60,14 @@ class AppServiceProvider extends ServiceProvider
         });
 
         //
-        $category_paid  = CategoryPaid::where('status',1)->orderby('position')->get();
-        $category_free  = CategoryFree::where('status',1)->orderby('position')->get();
-        $treandingnews = Treandingnews::where('status',1)->orderby('position')->limit(4)->get();
+        // these tables may not exist / be complete yet while `php artisan migrate` is building them
+        try {
+            $category_paid  = CategoryPaid::where('status',1)->orderby('position')->get();
+            $category_free  = CategoryFree::where('status',1)->orderby('position')->get();
+            $treandingnews = Treandingnews::where('status',1)->orderby('position')->limit(4)->get();
+        } catch (\Illuminate\Database\QueryException $e) {
+            $category_paid = $category_free = $treandingnews = collect();
+        }
            Paginator::useBootstrap();
            
            
