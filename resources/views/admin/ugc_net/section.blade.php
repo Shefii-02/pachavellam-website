@@ -184,7 +184,7 @@
 @section('scripts')
 <script>
 	$(document).ready(function() {
-       $('.ckeditor').ckeditor();
+       if ($.fn.ckeditor) { $('.ckeditor').ckeditor(); }
        
 	});
 
@@ -192,12 +192,12 @@
 
 <script src="https://cdn.ckeditor.com/4.12.1/standard/ckeditor.js"></script>
 <script>
-    var editor = CKEDITOR.replace('editor', {
+    var editor = document.getElementById('editor') ? CKEDITOR.replace('editor', {
         filebrowserUploadUrl: "{{route('ckeditor.upload', ['_token' => csrf_token() ])}}",
         filebrowserUploadMethod: 'form',
 		height: 400,
 		
-    });
+    }) : null;
 
 </script>
 

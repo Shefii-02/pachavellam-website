@@ -1070,6 +1070,7 @@ var e = {
       if (os) {
         document.addEventListener("DOMContentLoaded", function() {
           var cs = document.querySelectorAll('.custom-scrollbar');
+          if (typeof OverlayScrollbars === 'undefined') return;
           cs.forEach(c => {
               OverlayScrollbars(c, {
                 scrollbars: {
