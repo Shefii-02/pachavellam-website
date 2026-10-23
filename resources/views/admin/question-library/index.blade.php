@@ -2,7 +2,7 @@
 @section('content2')
 <style>
     .qlib-folder, .qlib-folder:hover { color: var(--bs-body-color) !important; }
-    .qlib-folder.active, .qlib-folder.active:hover { color: #fff !important; }
+    .qlib-folder.active, .qlib-folder.active:hover { color: #098209 !important; }
 </style>
 @php
     $label = $exam->short_name ?: $exam->name;
