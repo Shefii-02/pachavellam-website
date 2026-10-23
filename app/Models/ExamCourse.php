@@ -5,11 +5,14 @@ namespace App\Models;
 use App\Models\Concerns\LogsActivity;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /** A course of one exam type. */
 class ExamCourse extends Model
 {
-    use LogsActivity;
+    use LogsActivity, SoftDeletes;
+
+    protected bool $tracksDeleter = true;
     protected $table = 'exam_courses';
 
     protected $guarded = ['id'];

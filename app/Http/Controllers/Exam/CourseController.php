@@ -163,16 +163,9 @@ class CourseController extends Controller
         $exam = $this->exam($examSlug);
         $course = $this->course($exam, $id);
 
-        // files of every content node, then the rows (cascade)
-        DB::table('exam_course_nodes')->where('course_id', $course->id)->get(['file_path', 'audio_path'])
-            ->each(function ($n) {
-                $this->deleteFile($n->file_path);
-                $this->deleteFile($n->audio_path);
-            });
-        $this->deleteFile($course->cover_image);
-        $course->delete();
+        $course->delete();   // goes to Trash with its content and files; Trash removes them for good
 
-        return redirect($exam->examUrl('courses'))->with('message', 'Course deleted');
+        return redirect($exam->examUrl('courses'))->with('message', 'Course moved to Trash');
     }
 
     public function togglePublish(Request $request, $examSlug, $id)
@@ -363,7 +356,7 @@ class CourseController extends Controller
     {
         $base = Str::slug($title) ?: 'course';
         $slug = $base;
-        for ($i = 2; ExamCourse::where('slug', $slug)->exists(); $i++) {
+        for ($i = 2; ExamCourse::withTrashed()->where('slug', $slug)->exists(); $i++) {
             $slug = $base . '-' . $i;
         }
 

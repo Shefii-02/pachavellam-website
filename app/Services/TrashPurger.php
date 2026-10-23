@@ -4,10 +4,12 @@ namespace App\Services;
 
 use App\Models\CourseExam;
 use App\Models\LibraryClass;
+use App\Models\ExamCourse;
 use App\Models\LibraryQuestion;
 use App\Models\RoaringItem;
 use App\Models\RoaringStudy;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -22,6 +24,7 @@ class TrashPurger
         'classes' => [LibraryClass::class, 'Classes'],
         'course-exams' => [CourseExam::class, 'Course exams & entries'],
         'roaring' => [RoaringStudy::class, 'Roaring Study packs'],
+        'courses' => [ExamCourse::class, 'Courses'],
     ];
 
     public static function purge(Model $m): void
@@ -37,6 +40,7 @@ class TrashPurger
     {
         return match (true) {
             $m instanceof LibraryQuestion => $m->imagePaths(),
+            $m instanceof ExamCourse => self::courseFiles($m),
             $m instanceof LibraryClass => ($m->thumbnail && !preg_match('#^https?://#', $m->thumbnail)) ? [$m->thumbnail] : [],
             $m instanceof CourseExam => array_values(array_filter(array_merge([$m->instruction_pdf], $m->sections()->pluck('instruction_pdf')->all()))),
             $m instanceof RoaringStudy => array_values(array_filter(array_merge(
@@ -45,6 +49,14 @@ class TrashPurger
             ))),
             default => [],
         };
+    }
+
+    /** The cover and every file / audio of the course's content nodes. */
+    private static function courseFiles(ExamCourse $c): array
+    {
+        $nodes = DB::table('exam_course_nodes')->where('course_id', $c->id)->get(['file_path', 'audio_path']);
+
+        return array_values(array_filter(array_merge([$c->cover_image], $nodes->pluck('file_path')->all(), $nodes->pluck('audio_path')->all())));
     }
 
     /** Removes everything that has been in Trash longer than $days. @return int how many */

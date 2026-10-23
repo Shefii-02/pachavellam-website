@@ -69,7 +69,7 @@ class KpscDashboard
 
     private function learning(): array
     {
-        $courses = DB::table('exam_courses')->where('exam_id', $this->examId);
+        $courses = DB::table('exam_courses')->whereNull('deleted_at')->where('exam_id', $this->examId);
 
         return [
             'categories' => DB::table('exam_categories')->where('exam_id', $this->examId)->count(),
@@ -192,7 +192,7 @@ class KpscDashboard
     {
         return [
             'imports' => DB::table('library_import_batches')->where('exam_id', $this->examId)->orderByDesc('id')->limit(4)->get(['id', 'file_name', 'imported', 'skipped', 'status', 'created_at'])->all(),
-            'course_exams' => DB::table('course_exams as e')->whereNull('e.deleted_at')->join('exam_courses as c', 'c.id', '=', 'e.course_id')->where('e.exam_id', $this->examId)
+            'course_exams' => DB::table('course_exams as e')->whereNull('e.deleted_at')->join('exam_courses as c', 'c.id', '=', 'e.course_id')->whereNull('c.deleted_at')->where('e.exam_id', $this->examId)
                 ->orderByDesc('e.id')->limit(4)->get(['e.id', 'e.title', 'e.status', 'e.course_id', 'e.feature_id', 'c.title as course', 'e.created_at'])->all(),
             'roaring' => DB::table('roaring_studies as r')->whereNull('r.deleted_at')->join('roaring_study_exams as x', 'x.roaring_id', '=', 'r.id')->where('x.exam_id', $this->examId)
                 ->orderByDesc('r.publish_at')->limit(4)->get(['r.id', 'r.title', 'r.status', 'r.publish_at', 'r.access_type'])->all(),
@@ -214,7 +214,7 @@ class KpscDashboard
         $add('course exam(s) in draft', DB::table('course_exams')->whereNull('deleted_at')->where('exam_id', $this->examId)->where('status', 'draft')->count(), $exam->examUrl('courses'), 'info');
         $add('draft class(es) in the class library', DB::table('library_classes')->whereNull('deleted_at')->where('exam_id', $this->examId)->where('status', 'draft')->count(), $exam->examUrl('class-library') . '?status=draft', 'info');
         $add('class(es) without a length', DB::table('library_classes')->whereNull('deleted_at')->where('exam_id', $this->examId)->where('status', 'published')->whereNull('duration_seconds')->count(), $exam->examUrl('class-library'), 'warning');
-        $add('draft course(s)', DB::table('exam_courses')->where('exam_id', $this->examId)->where('status', 'draft')->count(), $exam->examUrl('courses') . '?status=draft', 'info');
+        $add('draft course(s)', DB::table('exam_courses')->whereNull('deleted_at')->where('exam_id', $this->examId)->where('status', 'draft')->count(), $exam->examUrl('courses') . '?status=draft', 'info');
         $add('published course exam(s) already closed', DB::table('course_exams')->whereNull('deleted_at')->where('exam_id', $this->examId)->where('status', 'published')->whereNotNull('end_at')->where('end_at', '<', now())->count(), $exam->examUrl('courses'), 'warning');
         $add('roaring study pack(s) in draft', DB::table('roaring_studies as r')->whereNull('r.deleted_at')->join('roaring_study_exams as x', 'x.roaring_id', '=', 'r.id')->where('x.exam_id', $this->examId)->where('r.status', 'draft')->count(), url('admin/exam/kpsc/roaring-study?status=draft'), 'info');
         $add('question(s) with no category', DB::table('library_questions')->whereNull('deleted_at')->where('exam_id', $this->examId)->whereNotExists(fn ($s) => $s->select(DB::raw(1))->from('library_question_categories as c')->whereColumn('c.question_id', 'library_questions.id'))->where('source', '!=', 'daily')->count(), $exam->examUrl('question-library'), 'warning');

@@ -140,7 +140,7 @@ class ExamCourseController extends Controller
 
         $direct = DB::table('exam_course_categories as cc')
             ->join('exam_courses as c', 'c.id', '=', 'cc.course_id')
-            ->where('c.status', 'published')->where('c.exam_id', $exam->id)
+            ->whereNull('c.deleted_at')->where('c.status', 'published')->where('c.exam_id', $exam->id)
             ->select('cc.category_id', 'cc.course_id')->get()->groupBy('category_id')->map(fn ($g) => $g->pluck('course_id')->all());
 
         $byParent = $cats->groupBy('parent_id');

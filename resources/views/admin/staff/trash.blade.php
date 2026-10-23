@@ -19,7 +19,7 @@
         @forelse ($list as $item)
             <tr>
                 <td style="max-width:520px"><div class="text-truncate fw-semibold">{{ $item instanceof \App\Models\LibraryQuestion ? $item->plainQuestion(140) : $item->title }}</div>
-                    <div class="small text-muted">{{ $item instanceof \App\Models\LibraryQuestion ? $item->typeLabel() : ($item instanceof \App\Models\LibraryClass ? $item->sourceLabel() : '#' . $item->id) }}</div></td>
+                    <div class="small text-muted">{{ $item instanceof \App\Models\LibraryQuestion ? $item->typeLabel() : ($item instanceof \App\Models\LibraryClass ? $item->sourceLabel() : ($item instanceof \App\Models\ExamCourse ? 'Course' : '#' . $item->id)) }}</div></td>
                 <td class="small text-nowrap">{{ $item->deleted_at->format('d M Y, h:i A') }}<div class="text-muted">{{ $item->deleted_at->diffForHumans() }}</div></td>
                 <td class="small">{{ $who[$item->deleted_by] ?? '—' }}</td>
                 <td class="text-end text-nowrap">

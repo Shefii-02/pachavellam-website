@@ -49,7 +49,7 @@ class ExamDashboard
     private function learning(): array
     {
         $id = $this->exam->id;
-        $courses = DB::table('exam_courses')->where('exam_id', $id);
+        $courses = DB::table('exam_courses')->whereNull('deleted_at')->where('exam_id', $id);
 
         return [
             'categories' => DB::table('exam_categories')->where('exam_id', $id)->count(),
@@ -159,7 +159,7 @@ class ExamDashboard
             'admissions' => DB::table('course_admissions as a')->join('users as u', 'u.id', '=', 'a.user_id')->join('exam_courses as c', 'c.id', '=', 'a.course_id')
                 ->where('a.exam_id', $id)->whereNull('a.deleted_at')->whereNotNull('a.admitted_at')->orderByDesc('a.admitted_at')->limit(5)
                 ->get(['a.id', 'u.name', 'c.title as course', 'a.amount_paid', 'a.source', 'a.status', 'a.admitted_at'])->all(),
-            'course_exams' => DB::table('course_exams as e')->whereNull('e.deleted_at')->join('exam_courses as c', 'c.id', '=', 'e.course_id')->where('e.exam_id', $id)->orderByDesc('e.id')->limit(4)
+            'course_exams' => DB::table('course_exams as e')->whereNull('e.deleted_at')->join('exam_courses as c', 'c.id', '=', 'e.course_id')->whereNull('c.deleted_at')->where('e.exam_id', $id)->orderByDesc('e.id')->limit(4)
                 ->get(['e.id', 'e.title', 'e.status', 'c.title as course'])->all(),
             'roaring' => DB::table('roaring_studies as r')->whereNull('r.deleted_at')->join('roaring_study_exams as x', 'x.roaring_id', '=', 'r.id')->where('x.exam_id', $id)->orderByDesc('r.publish_at')->limit(4)
                 ->get(['r.id', 'r.title', 'r.status', 'r.publish_at', 'r.access_type'])->all(),
@@ -176,7 +176,7 @@ class ExamDashboard
             }
         };
 
-        $add('draft course(s)', DB::table('exam_courses')->where('exam_id', $id)->where('status', 'draft')->count(), $this->exam->examUrl('courses') . '?status=draft');
+        $add('draft course(s)', DB::table('exam_courses')->whereNull('deleted_at')->where('exam_id', $id)->where('status', 'draft')->count(), $this->exam->examUrl('courses') . '?status=draft');
         $add('course exam(s) in draft', DB::table('course_exams')->whereNull('deleted_at')->where('exam_id', $id)->where('status', 'draft')->count(), $this->exam->examUrl('courses'));
         $add('draft class(es)', DB::table('library_classes')->whereNull('deleted_at')->where('exam_id', $id)->where('status', 'draft')->count(), $this->exam->examUrl('class-library') . '?status=draft');
         $add('class(es) without a length', DB::table('library_classes')->whereNull('deleted_at')->where('exam_id', $id)->where('status', 'published')->whereNull('duration_seconds')->count(), $this->exam->examUrl('class-library'), 'warning');
