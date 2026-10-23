@@ -90,8 +90,10 @@
             </div>
         @endif
 
+        @php $view = request('view') === 'grid' ? 'grid' : 'list'; @endphp
         <form method="GET" class="row g-2 mb-3">
             @if ($current)<input type="hidden" name="folder" value="{{ $current->id }}">@endif
+            <input type="hidden" name="view" value="{{ $view }}">
             <div class="col-md-4"><input type="text" name="q" value="{{ request('q') }}" class="form-control form-control-sm" placeholder="Search question text..."></div>
             <div class="col-6 col-md-3">
                 <select name="category" class="form-select form-select-sm">
@@ -122,6 +124,10 @@
             <div class="card bg-transparent border rounded-3">
                 <div class="card-header bg-transparent border-bottom py-2 d-flex flex-wrap gap-2 align-items-center">
                     <span class="small text-muted me-auto">{{ $questions->total() }} question(s){{ $current && !$deep ? ' directly in this folder' : '' }}</span>
+                    <div class="btn-group btn-group-sm" role="group" aria-label="View">
+                        <a href="{{ request()->fullUrlWithQuery(['view' => 'list', 'page' => null]) }}" class="btn btn-{{ $view === 'list' ? 'primary' : 'light' }} mb-0" title="List"><i class="bi bi-list-ul"></i></a>
+                        <a href="{{ request()->fullUrlWithQuery(['view' => 'grid', 'page' => null]) }}" class="btn btn-{{ $view === 'grid' ? 'primary' : 'light' }} mb-0" title="Cards"><i class="bi bi-grid-3x3-gap"></i></a>
+                    </div>
                     <select name="folder_id" class="form-select form-select-sm w-auto">
                         <option value="">Move selected to...</option>
                         @foreach ($tree as $f)<option value="{{ $f['id'] }}">{{ str_repeat('— ', $f['depth']) }}{{ $f['name'] }}</option>@endforeach
@@ -129,6 +135,35 @@
                     <button name="action" value="move" class="btn btn-sm btn-light mb-0" onclick="return bulkCheck(this)">Move</button>
                     <button name="action" value="delete" class="btn btn-sm btn-outline-danger mb-0" onclick="return bulkCheck(this)">Delete</button>
                 </div>
+                @if ($view === 'grid')
+                <div class="p-3">
+                    <div class="form-check mb-2"><input type="checkbox" class="form-check-input" id="checkAll"><label class="form-check-label small" for="checkAll">Select all</label></div>
+                    <div class="row g-3">
+                    @forelse ($questions as $item)
+                        <div class="col-12 col-md-6 col-xl-4">
+                            <div class="card h-100 bg-transparent border rounded-3">
+                                <div class="card-body py-2 d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-start mb-1">
+                                        <input type="checkbox" class="form-check-input row-check mt-1" name="ids[]" value="{{ $item->id }}">
+                                        <a href="{{ $base }}/questions/{{ $item->id }}/edit" class="btn btn-sm btn-light mb-0"><i class="bi bi-pencil"></i></a>
+                                    </div>
+                                    <div class="mb-2" style="display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden">
+                                        @if ($item->hasImages())<i class="bi bi-image text-info me-1" title="has pictures"></i>@endif
+                                        {{ $item->plainQuestion(220) }}
+                                    </div>
+                                    <div class="small text-muted mt-auto">{{ $item->question_type !== 'single' ? $item->typeLabel() . ' · ' : '' }}Answer: {{ $item->answerLabel() }}{{ $item->difficulty ? ' · ' . ucfirst($item->difficulty) : '' }}</div>
+                                    <div class="small mt-1"><i class="bi bi-folder me-1"></i><a href="{{ $base }}?folder={{ $item->folder_id }}">{{ $item->folder?->name }}</a></div>
+                                    @if ($item->categories->isNotEmpty())<div class="small text-muted">{{ $item->categories->pluck('name')->take(3)->implode(', ') }}{{ $item->categories->count() > 3 ? ' +' . ($item->categories->count() - 3) : '' }}</div>@endif
+                                    <div class="mt-1">@foreach ($item->texts as $tx)<span class="badge bg-light text-dark border">{{ strtoupper($tx->lang) }}</span> @endforeach</div>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-12 text-center text-muted py-4">No questions here yet. Use "Import questions" or "Add question".</div>
+                    @endforelse
+                    </div>
+                </div>
+                @else
                 <div class="table-responsive">
                     <table class="table align-middle mb-0 table-hover">
                         <thead><tr>
@@ -158,6 +193,7 @@
                         </tbody>
                     </table>
                 </div>
+                @endif
             </div>
         </form>
         <div class="mt-3">@include('admin.partials.per-page', ['p' => $questions])
