@@ -159,16 +159,20 @@ class QuestionLibraryController extends Controller
         $folder = $this->folder($exam, $id);
         $ids = array_merge([$folder->id], $folder->descendantIds());
 
-        $count = LibraryQuestion::withTrashed()->whereIn('folder_id', $ids)->count();   // items in Trash still sit in the folder
+        // questions in Trash still hold the folder (the database refuses to delete a folder that has any), so only live ones block it
+        $live = LibraryQuestion::whereIn('folder_id', $ids)->count();
+        if ($live > 0 && !$request->boolean('clear_all')) {
+            return back()->withErrors(['folder' => "This folder (with its sub folders) still has {$live} question(s). Tick \"Also delete everything inside\" to delete them with the folder."]);
+        }
+
+        $count = LibraryQuestion::withTrashed()->whereIn('folder_id', $ids)->count();
         if ($count > 0) {
-            if (!$request->boolean('clear_all')) {
-                return back()->withErrors(['folder' => "This folder (with its sub folders) still has {$count} question(s). Tick \"Also delete everything inside\" to delete them with the folder."]);
-            }
+            // live ones (only when asked to) and the ones already in Trash are removed for good, pictures included
             DB::transaction(function () use ($ids, $folder, $exam, $count) {
                 \App\Services\ActivityLogger::quietly(function () use ($ids) {
                     LibraryQuestion::withTrashed()->whereIn('folder_id', $ids)->chunkById(200, function ($questions) {
                         foreach ($questions as $q) {
-                            \App\Services\TrashPurger::purge($q);   // pictures are removed too
+                            \App\Services\TrashPurger::purge($q);
                         }
                     });
                 });

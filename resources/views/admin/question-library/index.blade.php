@@ -210,7 +210,7 @@
         @if (($total[$current->id] ?? 0) > 0)
             <div class="alert alert-warning small">It still has <b>{{ $total[$current->id] }}</b> question(s) (including sub folders). Tick the box below to delete them with the folder.</div>
         @else
-            <div class="small text-muted mb-2">Questions that are only in Trash also keep a folder from being deleted.</div>
+            <div class="small text-muted mb-2">Any questions of this folder that are in Trash are removed for good with it.</div>
         @endif
         <div class="form-check">
             <input class="form-check-input" type="checkbox" name="clear_all" value="1" id="clearAll">
