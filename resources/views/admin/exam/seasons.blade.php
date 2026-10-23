@@ -15,7 +15,7 @@
         <button type="button" class="btn btn-sm btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#newSession"><i class="bi bi-plus-lg me-1"></i>New season</button>
     </div>
 </div>
-@if (season('success'))<div class="alert alert-success py-2">{{ season('success') }}</div>@endif
+@if (session('success'))<div class="alert alert-success py-2">{{ session('success') }}</div>@endif
 @if ($errors->any())<div class="alert alert-danger py-2">{{ $errors->first() }}</div>@endif
 
 <div class="row g-3">

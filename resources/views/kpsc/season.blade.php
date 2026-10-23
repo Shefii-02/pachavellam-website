@@ -26,8 +26,8 @@
 @section('content')
 <div class="page-content-wrapper"><div class="container"><div class="ss-wrap">
     <a href="{{ $back }}" class="small"><i class="bi bi-arrow-left"></i> {{ $exam->short_name ?: $exam->name }} exams</a>
-    @if (season('season_msg'))<div class="ss-msg err mt-2"><i class="bi bi-lock-fill me-1"></i>{{ season('season_msg') }}</div>@endif
-    @if (season('season_ok'))<div class="ss-msg ok mt-2">{{ season('season_ok') }}</div>@endif
+    @if (session('season_msg'))<div class="ss-msg err mt-2"><i class="bi bi-lock-fill me-1"></i>{{ session('season_msg') }}</div>@endif
+    @if (session('season_ok'))<div class="ss-msg ok mt-2">{{ session('season_ok') }}</div>@endif
 
     <div class="ss-hero mt-2">
         @if ($season->cover_image)<div class="ss-cover" style="background-image:url('{{ Storage::url($season->cover_image) }}')"></div>@endif

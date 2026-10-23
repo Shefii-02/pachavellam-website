@@ -28,7 +28,7 @@
         <button type="button" class="btn btn-sm btn-outline-primary mb-0" data-bs-toggle="modal" data-bs-target="#editSession"><i class="bi bi-pencil me-1"></i>Edit season</button>
     </div>
 </div>
-@if (season('success'))<div class="alert alert-success py-2">{{ season('success') }}</div>@endif
+@if (session('success'))<div class="alert alert-success py-2">{{ session('success') }}</div>@endif
 @if ($errors->any())<div class="alert alert-danger py-2">{{ $errors->first() }}</div>@endif
 
 {{-- exams of the season --}}
@@ -85,7 +85,7 @@
 
 {{-- Edit season --}}
 <div class="modal fade" id="editSession" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
-    <form action="{{ $base }}/seasons/{{ $season->id }}" method="POST" enctype="multipart/form-data">@csrf @method('PUT')<input type="hidden" name="back" value="season">
+    <form action="{{ $base }}/seasons/{{ $season->id }}" method="POST" enctype="multipart/form-data">@csrf @method('PUT')<input type="hidden" name="back" value="session">
         <div class="modal-header"><h5 class="modal-title"><i class="bi bi-pencil me-1"></i>Edit season</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
         <div class="modal-body"><div class="row g-2">@include('admin.exam._season-fields', ['s' => $season, 'p' => 'ed', 'special' => $special])</div></div>
         <div class="modal-footer"><button type="button" class="btn btn-light mb-0" data-bs-dismiss="modal">Cancel</button><button class="btn btn-success mb-0"><i class="bi bi-check-lg me-1"></i>Save</button></div>
