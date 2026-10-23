@@ -39,7 +39,7 @@
     {!! $heading('Exams') !!}
     {!! $link(url('admin/exam/kpsc/series/daily'), 'bi-list-task', 'Daily Exam Series', (request()->is('admin/exam/kpsc/series/daily*') || request()->is('admin/kpsc/daily-exam*')) ? 'active' : '') !!}
     {!! $link(url('admin/exam/kpsc/series/omr'), 'bi-pencil-square', 'OMR Exam Series', (request()->is('admin/exam/kpsc/series/omr*') || request()->is('admin/kpsc/model-exam*')) ? 'active' : '') !!}
-    {!! $link(url('admin/kpsc/ca-daily-exam'), 'bi-calendar2-check', 'CA Exam Series', active_menu('ca-daily-exam')) !!}
+    {!! $link(url('admin/exam/kpsc/series/ca'), 'bi-calendar2-check', 'CA Exam Series', (request()->is('admin/exam/kpsc/series/ca*') || request()->is('admin/kpsc/ca-daily-exam*')) ? 'active' : '') !!}
     @if (\App\Support\StaffAccess::can($me, 'Exam courses manage'))
         @php $kpscSeries = $examModel ? \App\Http\Controllers\Exam\ExamSeriesController::seriesCourseId($examModel) : null; @endphp
         {!! $link(url('admin/exam/kpsc/series/gk'), 'bi-globe2', 'GK Exam Series', (request()->is('admin/exam/kpsc/series/gk*') || ($kpscSeries && request()->is('admin/exam/kpsc/courses/' . $kpscSeries . '/exams/gk-exams*'))) ? 'active' : '') !!}

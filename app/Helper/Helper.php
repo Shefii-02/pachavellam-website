@@ -6,6 +6,15 @@ use Illuminate\Support\Facades\Auth;
 
 
 
+if (!function_exists('per_page')) {
+     /** Page size chosen by the admin (?per_page=), falling back to the listing's own default. */
+     function per_page(int $default = 20): int
+     {
+          $n = (int) request('per_page');
+          return in_array($n, [10, 20, 25, 30, 50, 100, 200], true) ? $n : $default;
+     }
+}
+
 if (!function_exists('admin')) {
      function kpsc_cms($url)
      {

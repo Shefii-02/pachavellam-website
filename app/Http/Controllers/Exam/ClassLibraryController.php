@@ -72,7 +72,7 @@ class ClassLibraryController extends Controller
             ->when($request->filled('source'), fn ($q) => $q->where('source', $request->source))
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->with('folder:id,name')->withCount('courseLinks')
-            ->orderByDesc('id')->paginate(25)->withQueryString();
+            ->orderByDesc('id')->paginate(per_page(25))->withQueryString();
 
         return view('admin.class-library.index', $this->data($exam, [
             'current' => $current,

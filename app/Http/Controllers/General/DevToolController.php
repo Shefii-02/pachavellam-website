@@ -27,7 +27,7 @@ class DevToolController extends Controller
             ->when($request->filled('user'), fn ($q) => $q->where('user_id', (int) $request->user))
             ->when($request->filled('date'), fn ($q) => $q->whereDate('created_at', $request->date))
             ->latest('id')
-            ->paginate(50)
+            ->paginate(per_page(50))->withQueryString()
             ->withQueryString();
 
         return view('admin.general.dev-tools.api-logs', compact('logs'));

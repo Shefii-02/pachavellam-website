@@ -14,7 +14,7 @@ use App\Services\SeasonAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
-/** A season (session) of an exam series: what it holds, its price, and the Buy button. /seasons/{id} */
+/** A Season of an exam series: what it holds, its price, and the Buy button. /seasons/{id} */
 class SeasonController extends Controller
 {
     public const PAGES = ['daily' => 'daily-exams', 'omr' => 'omr-exams', 'ca' => 'ca-exams', 'gk' => 'gk-exams', 'special' => 'special-exams'];
@@ -24,7 +24,7 @@ class SeasonController extends Controller
         return view('kpsc.season', $this->data($request, $id, $access));
     }
 
-    /** Everything the session page shows (also read by the app API). */
+    /** Everything the season page shows (also read by the app API). */
     public function data(Request $request, $id, SeasonAccess $access): array
     {
         $season = ExamSeason::with('exam')->where('status', 'published')->findOrFail($id);
@@ -61,7 +61,7 @@ class SeasonController extends Controller
         }
         usort($rows, fn ($a, $b) => strcmp($a->sort, $b->sort));
 
-        \App\Support\Seo::set(['key' => 'season:' . $season->id, 'title' => $season->title . ' - ' . ($season->exam->short_name ?? '') . ' | Pachavellam', 'description' => $season->tagline ?: strip_tags((string) $season->description) ?: 'Exam session on Pachavellam.',
+        \App\Support\Seo::set(['key' => 'season:' . $season->id, 'title' => $season->title . ' - ' . ($season->exam->short_name ?? '') . ' | Pachavellam', 'description' => $season->tagline ?: strip_tags((string) $season->description) ?: 'Exam season on Pachavellam.',
             'image' => $season->cover_image ? \Illuminate\Support\Facades\Storage::url($season->cover_image) : null]);
 
         return [
@@ -82,15 +82,15 @@ class SeasonController extends Controller
         $access->syncCourse($season);                        // makes sure the purchase course matches the price
         $course = ExamCourse::find($season->fresh()->course_id);
         if (!$course || $course->status !== 'published') {
-            return redirect($back)->with('season_msg', 'This session cannot be bought right now.');
+            return redirect($back)->with('season_msg', 'This season cannot be bought right now.');
         }
         if ($access->owns($request->user(), $season)) {
-            return redirect($back)->with('season_ok', 'You already have this session.');
+            return redirect($back)->with('season_ok', 'You already have this season.');
         }
         try {
             $link = PaymentLink::where('user_id', $request->user()->id)->where('course_id', $course->id)->where('channel', 'web')->where('status', 'active')->latest('id')->first();
             if (!$link || !$link->isUsable()) {
-                $link = $links->create($request->user(), $course, 'web', null, 48, 'Bought from the website (exam session)', null);
+                $link = $links->create($request->user(), $course, 'web', null, 48, 'Bought from the website (exam season)', null);
             }
 
             return redirect($link->url());

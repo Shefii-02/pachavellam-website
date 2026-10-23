@@ -53,7 +53,7 @@ class RoaringStudyController extends Controller
             ->when($request->filled('status'), fn ($q) => $q->where('status', $request->status))
             ->when($request->filled('access'), fn ($q) => $q->where('access_type', $request->access))
             ->when($request->filled('q'), fn ($q) => $q->where('title', 'like', '%' . $request->q . '%'))
-            ->orderByDesc('publish_at')->orderByDesc('id')->paginate(20)->withQueryString();
+            ->orderByDesc('publish_at')->orderByDesc('id')->paginate(per_page(20))->withQueryString();
 
         $itemCounts = RoaringItem::join('roaring_sections', 'roaring_sections.id', '=', 'roaring_items.section_id')
             ->whereIn('roaring_sections.roaring_id', $list->pluck('id'))

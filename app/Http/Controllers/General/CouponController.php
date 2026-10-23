@@ -215,7 +215,7 @@ class CouponController extends Controller
             ->when($request->filled('to'), fn ($q) => $q->whereDate('created_at', '<=', $request->to))
             ->when($request->filled('q'), fn ($q) => $q->whereIn('user_id', fn ($s) => $s->select('id')->from('users')
                 ->where(fn ($w) => $w->where('name', 'like', '%' . $request->q . '%')->orWhere('email', 'like', '%' . $request->q . '%')->orWhere('mobile', 'like', '%' . $request->q . '%'))))
-            ->latest('id')->paginate(20)->withQueryString();
+            ->latest('id')->paginate(per_page(20))->withQueryString();
 
         return view('admin.general.coupons.show', [
             'coupon' => $coupon->loadCount(['courses']),

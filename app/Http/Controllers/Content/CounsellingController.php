@@ -38,7 +38,7 @@ class CounsellingController extends Controller
             ->when(isset(CounsellingRequest::STATUSES[$request->status]), fn ($q) => $q->where('status', $request->status))
             ->when($request->filled('exam'), fn ($q) => $q->where('exam_id', $request->exam))
             ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w->where('name', 'like', '%' . $request->q . '%')->orWhere('phone', 'like', '%' . $request->q . '%')))
-            ->orderByRaw("status = 'new' desc")->orderByDesc('id')->paginate(25)->withQueryString();
+            ->orderByRaw("status = 'new' desc")->orderByDesc('id')->paginate(per_page(25))->withQueryString();
 
         return view('admin.content.counselling.index', [
             'list' => $list, 'exams' => CompetitiveExam::orderBy('position')->get(),

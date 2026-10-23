@@ -1,9 +1,9 @@
-{{-- The fields of a season (session): used to add and to edit. $s = the season or null, $p = unique id prefix, $special = special exams are always paid. --}}
+{{-- The fields of a season: used to add and to edit. $s = the season or null, $p = unique id prefix, $special = special exams are always paid. --}}
 @php
     $v = fn ($f, $d = '') => old($f, $s->{$f} ?? $d);
     $paid = $special || old('is_paid', $s->is_paid ?? false);
 @endphp
-<div class="col-md-6"><label class="form-label small mb-0">Season (session) title <span class="text-danger">*</span></label><input class="form-control" name="title" required maxlength="150" placeholder="e.g. History - Season 1" value="{{ $v('title') }}"></div>
+<div class="col-md-6"><label class="form-label small mb-0">Season title <span class="text-danger">*</span></label><input class="form-control" name="title" required maxlength="150" placeholder="e.g. History - Season 1" value="{{ $v('title') }}"></div>
 <div class="col-md-6"><label class="form-label small mb-0">Tagline</label><input class="form-control" name="tagline" maxlength="200" value="{{ $v('tagline') }}"></div>
 <div class="col-md-3"><label class="form-label small mb-0">Built around</label>
     <select name="basis" class="form-select"><option value="">General</option>@foreach (\App\Models\ExamSeason::BASES as $bk => $bl)<option value="{{ $bk }}" {{ $v('basis') === $bk ? 'selected' : '' }}>{{ $bl }}</option>@endforeach</select></div>

@@ -174,19 +174,19 @@
                                     $omrAcc = app(\App\Services\SeasonAccess::class);
                                 @endphp
                                 <div class="col-md-12 mt-2">
-                                    <label class="form-label">Session (season)</label>
+                                    <label class="form-label">Season</label>
                                     <select name="series_season_id" id="series_season_edit" class="form-control">
-                                        <option value="">No session</option>
+                                        <option value="">No season</option>
                                         @foreach ($omrSessions as $se)
                                             <option value="{{ $se->id }}">{{ $se->title }} - {{ $omrAcc->isPaid($se) ? 'Paid ₹' . rtrim(rtrim(number_format($omrAcc->effectivePrice($se), 2), '0'), '.') : 'Free' }}</option>
                                         @endforeach
                                     </select>
-                                    <div class="form-text"><a href="{{ url('admin/exam/kpsc/series/omr') }}" target="_blank">Create / manage sessions</a></div>
+                                    <div class="form-text"><a href="{{ url('admin/exam/kpsc/series/omr') }}" target="_blank">Create / manage seasons</a></div>
                                 </div>
                                 <div class="col-md-12 mt-2">
                                     <div class="form-check form-switch">
                                         <input class="form-check-input" type="checkbox" role="switch" name="free_access" id="free_access_edit" value="1">
-                                        <label class="form-check-label" for="free_access_edit">Free access - open for everyone even when its session is paid</label>
+                                        <label class="form-check-label" for="free_access_edit">Free access - open for everyone even when its season is paid</label>
                                     </div>
                                 </div>
 

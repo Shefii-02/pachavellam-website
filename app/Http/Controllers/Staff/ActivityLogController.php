@@ -39,7 +39,7 @@ class ActivityLogController extends Controller
     {
         StaffAccess::authorize($request, 'Activity log view');
 
-        $list = $this->query($request)->orderByDesc('id')->paginate(40)->withQueryString();
+        $list = $this->query($request)->orderByDesc('id')->paginate(per_page(40))->withQueryString();
 
         return view('admin.staff.activity-logs', [
             'list' => $list, 'staff' => User::where('type', '!=', 'Student')->orderBy('name')->get(['id', 'name']),

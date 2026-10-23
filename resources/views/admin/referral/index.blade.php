@@ -56,5 +56,6 @@
         <tr><td colspan="7" class="text-center text-muted py-5">No referrals found.</td></tr>
     @endforelse
     </tbody></table></div></div>
-<div class="mt-3">{{ $list->links() }}</div>
+<div class="mt-3">@include('admin.partials.per-page', ['p' => $list])
+{{ $list->links() }}</div>
 @endsection

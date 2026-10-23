@@ -48,7 +48,7 @@
                 <tbody>
                     @forelse ($list as $row)
                         <tr>
-                            <td>{{ $row->id }}</td>
+                            <td>{{ $list->firstItem() + $loop->index }}</td>
                             @foreach ($config['list'] as $col)
                                 @php $f = $fields[$col]; $val = $row->{$col}; @endphp
                                 <td>
@@ -102,7 +102,8 @@
                 </tbody>
             </table>
         </div>
-        <div class="mt-3">{{ $list->links('pagination::bootstrap-5') }}</div>
+        <div class="mt-3">@include('admin.partials.per-page', ['p' => $list])
+{{ $list->links('pagination::bootstrap-5') }}</div>
     </div>
 </div>
 @endsection

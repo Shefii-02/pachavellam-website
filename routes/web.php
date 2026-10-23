@@ -239,7 +239,7 @@ Route::middleware('auth')->group(function () {
     Route::get('my-tests/analysis', 'TestController@analysis');
 });
 
-// a season (session) of an exam series: what it holds, its price, Buy
+// a season of an exam series: what it holds, its price, Buy
 Route::get('seasons/{id}', 'SeasonController@show')->whereNumber('id');
 Route::get('seasons/{id}/buy', 'SeasonController@buy')->whereNumber('id')->middleware(['auth', 'throttle:20,1']);
 

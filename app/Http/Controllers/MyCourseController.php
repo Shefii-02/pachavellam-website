@@ -40,7 +40,7 @@ class MyCourseController extends Controller
         if (!$admission && !$preview) {
             return redirect(url('courses/' . ($course->slug ?: $course->id)))->with('message', 'Buy this course to open it.');
         }
-        abort_if(str_starts_with((string) $course->slug, 'series-'), 404);   // the hidden series / session courses have no page
+        abort_if(str_starts_with((string) $course->slug, 'series-'), 404);   // the hidden series / season courses have no page
 
         $now = now();
         $tabs = [];

@@ -28,7 +28,7 @@
                             @if ($photo)
                                 <img src="{{ $photo }}" alt="" class="rounded-circle me-3" style="width:72px;height:72px;object-fit:cover">
                             @else
-                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style="width:72px;height:72px;font-size:28px">{{ $initial }}</div>
+                                <img src="{{ asset('assets/images/user.png') }}" alt="" class="rounded-circle me-3" style="width:72px;height:72px;object-fit:cover">
                             @endif
                             <div class="flex-grow-1">
                                 <label class="form-label mb-1">Profile photo</label>

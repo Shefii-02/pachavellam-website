@@ -76,7 +76,8 @@
                 </table>
             </div>
             <div class="mt-3 d-flex justify-content-between align-items-center">
-                <div>{{ $logs->links('pagination::bootstrap-5') }}</div>
+                <div>@include('admin.partials.per-page', ['p' => $logs])
+{{ $logs->links('pagination::bootstrap-5') }}</div>
                 <a href="{{ admin_general('dev-tools/prune?days=30') }}" class="btn btn-sm btn-outline-danger"
                     onclick="return confirm('Delete all request logs older than 30 days?')">Delete logs older than 30 days</a>
             </div>

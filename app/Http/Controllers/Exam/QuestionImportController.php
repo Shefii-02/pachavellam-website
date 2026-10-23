@@ -159,7 +159,7 @@ class QuestionImportController extends Controller
         $exam = $this->exam($examSlug);
 
         return view('admin.question-library.imports', $this->data($exam, [
-            'batches' => LibraryImportBatch::where('exam_id', $exam->id)->with(['folder:id,name', 'user:id,name'])->orderByDesc('id')->paginate(20),
+            'batches' => LibraryImportBatch::where('exam_id', $exam->id)->with(['folder:id,name', 'user:id,name'])->orderByDesc('id')->paginate(per_page(20))->withQueryString(),
         ]));
     }
 

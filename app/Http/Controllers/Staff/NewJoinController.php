@@ -53,7 +53,7 @@ class NewJoinController extends Controller
     public function index(Request $request)
     {
         StaffAccess::authorize($request, 'New joins view');
-        $list = $this->query($request)->paginate(30)->withQueryString();
+        $list = $this->query($request)->paginate(per_page(30))->withQueryString();
 
         $ids = $list->pluck('id');
         $interests = DB::table('student_exam_interests as i')->join('competitive_exams as e', 'e.id', '=', 'i.exam_id')->whereIn('i.user_id', $ids)->get(['i.user_id', 'e.short_name', 'e.name'])->groupBy('user_id');

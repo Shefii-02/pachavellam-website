@@ -108,7 +108,8 @@
                 @endif
                 <div class="card-footer bg-transparent d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <button class="btn btn-success btn-sm mb-0"><i class="bi bi-plus-circle me-1"></i>Add selected</button>
-                    <div>{{ $candidates->links('pagination::bootstrap-5') }}</div>
+                    <div>@include('admin.partials.per-page', ['p' => $candidates])
+{{ $candidates->links('pagination::bootstrap-5') }}</div>
                 </div>
             </form>
         </div>

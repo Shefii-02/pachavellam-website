@@ -122,7 +122,8 @@
                 </div>
             </div>
         </form>
-        <div class="mt-3">{{ $classes->links() }}</div>
+        <div class="mt-3">@include('admin.partials.per-page', ['p' => $classes])
+{{ $classes->links() }}</div>
     </div>
 </div>
 

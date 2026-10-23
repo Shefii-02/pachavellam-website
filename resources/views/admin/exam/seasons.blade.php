@@ -6,16 +6,16 @@
     $acc = app(\App\Services\SeasonAccess::class);
 @endphp
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-    <div><h3 class="mb-0">{{ $label }} - {{ $title }}</h3><div class="small text-muted">Create a session first (free or paid), then open it to add and manage its exams.</div></div>
+    <div><h3 class="mb-0">{{ $label }} - {{ $title }}</h3><div class="small text-muted">Create a season first (free or paid), then open it to add and manage its exams.</div></div>
     <div class="d-flex gap-2">
-        <a href="{{ $builder }}?season=none" class="btn btn-sm btn-light mb-0"><i class="bi bi-list-ul me-1"></i>Exams without a session ({{ (int) optional($counts->get(''))->c }})</a>
+        <a href="{{ $builder }}?season=none" class="btn btn-sm btn-light mb-0"><i class="bi bi-list-ul me-1"></i>Exams without a season ({{ (int) optional($counts->get(''))->c }})</a>
         @if ($exam->slug === 'kpsc' && in_array($kind, ['daily', 'omr']))
             <a href="{{ url($kind === 'daily' ? 'admin/kpsc/daily-exam/view' : 'admin/kpsc/model-exam/view') }}" class="btn btn-sm btn-light mb-0"><i class="bi bi-archive me-1"></i>All old exams</a>
         @endif
-        <button type="button" class="btn btn-sm btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#newSession"><i class="bi bi-plus-lg me-1"></i>New session</button>
+        <button type="button" class="btn btn-sm btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#newSession"><i class="bi bi-plus-lg me-1"></i>New season</button>
     </div>
 </div>
-@if (session('success'))<div class="alert alert-success py-2">{{ session('success') }}</div>@endif
+@if (season('success'))<div class="alert alert-success py-2">{{ season('success') }}</div>@endif
 @if ($errors->any())<div class="alert alert-danger py-2">{{ $errors->first() }}</div>@endif
 
 <div class="row g-3">
@@ -43,22 +43,22 @@
                 </div>
                 <div class="card-footer bg-transparent d-flex gap-2">
                     <a href="{{ $base }}/seasons/{{ $s->id }}" class="btn btn-sm btn-primary mb-0 flex-fill"><i class="bi bi-list-check me-1"></i>Manage exams</a>
-                    <form action="{{ $base }}/seasons/{{ $s->id }}" method="POST" onsubmit="return confirm('Delete this session? Its exams are kept without a session.')">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger mb-0" title="Delete session"><i class="bi bi-trash"></i></button></form>
+                    <form action="{{ $base }}/seasons/{{ $s->id }}" method="POST" onsubmit="return confirm('Delete this season? Its exams are kept without a season.')">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger mb-0" title="Delete season"><i class="bi bi-trash"></i></button></form>
                 </div>
             </div>
         </div>
     @empty
-        <div class="col-12 text-center text-muted py-5"><i class="bi bi-collection fs-1 d-block mb-2"></i>No sessions yet. Press <b>New session</b> to create the first one.</div>
+        <div class="col-12 text-center text-muted py-5"><i class="bi bi-collection fs-1 d-block mb-2"></i>No seasons yet. Press <b>New season</b> to create the first one.</div>
     @endforelse
 </div>
 
-{{-- New session --}}
+{{-- New season --}}
 <div class="modal fade" id="newSession" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
     <form action="{{ $base }}/seasons" method="POST" enctype="multipart/form-data">@csrf
-        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-plus-circle me-1"></i>New {{ $special ? 'special exam' : '' }} session</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-plus-circle me-1"></i>New {{ $special ? 'special exam' : '' }} season</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
         <div class="modal-body"><div class="row g-2">@include('admin.exam._season-fields', ['s' => null, 'p' => 'new', 'special' => $special])</div>
-            <div class="alert alert-info small mt-3 mb-0">After you save, the session opens and you can add its exams.</div></div>
-        <div class="modal-footer"><button type="button" class="btn btn-light mb-0" data-bs-dismiss="modal">Cancel</button><button class="btn btn-success mb-0"><i class="bi bi-check-lg me-1"></i>Create session</button></div>
+            <div class="alert alert-info small mt-3 mb-0">After you save, the season opens and you can add its exams.</div></div>
+        <div class="modal-footer"><button type="button" class="btn btn-light mb-0" data-bs-dismiss="modal">Cancel</button><button class="btn btn-success mb-0"><i class="bi bi-check-lg me-1"></i>Create season</button></div>
     </form>
 </div></div></div>
 @if ($errors->any() && old('title') && !request()->routeIs('*seasons.update'))<script>document.addEventListener('DOMContentLoaded', function () { new bootstrap.Modal(document.getElementById('newSession')).show(); });</script>@endif

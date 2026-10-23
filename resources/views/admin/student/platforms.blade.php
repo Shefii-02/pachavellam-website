@@ -190,7 +190,8 @@
                 </tbody>
             </table>
         </div>
-        <div class="mt-3">{{ $list->links('pagination::bootstrap-5') }}</div>
+        <div class="mt-3">@include('admin.partials.per-page', ['p' => $list])
+{{ $list->links('pagination::bootstrap-5') }}</div>
         <p class="small text-muted mb-0 mt-2">One row per user and platform. “Last active” is the last successful request (app or website); it is refreshed at most every 5 minutes.</p>
     </div>
 </div>

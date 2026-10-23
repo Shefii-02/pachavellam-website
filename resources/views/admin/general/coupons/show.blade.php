@@ -200,7 +200,8 @@
             </tbody>
         </table>
     </div>
-    <div class="card-footer bg-transparent">{{ $rows->links('pagination::bootstrap-5') }}</div>
+    <div class="card-footer bg-transparent">@include('admin.partials.per-page', ['p' => $rows])
+{{ $rows->links('pagination::bootstrap-5') }}</div>
 </div>
 </div>
 @endsection

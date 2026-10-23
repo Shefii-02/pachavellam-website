@@ -209,7 +209,7 @@
                                     data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown"
                                     aria-expanded="false">
                                     <img class="avatar-img rounded-circle"
-                                        src="{{ asset('storage/users/' . Auth::user()->image) }}" alt="avatar">
+                                        src="{{ Auth::user()->photoUrl() ?: asset('assets/images/user.png') }}" alt="avatar">
                                 </a>
 
                                 <!-- Profile dropdown START -->
@@ -221,7 +221,7 @@
                                             <!-- Avatar -->
                                             <div class="avatar me-3">
                                                 <img class="avatar-img rounded-circle shadow"
-                                                    src="{{ asset('storage/users/' . Auth::user()->image) }}"
+                                                    src="{{ Auth::user()->photoUrl() ?: asset('assets/images/user.png') }}"
                                                     alt="avatar">
                                             </div>
                                             <div>

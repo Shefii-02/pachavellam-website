@@ -32,7 +32,7 @@
                     <tbody>
                         @forelse ($users as $user)
                             <tr>
-                                <td>{{ $user->id }}</td>
+                                <td>{{ $users->firstItem() + $loop->index }}</td>
                                 <td>{{ $user->name ?: '—' }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td>{{ $user->mobile ?: '—' }}</td>
@@ -51,7 +51,8 @@
                     </tbody>
                 </table>
             </div>
-            <div class="mt-3">{{ $users->links() }}</div>
+            <div class="mt-3">@include('admin.partials.per-page', ['p' => $users])
+{{ $users->links() }}</div>
         </div>
     </div>
 @endsection

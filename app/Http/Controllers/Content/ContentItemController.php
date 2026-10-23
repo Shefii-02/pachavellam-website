@@ -53,7 +53,7 @@ class ContentItemController extends Controller
             ->when($folderMode, fn ($q) => $q->where('folder_id', $current?->id))
             ->when(in_array($request->status, ['0', '1'], true), fn ($q) => $q->where('status', $request->status))
             ->when($request->filled('q'), fn ($q) => $q->where('title', 'like', '%' . $request->q . '%'))
-            ->orderByDesc('is_pinned')->orderByDesc('position')->orderByDesc('id')->paginate(25)->withQueryString();
+            ->orderByDesc('is_pinned')->orderByDesc('position')->orderByDesc('id')->paginate(per_page(25))->withQueryString();
 
         return view('admin.content.items.index', ['m' => $m, 'list' => $list, 'exams' => $exams, 'folderMode' => (bool) $folderMode, 'exam' => $exam, 'current' => $current, 'subfolders' => $subfolders,
             'allFolders' => $folderMode ? ContentFolder::where('exam_id', $exam->id)->where('kind', $m['kind'])->orderBy('title')->get() : collect()]);

@@ -89,5 +89,6 @@
         </div></div>
     @endforelse
 </div>
-<div class="mt-3">{{ $courses->links('pagination::bootstrap-5') }}</div>
+<div class="mt-3">@include('admin.partials.per-page', ['p' => $courses])
+{{ $courses->links('pagination::bootstrap-5') }}</div>
 @endsection

@@ -148,7 +148,7 @@
                         <!-- Table item -->
                             <tr>
                                
-                                <td>{{$row->id}}</td>
+                                <td>{{ $list->firstItem() + $loop->index }}</td>
                                 <!-- Table data -->
                                 <td><a href="{{ student_cms('student-list/' . $row->id) }}">{{ ucwords($row->name) ?: '(no name)' }}</a></td>
                                 <td>{{$row->email}}</td>
@@ -170,7 +170,8 @@
                 </table>
             </div>
             <!-- Course list table END -->
-            <div class="mt-3">{{ $list->links('pagination::bootstrap-5') }}</div>
+            <div class="mt-3">@include('admin.partials.per-page', ['p' => $list])
+{{ $list->links('pagination::bootstrap-5') }}</div>
 
         </div>
         <!-- Card body START -->

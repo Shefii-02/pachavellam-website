@@ -36,7 +36,7 @@ class ReferralAdminController extends Controller
                 ->orWhere('a.mobile', 'like', "%{$request->q}%")->orWhere('b.mobile', 'like', "%{$request->q}%")->orWhere('r.code', 'like', "%{$request->q}%")))
             ->orderByDesc('r.id')
             ->select('r.*', 'a.name as referrer_name', 'a.mobile as referrer_mobile', 'b.name as referred_name', 'b.mobile as referred_mobile')
-            ->paginate(30)->withQueryString();
+            ->paginate(per_page(30))->withQueryString();
 
         $tot = DB::table('referrals')->selectRaw("count(*) c, sum(status='rewarded') rewarded, sum(status='joined') pending, coalesce(sum(referrer_coins + referred_coins),0) coins")->first();
         $byPlatform = DB::table('referrals')->selectRaw('platform, count(*) c')->groupBy('platform')->pluck('c', 'platform');

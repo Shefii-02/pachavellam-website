@@ -16,7 +16,7 @@ class ExamSeason extends Model
 
     public const STATUSES = ['draft' => ['Draft', 'secondary'], 'published' => ['Published', 'success'], 'archived' => ['Archived', 'dark']];
 
-    public const BASES = ['subject' => 'Subject based', 'category' => 'Category based', 'exam' => 'Exam related', 'other' => 'Other'];
+    public const BASES = ['subject' => 'Subject based', 'category' => 'Category based', 'exam' => 'Exam based', 'other' => 'Other'];
 
     public function exam()
     {

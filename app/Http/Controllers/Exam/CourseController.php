@@ -38,7 +38,7 @@ class CourseController extends Controller
             ->when($request->filled('category'), fn ($q) => $q->inCategory($request->category))
             ->with('categories:id,name')->withCount(['features', 'members', 'nodes'])
             ->orderByDesc('is_featured')->orderBy('position')->orderByDesc('id')
-            ->paginate(20)->withQueryString();
+            ->paginate(per_page(20))->withQueryString();
 
         return view('admin.exam.course.index', [
             'exam' => $exam,

@@ -24,6 +24,7 @@
             <div class="list-group-item bg-transparent text-center text-muted py-4">Nothing to show.</div>
         @endforelse
     </div></div>
-    <div class="mt-3">{{ $list->links() }}</div>
+    <div class="mt-3">@include('admin.partials.per-page', ['p' => $list])
+{{ $list->links() }}</div>
 </div>
 @endsection

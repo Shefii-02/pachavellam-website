@@ -162,7 +162,7 @@ class ExamToolsController extends Controller
             ->when($request->filled('category'), fn ($q) => $q->whereHas('categories', fn ($c) => $c->where('exam_categories.id', $request->category)))
             ->when($request->filled('q'), fn ($q) => $q->whereHas('texts', fn ($t) => $t->where('question', 'like', '%' . $request->q . '%')))
             ->when($request->input('hide_used', '1') === '1', fn ($q) => $q->whereNotIn('id', $have))
-            ->with(['texts', 'folder:id,name'])->orderByDesc('id')->paginate(30)->withQueryString();
+            ->with(['texts', 'folder:id,name'])->orderByDesc('id')->paginate(per_page(30))->withQueryString();
 
         return view('cms.exam-tools.library', [
             'exam' => $exam, 'cfg' => self::SECTIONS[$exam->section], 'questions' => $questions, 'have' => $have,

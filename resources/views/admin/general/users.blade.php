@@ -99,7 +99,7 @@
                         <!-- Table item -->
                             <tr>
                                
-                                <td>{{$list->id}}</td>
+                                <td>{{ $loop->iteration }}</td>
                                 <!-- Table data -->
                                 <td>{{ucwords($list->name)}}</td>
                                 <td>{{ucwords($list->email)}}</td>

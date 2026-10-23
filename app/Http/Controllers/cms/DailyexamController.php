@@ -20,7 +20,7 @@ class DailyexamController extends Controller
     public function daily_exams()
     {
         if (!request()->filled('session') && !request()->boolean('legacy')) {
-            return redirect(url('admin/exam/kpsc/series/daily'));   // sessions first
+            return redirect(url('admin/exam/kpsc/series/daily'));   // seasons first
         }
         $exam_titles = DailyExam::where('section', 'Daily Exam')->groupBy('examtitle')->get('examtitle');
         // $exam_subjects = DailyExam::groupBy('subject')->get('subject');

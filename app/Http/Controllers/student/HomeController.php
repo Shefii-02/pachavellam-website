@@ -28,7 +28,7 @@ class HomeController extends Controller
 
         $list = StudentFilter::query($filters)
             ->orderByDesc('users.id')
-            ->paginate(50)
+            ->paginate(per_page(50))->withQueryString()
             ->withQueryString();
 
         // newest activity is only needed for the rows on screen

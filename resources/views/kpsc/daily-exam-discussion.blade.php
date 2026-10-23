@@ -45,7 +45,7 @@
                   <div class="comment">
                       <div class="d-flex">
                           <img class="rounded-circle comment-img"
-                          src="{{ Storage::url('users/'.$listing->sender_img) }}" />
+                          src="{{ $listing->sender_img ? Storage::url('users/'.$listing->sender_img) : asset('assets/images/user.png') }}" />
                           <div class="ml-1"><a href="#" class="fw-bold link-dark ml-1">{{$listing->sender_name}}</a> 
                           <!--<span class="text-muted text-nowrap">2 days ago</span>-->
                           </div>
@@ -64,7 +64,7 @@
                     <div class="comment ml-3 mt-2 bg-light rounded p-2">
                       <div class="d-flex">
                           <img class="rounded-circle comment-img"
-                          src="{{ Storage::url('users/'.$listing->reply_img) }}" />
+                          src="{{ $listing->reply_img ? Storage::url('users/'.$listing->reply_img) : asset('assets/images/user.png') }}" />
                           <div class="ml-1"><a href="#" class="fw-bold link-dark ml-1">{{$listing->reply_name}}</a>
                           <!--<span class="text-muted text-nowrap">2 days ago</span>-->
                           </div>

@@ -39,7 +39,7 @@ class TrashController extends Controller
 
         $list = $this->scoped($class::onlyTrashed(), $type, $request)
             ->when($request->filled('q') && $type !== 'questions', fn ($q) => $q->where('title', 'like', '%' . $request->q . '%'))
-            ->orderByDesc('deleted_at')->paginate(25)->withQueryString();
+            ->orderByDesc('deleted_at')->paginate(per_page(25))->withQueryString();
 
         $counts = [];
         foreach (TrashPurger::TYPES as $k => [$c]) {

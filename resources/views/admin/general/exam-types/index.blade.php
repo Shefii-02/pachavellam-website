@@ -31,7 +31,7 @@
                 <tbody>
                     @forelse ($exams as $e)
                         <tr>
-                            <td>{{ $e->id }}</td>
+                            <td>{{ $loop->iteration }}</td>
                             <td>
                                 <span class="badge text-white" style="background:{{ $e->color ?: '#6c757d' }}">{{ $e->short_name ?: $e->name }}</span>
                                 <span class="ms-1">{{ $e->name }}</span>

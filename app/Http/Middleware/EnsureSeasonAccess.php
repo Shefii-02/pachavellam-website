@@ -9,8 +9,8 @@ use Closure;
 use Illuminate\Http\Request;
 
 /**
- * Old KPSC exam pages (daily / model / CA): an exam in a paid session opens only for the free exams of the session
- * and for students who bought the session. Everyone else is sent to the session page to buy it.
+ * Old KPSC exam pages (daily / model / CA): an exam in a paid season opens only for the free exams of the season
+ * and for students who bought the season. Everyone else is sent to the season page to buy it.
  */
 class EnsureSeasonAccess
 {
@@ -24,7 +24,7 @@ class EnsureSeasonAccess
         $season = ExamSeason::find($exam->series_season_id);
         $access = app(SeasonAccess::class);
         if ($season && $access->state($request->user(), $season, 'legacy', $exam->id) === 'locked') {
-            $msg = 'This exam is part of the paid session "' . $season->title . '". Buy the session to attempt it.';
+            $msg = 'This exam is part of the paid season "' . $season->title . '". Buy the season to attempt it.';
             if ($request->expectsJson()) {
                 return response()->json(['message' => $msg, 'buy_url' => $access->buyUrl($season)], 403);
             }

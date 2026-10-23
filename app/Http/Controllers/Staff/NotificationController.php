@@ -31,7 +31,7 @@ class NotificationController extends Controller
         $list = StaffNotifier::visibleTo($user)
             ->when($request->filled('type'), fn ($q) => $q->where('type', $request->type))
             ->when($request->input('state') === 'unread', fn ($q) => $q->whereNotIn('id', $read->keys()->all() ?: [0]))
-            ->with('exam:id,short_name,name')->orderByDesc('id')->paginate(30)->withQueryString();
+            ->with('exam:id,short_name,name')->orderByDesc('id')->paginate(per_page(30))->withQueryString();
 
         return view('admin.staff.notifications', ['list' => $list, 'read' => $read, 'unread' => StaffNotifier::unreadCount($user)]);
     }

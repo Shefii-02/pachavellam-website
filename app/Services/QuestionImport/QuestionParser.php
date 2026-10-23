@@ -90,6 +90,8 @@ class QuestionParser
         $cur = null;
         $mode = null;   // 'question' | 'option' | 'explanation'
         $opt = 0;
+        $numbered = false;   // options written 1) 2) 3) 4) after lettered statements (A) B) C) ...)
+        $awaitAnswer = false;   // an "Answer:" line with the key on the next line
 
         $flush = function () use (&$rows, &$cur) {
             if ($cur) {
@@ -109,6 +111,43 @@ class QuestionParser
                     continue;
                 }
 
+                // the answer key written on the line after a bare "Answer:"
+                if ($awaitAnswer && $cur && $line !== '') {
+                    $cur['answer'] = $line;
+                    $awaitAnswer = false;
+                    continue;
+                }
+
+                // options numbered 1) 2) 3) 4) - the lettered lines above them were statements of the question
+                if ($cur && $mode !== 'explanation' && $cur['answer'] === '' && preg_match('/^\s*\(?([1-4])\s*[\)\.\:]\s*(.*)$/su', $line, $nm)) {
+                    $n = (int) $nm[1];
+                    if (!$numbered && $n === 1 && $opt >= 1) {
+                        $statements = [];
+                        foreach ($cur['options'] as $k => $t) {
+                            if ($t !== '') {
+                                $statements[] = chr(64 + $k) . ') ' . $t;
+                            }
+                        }
+                        $cur['question'] = trim($cur['question'] . "\n" . implode("\n", $statements));
+                        $cur['options'] = [1 => '', 2 => '', 3 => '', 4 => ''];
+                        foreach ($cur['images'] as $slot => $list) {
+                            if (str_starts_with($slot, 'option_')) {
+                                $cur['images']['question'] = array_merge($cur['images']['question'], $list);
+                                $cur['images'][$slot] = [];
+                            }
+                        }
+                        $numbered = true;
+                        $opt = 0;
+                    }
+                    if ($numbered && $n === $opt + 1) {
+                        $opt++;
+                        $cur['options'][$opt] = trim($nm[2]);
+                        $this->addImages($cur, 'option_' . $opt, $imgs);
+                        $mode = 'option';
+                        continue;
+                    }
+                }
+
                 // a new question
                 if (preg_match('/^\s*(?:Q(?:uestion)?\.?\s*)?(\d{1,4})\s*[\.\)\-:]\s*(.*)$/isu', $line, $m)) {
                     // inside a question, a line like "2) ..." is only a new question when the options are complete or the answer was given
@@ -120,6 +159,8 @@ class QuestionParser
                         $this->addImages($cur, 'question', $imgs);
                         $mode = 'question';
                         $opt = 0;
+                        $numbered = false;
+                        $awaitAnswer = false;
                         continue;
                     }
                 }
@@ -128,7 +169,7 @@ class QuestionParser
                 }
 
                 // an option: A) B) C) D) in order
-                if (preg_match('/^\s*\(?([A-Da-d])\s*[\)\.\:]\s*(.*)$/su', $line, $m) && (ord(strtoupper($m[1])) - 64) === $opt + 1 && $cur['answer'] === '' && $mode !== 'explanation') {
+                if (preg_match('/^\s*\(?([A-Da-d])\s*[\)\.\:]\s*(.*)$/su', $line, $m) && (ord(strtoupper($m[1])) - 64) === $opt + 1 && $cur['answer'] === '' && $mode !== 'explanation' && !$numbered) {
                     $opt++;
                     $cur['options'][$opt] = trim($m[2]);
                     $this->addImages($cur, 'option_' . $opt, $imgs);
@@ -136,8 +177,9 @@ class QuestionParser
                     continue;
                 }
 
-                if (preg_match('/^\s*(?:answer|ans|correct\s*answer|correct|ഉത്തരം)\s*[:\-\.]?\s*(.+)$/isu', $line, $m)) {
+                if (preg_match('/^\s*(?:answer|ans|correct\s*answer|correct|ഉത്തരം)\s*[:\-\.]?\s*(.*)$/isu', $line, $m)) {
                     $cur['answer'] = trim($m[1]);
+                    $awaitAnswer = $cur['answer'] === '';
                     $this->addImages($cur, 'explanation', $imgs);
                     $mode = 'answer';
                     continue;

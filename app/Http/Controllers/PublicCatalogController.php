@@ -34,7 +34,7 @@ class PublicCatalogController extends Controller
     }
 
     /**
-     * Active seasons (sessions) of one exam series (daily / omr / ca / gk / special) of an exam type, each with its exams newest first,
+     * Active Season of one exam series (daily / omr / ca / gk / special) of an exam type, each with its exams newest first,
      * its price (free or paid) and which exams are locked for this student. KPSC's old CA seasons are included for the CA series.
      * Returns [] when there is no active season (the card then shows the latest exams instead).
      */
@@ -328,7 +328,7 @@ class PublicCatalogController extends Controller
         return view('kpsc.series', $this->seriesData($request, $slug, $series));
     }
 
-    /** Everything a series page shows: active sessions and the other exams (also read by the app API). */
+    /** Everything a series page shows: active seasons and the other exams (also read by the app API). */
     public function seriesData(Request $request, $slug, $series): array
     {
         $exam = CompetitiveExam::where('slug', $slug)->where('status', 1)->firstOrFail();
@@ -366,7 +366,7 @@ class PublicCatalogController extends Controller
             return [$start || $end ? 'Live now' : 'Open', 'live'];
         };
 
-        // one row for an old KPSC exam or a builder exam; a paid session's locked exams send the student to the session page
+        // one row for an old KPSC exam or a builder exam; a paid season's locked exams send the student to the season page
         $row = function ($e, $se = null) use ($tag, $base, $done, $access, $user) {
             $legacyRow = $e instanceof \App\Models\DailyExam;
             [$t, $c] = $legacyRow ? $tag($e->started_at, $e->ended_at) : $tag($e->start_at, $e->end_at);
@@ -383,7 +383,7 @@ class PublicCatalogController extends Controller
         };
         $money = fn ($v) => rtrim(rtrim(number_format($v, 2), '0'), '.');
 
-        // ---- active sessions (seasons), each with its exams newest first
+        // ---- active seasons (seasons), each with its exams newest first
         $active = [];
         $activeIds = [];
         $caIds = [];
@@ -435,7 +435,7 @@ class PublicCatalogController extends Controller
         $rows = $others->getCollection()->map(fn ($e) => $row($e, ($k = $sid($e)) ? ($seasonMap[$k] ?? null) : null))->all();
 
         \App\Support\Seo::set(['key' => 'series:' . $exam->slug . ':' . $series, 'title' => $label . ' - ' . ($exam->short_name ?: $exam->name) . ' | Pachavellam',
-            'description' => 'Attempt the ' . strtolower($label) . ' of ' . $exam->name . '. Active sessions first, then every other exam.']);
+            'description' => 'Attempt the ' . strtolower($label) . ' of ' . $exam->name . '. Active seasons first, then every other exam.']);
 
         return ['exam' => $exam, 'series' => $series, 'label' => $label, 'icon' => $icon, 'active' => $active, 'others' => $others, 'rows' => $rows, 'title' => $label . ' - ' . ($exam->short_name ?: $exam->name),
             'accent' => $exam->color ?: '#0a8f5b'];

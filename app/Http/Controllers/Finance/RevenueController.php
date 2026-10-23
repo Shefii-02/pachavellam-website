@@ -185,7 +185,7 @@ class RevenueController extends Controller
     public function transactionsIndex(Request $request)
     {
         $this->adminOnly($request);
-        $list = $this->transactions($request)->with(['user:id,name,mobile', 'course:id,title'])->orderByDesc('id')->paginate(30)->withQueryString();
+        $list = $this->transactions($request)->with(['user:id,name,mobile', 'course:id,title'])->orderByDesc('id')->paginate(per_page(30))->withQueryString();
 
         return view('admin.finance.transactions', [
             'list' => $list, 'exams' => StaffAccess::scope(CompetitiveExam::orderBy('position'), $request->user(), 'id')->get(), 'courses' => StaffAccess::scope(ExamCourse::orderBy('title'), $request->user())->get(['id', 'title', 'exam_id']),

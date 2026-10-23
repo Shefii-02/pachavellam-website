@@ -26,8 +26,8 @@
 @section('content')
 <div class="page-content-wrapper"><div class="container"><div class="ss-wrap">
     <a href="{{ $back }}" class="small"><i class="bi bi-arrow-left"></i> {{ $exam->short_name ?: $exam->name }} exams</a>
-    @if (session('season_msg'))<div class="ss-msg err mt-2"><i class="bi bi-lock-fill me-1"></i>{{ session('season_msg') }}</div>@endif
-    @if (session('season_ok'))<div class="ss-msg ok mt-2">{{ session('season_ok') }}</div>@endif
+    @if (season('season_msg'))<div class="ss-msg err mt-2"><i class="bi bi-lock-fill me-1"></i>{{ season('season_msg') }}</div>@endif
+    @if (season('season_ok'))<div class="ss-msg ok mt-2">{{ season('season_ok') }}</div>@endif
 
     <div class="ss-hero mt-2">
         @if ($season->cover_image)<div class="ss-cover" style="background-image:url('{{ Storage::url($season->cover_image) }}')"></div>@endif
@@ -38,7 +38,7 @@
                 @if ($season->basis)<span>{{ \App\Models\ExamSeason::BASES[$season->basis] ?? $season->basis }}@if ($season->basis_name): {{ $season->basis_name }}@endif</span>@endif
                 @if ($season->starts_on || $season->ends_on)<span><i class="bi bi-calendar3"></i> {{ $season->starts_on?->format('d M Y') ?? '…' }} - {{ $season->ends_on?->format('d M Y') ?? 'running' }}</span>@endif
                 <span>{{ count($rows) }} exam{{ count($rows) == 1 ? '' : 's' }}</span>
-                @if ($paid)<span class="y">Paid session</span>@if ($freeCount)<span class="g">{{ $freeCount }} free exam{{ $freeCount == 1 ? '' : 's' }}</span>@endif<span>{{ $access->validityLabel($season) }}</span>@else<span class="g">Free - all exams</span>@endif
+                @if ($paid)<span class="y">Paid season</span>@if ($freeCount)<span class="g">{{ $freeCount }} free exam{{ $freeCount == 1 ? '' : 's' }}</span>@endif<span>{{ $access->validityLabel($season) }}</span>@else<span class="g">Free - all exams</span>@endif
             </div>
             @if ($season->description)<p style="white-space:pre-line">{{ strip_tags($season->description) }}</p>@endif
 
@@ -47,9 +47,9 @@
                     @php $eff = $access->effectivePrice($season); @endphp
                     <div class="ss-price">₹{{ rtrim(rtrim(number_format($eff, 2), '0'), '.') }}@if ($eff < $season->price)<s>₹{{ rtrim(rtrim(number_format($season->price, 2), '0'), '.') }}</s>@endif<small>one payment · {{ $access->validityLabel($season) }}</small></div>
                     @if ($owns)
-                        <span class="ss-btn" style="background:#0a6b46">✓ You have this session</span>
+                        <span class="ss-btn" style="background:#0a6b46">✓ You have this season</span>
                     @elseif (auth()->check())
-                        <a class="ss-btn" href="{{ url('seasons/' . $season->id . '/buy') }}">Buy this session</a>
+                        <a class="ss-btn" href="{{ url('seasons/' . $season->id . '/buy') }}">Buy this season</a>
                     @else
                         <a class="ss-btn" href="{{ url('sign-in') }}">Sign in to buy</a>
                     @endif
@@ -58,7 +58,7 @@
         </div>
     </div>
 
-    <div class="hb-sec"><h2 style="font-size:1.05rem;font-weight:800;color:var(--pv-text)">Exams in this session</h2></div>
+    <div class="hb-sec"><h2 style="font-size:1.05rem;font-weight:800;color:var(--pv-text)">Exams in this season</h2></div>
     <div class="ss-list">
         @forelse ($rows as $i => $r)
             @if ($r->state === 'locked')
@@ -74,7 +74,7 @@
                 </a>
             @endif
         @empty
-            <div class="hb-empty"><i class="bi bi-hourglass-split"></i>No exams in this session yet.</div>
+            <div class="hb-empty"><i class="bi bi-hourglass-split"></i>No exams in this season yet.</div>
         @endforelse
     </div>
 </div></div></div>

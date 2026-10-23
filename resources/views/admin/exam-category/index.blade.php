@@ -46,7 +46,7 @@
                 <tbody>
                     @forelse ($list as $item)
                         <tr>
-                            <td>{{ $item->id }}</td>
+                            <td>{{ $loop->iteration }}</td>
                             <td>
                                 @if ($item->image)<img src="{{ asset('storage/' . $item->image) }}" alt="" class="me-2" style="height:32px;width:32px;object-fit:cover;border-radius:6px">@endif
                                 <a href="{{ $baseUrl }}?parent={{ $item->id }}">{{ $item->name }}</a>

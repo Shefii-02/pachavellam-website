@@ -23,7 +23,7 @@ class PlatformController extends Controller
     {
         $f = $this->filters($request);
 
-        $list = $this->usersQuery($f)->orderByDesc('a.last_active_at')->paginate(50)->withQueryString();
+        $list = $this->usersQuery($f)->orderByDesc('a.last_active_at')->paginate(per_page(50))->withQueryString();
 
         $now = Carbon::now();
         $summary = DB::table('user_platform_activity as a')->join('users as u', 'u.id', '=', 'a.user_id')

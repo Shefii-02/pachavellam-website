@@ -97,7 +97,7 @@ class SeasonAccess
         return $this->seasonCache[$e->series_season_id] ??= ExamSeason::find($e->series_season_id);
     }
 
-    /** The paid session that keeps this old KPSC exam locked for the student, or null when it is open to them. */
+    /** The paid season that keeps this old KPSC exam locked for the student, or null when it is open to them. */
     public function lockedSeason(?User $user, \App\Models\DailyExam $e): ?ExamSeason
     {
         $s = $this->seasonOfExam($e);

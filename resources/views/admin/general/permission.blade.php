@@ -83,7 +83,7 @@
                         <!-- Table item -->
                             <tr>
                                
-                                <td>{{$list->id}}</td>
+                                <td>{{ $loop->iteration }}</td>
                                 <!-- Table data -->
                                 <td>{{$list->name}}</td>
                                 <td>{{$list->category}}</td>

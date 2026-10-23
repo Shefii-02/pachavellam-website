@@ -79,7 +79,7 @@ class QuestionLibraryController extends Controller
             ->when($request->input('images') === '1', fn ($q) => $q->where(fn ($w) => $w->whereNotNull('question_image')->orWhereNotNull('option_images')->orWhereNotNull('explanation_image')))
             ->with(['texts', 'categories:id,name', 'folder:id,name'])
             ->orderByDesc('id')
-            ->paginate(25)->withQueryString();
+            ->paginate(per_page(25))->withQueryString();
 
         return view('admin.question-library.index', $this->data($exam, [
             'current' => $current,

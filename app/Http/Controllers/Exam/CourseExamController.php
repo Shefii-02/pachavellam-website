@@ -221,7 +221,7 @@ class CourseExamController extends Controller
             ->when($request->filled('q'), fn ($q) => $q->whereHas('texts', fn ($t) => $t->where('question', 'like', '%' . $request->q . '%')))
             ->when($request->input('hide_used', '1') === '1', fn ($q) => $q->whereNotIn('id', $inExam))
             ->with(['texts', 'folder:id,name'])
-            ->orderByDesc('id')->paginate(30)->withQueryString();
+            ->orderByDesc('id')->paginate(per_page(30))->withQueryString();
 
         return view('admin.exam.course-exams.library', $this->data($request, $course, $feature) + [
             'item' => $item, 'section' => $section, 'sections' => $item->sections()->get(),

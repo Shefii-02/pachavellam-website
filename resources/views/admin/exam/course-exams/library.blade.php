@@ -76,7 +76,8 @@
         </div>
     </div>
 </form>
-<div class="mt-3">{{ $questions->links() }}</div>
+<div class="mt-3">@include('admin.partials.per-page', ['p' => $questions])
+{{ $questions->links() }}</div>
 <script>
 var all = document.getElementById('checkAll');
 all.addEventListener('change', function () { document.querySelectorAll('.row-check:not(:disabled)').forEach(function (c) { c.checked = all.checked; }); });

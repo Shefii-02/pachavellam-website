@@ -84,7 +84,7 @@
                         <!-- Table item -->
                             <tr>
                                
-                                <td>{{$list->id}}</td>
+                                <td>{{ $loop->iteration }}</td>
                                 <!-- Table data -->
                                 <td>{{ucwords($list->title)}}</td>
                                 <td>{{ Str::limit($list->description, 20) }}</td>

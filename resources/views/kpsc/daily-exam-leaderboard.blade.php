@@ -169,7 +169,7 @@
             <div class="person second">
                 <div class="num">2</div>
                 <i class="fas fa-caret-up"></i>
-                <img src="{{ $list_attempt->get(1)->image ? Storage::url('users/' . $list_attempt->get(1)->image) : 'https://img.icons8.com/bubbles/100/000000/user.png' }}" 
+                <img src="{{ $list_attempt->get(1)->image ? Storage::url('users/' . $list_attempt->get(1)->image) : asset('assets/images/user.png') }}" 
                 onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?background=5c60f5&color=fff&name={{ urlencode($list_attempt->get(1)->name ?? 'User') }}';"
                 alt="" class="photo">
            
@@ -182,7 +182,7 @@
             <div class="person first">
                 <div class="num">1</div>
                 <i class="fas fa-crown"></i>
-                <img src="{{ $list_attempt->get(0)->image ? Storage::url('users/' . $list_attempt->get(0)->image) : 'https://img.icons8.com/bubbles/100/000000/user.png' }}" 
+                <img src="{{ $list_attempt->get(0)->image ? Storage::url('users/' . $list_attempt->get(0)->image) : asset('assets/images/user.png') }}" 
                 onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?background=5c60f5&color=fff&name={{ urlencode($list_attempt->get(0)->name ?? 'User') }}';"
                 alt="" class="photo main">
            
@@ -196,7 +196,7 @@
                 <div class="num">3</div>
                 <i class="fas fa-caret-up"></i>
 
-                <img src="{{ $list_attempt->get(2)->image ? Storage::url('users/' . $list_attempt->get(2)->image) : 'https://img.icons8.com/bubbles/100/000000/user.png' }}" 
+                <img src="{{ $list_attempt->get(2)->image ? Storage::url('users/' . $list_attempt->get(2)->image) : asset('assets/images/user.png') }}" 
                 onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?background=5c60f5&color=fff&name={{ urlencode($list_attempt->get(2)->name ?? 'User') }}';"
                 alt="" class="photo">           
                 <p class="link">@ {!! $list_attempt->get(2)->name !!}</p>
@@ -216,7 +216,7 @@
                     <div class="info flex">
 
                         {{-- <img src="@if ($list->image != null) {{ Storage::url('users/'.$list->image) }} @else https://img.icons8.com/bubbles/100/000000/user.png @endif" alt="" class="p_img"> --}}
-                        <img src="{{ $list->image ? Storage::url('users/' . $list->image) : 'https://img.icons8.com/bubbles/100/000000/user.png' }}"
+                        <img src="{{ $list->image ? Storage::url('users/' . $list->image) : asset('assets/images/user.png') }}"
                             onerror="this.src='https://ui-avatars.com/api/?background=5c60f5&color=fff&name={{ urlencode($list->name) }}';"
                             alt="" class="p_img">
                         <p class="link">@ {!! $list->name !!}</p>

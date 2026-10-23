@@ -25,16 +25,16 @@
     </div>
     <div class="d-flex gap-2 flex-wrap">
         <a href="{{ url('seasons/' . $season->id) }}" target="_blank" class="btn btn-sm btn-light mb-0"><i class="bi bi-box-arrow-up-right me-1"></i>See on website</a>
-        <button type="button" class="btn btn-sm btn-outline-primary mb-0" data-bs-toggle="modal" data-bs-target="#editSession"><i class="bi bi-pencil me-1"></i>Edit session</button>
+        <button type="button" class="btn btn-sm btn-outline-primary mb-0" data-bs-toggle="modal" data-bs-target="#editSession"><i class="bi bi-pencil me-1"></i>Edit season</button>
     </div>
 </div>
-@if (session('success'))<div class="alert alert-success py-2">{{ session('success') }}</div>@endif
+@if (season('success'))<div class="alert alert-success py-2">{{ season('success') }}</div>@endif
 @if ($errors->any())<div class="alert alert-danger py-2">{{ $errors->first() }}</div>@endif
 
-{{-- exams of the session --}}
+{{-- exams of the season --}}
 <div class="card bg-transparent border rounded-3 mb-4">
     <div class="card-header bg-transparent d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <strong><i class="bi bi-list-check me-1"></i>Exams in this session <span class="badge bg-secondary">{{ $courseExams->count() + $legacy->count() }}</span></strong>
+        <strong><i class="bi bi-list-check me-1"></i>Exams in this season <span class="badge bg-secondary">{{ $courseExams->count() + $legacy->count() }}</span></strong>
         <div class="d-flex gap-2 flex-wrap">
             <a href="{{ $addUrl }}" class="btn btn-sm btn-success mb-0"><i class="bi bi-plus-lg me-1"></i>Add exam</a>
             @if ($legacyAdd)<a href="{{ $legacyAdd }}" class="btn btn-sm btn-outline-success mb-0" title="The old exam form of KPSC"><i class="bi bi-plus-lg me-1"></i>Add exam (old form)</a>@endif
@@ -70,23 +70,23 @@
                         @if ($kind === 'omr')<a href="{{ url('admin/kpsc/model-exam/view') }}" class="btn btn-sm btn-light mb-0" title="Edit in the OMR exam list"><i class="bi bi-pencil"></i></a>
                         @elseif ($legacyBase)<a href="{{ url($legacyBase . '/edit/' . $d->id) }}" class="btn btn-sm btn-light mb-0" title="Edit"><i class="bi bi-pencil"></i></a>@endif
                         <form class="d-inline" action="{{ $base }}/seasons/{{ $season->id }}/legacy-status/{{ $d->id }}" method="POST">@csrf<button class="btn btn-sm btn-light mb-0" title="{{ $d->status ? 'Unpublish' : 'Publish' }}"><i class="bi {{ $d->status ? 'bi-eye-slash' : 'bi-eye' }}"></i></button></form>
-                        <form class="d-inline" action="{{ $base }}/seasons/{{ $season->id }}/detach/{{ $d->id }}" method="POST" onsubmit="return confirm('Take this exam out of the session? The exam itself is kept.')">@csrf<button class="btn btn-sm btn-light mb-0" title="Take out of the session"><i class="bi bi-box-arrow-right"></i></button></form>
+                        <form class="d-inline" action="{{ $base }}/seasons/{{ $season->id }}/detach/{{ $d->id }}" method="POST" onsubmit="return confirm('Take this exam out of the season? The exam itself is kept.')">@csrf<button class="btn btn-sm btn-light mb-0" title="Take out of the season"><i class="bi bi-box-arrow-right"></i></button></form>
                         @if ($legacyBase)<a href="{{ url($legacyBase . '/delete/' . $d->id) }}" class="btn btn-sm btn-outline-danger mb-0" title="Delete the exam" onclick="return confirm('Delete this exam and its questions?')"><i class="bi bi-trash"></i></a>@endif
                     </td>
                 </tr>
             @endforeach
             @if (!$courseExams->count() && !$legacy->count())
-                <tr><td colspan="5" class="text-center text-muted py-5"><i class="bi bi-journal-plus fs-1 d-block mb-2"></i>No exams in this session yet. Press <b>Add exam</b>.</td></tr>
+                <tr><td colspan="5" class="text-center text-muted py-5"><i class="bi bi-journal-plus fs-1 d-block mb-2"></i>No exams in this season yet. Press <b>Add exam</b>.</td></tr>
             @endif
             </tbody>
         </table>
     </div>
 </div>
 
-{{-- Edit session --}}
+{{-- Edit season --}}
 <div class="modal fade" id="editSession" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
-    <form action="{{ $base }}/seasons/{{ $season->id }}" method="POST" enctype="multipart/form-data">@csrf @method('PUT')<input type="hidden" name="back" value="session">
-        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-pencil me-1"></i>Edit session</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <form action="{{ $base }}/seasons/{{ $season->id }}" method="POST" enctype="multipart/form-data">@csrf @method('PUT')<input type="hidden" name="back" value="season">
+        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-pencil me-1"></i>Edit season</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
         <div class="modal-body"><div class="row g-2">@include('admin.exam._season-fields', ['s' => $season, 'p' => 'ed', 'special' => $special])</div></div>
         <div class="modal-footer"><button type="button" class="btn btn-light mb-0" data-bs-dismiss="modal">Cancel</button><button class="btn btn-success mb-0"><i class="bi bi-check-lg me-1"></i>Save</button></div>
     </form>
@@ -96,16 +96,16 @@
 @if ($attachable->count())
 <div class="modal fade" id="attachExams" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
     <form action="{{ $base }}/seasons/{{ $season->id }}/attach" method="POST">@csrf
-        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-link-45deg me-1"></i>Add existing exams to this session</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-link-45deg me-1"></i>Add existing exams to this season</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
         <div class="modal-body">
-            <div class="small text-muted mb-2">Old exams that are not in any session. Tick the ones to add.</div>
+            <div class="small text-muted mb-2">Old exams that are not in any season. Tick the ones to add.</div>
             <div class="list-group">
                 @foreach ($attachable as $d)
                     <label class="list-group-item d-flex gap-2 align-items-center"><input class="form-check-input mt-0" type="checkbox" name="ids[]" value="{{ $d->id }}"><span class="flex-fill">{{ $d->exam_title ?: ($d->examtitle ?: 'Exam') }}</span><span class="small text-muted">{{ $d->exam_date ? \Illuminate\Support\Carbon::parse($d->exam_date)->format('d M Y') : '' }}</span></label>
                 @endforeach
             </div>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-light mb-0" data-bs-dismiss="modal">Cancel</button><button class="btn btn-success mb-0">Add to session</button></div>
+        <div class="modal-footer"><button type="button" class="btn btn-light mb-0" data-bs-dismiss="modal">Cancel</button><button class="btn btn-success mb-0">Add to season</button></div>
     </form>
 </div></div></div>
 @endif

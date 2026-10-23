@@ -1,5 +1,9 @@
 @extends($layout)
 @section('content2')
+<style>
+    .qlib-folder, .qlib-folder:hover { color: var(--bs-body-color) !important; }
+    .qlib-folder.active, .qlib-folder.active:hover { color: #fff !important; }
+</style>
 @php
     $label = $exam->short_name ?: $exam->name;
     $q = fn ($extra = []) => '?' . http_build_query(array_filter(array_merge(request()->query(), $extra), fn ($v) => $v !== null && $v !== ''));
@@ -33,11 +37,11 @@
                 <button class="btn btn-sm btn-light mb-0" data-bs-toggle="modal" data-bs-target="#folderModal" data-parent="" data-title="New folder"><i class="bi bi-folder-plus"></i></button>
             </div>
             <div class="list-group list-group-flush">
-                <a href="{{ $base }}" class="list-group-item list-group-item-action bg-transparent {{ !$current ? 'active' : '' }}">
+                <a href="{{ $base }}" class="qlib-folder list-group-item list-group-item-action bg-transparent {{ !$current ? 'active' : '' }}">
                     <i class="bi bi-collection me-1"></i>All questions
                 </a>
                 @foreach ($tree as $f)
-                    <a href="{{ $base }}?folder={{ $f['id'] }}" class="list-group-item list-group-item-action bg-transparent d-flex justify-content-between align-items-center {{ $current?->id === $f['id'] ? 'active' : '' }}"
+                    <a href="{{ $base }}?folder={{ $f['id'] }}" class="qlib-folder list-group-item list-group-item-action bg-transparent d-flex justify-content-between align-items-center {{ $current?->id === $f['id'] ? 'active' : '' }}"
                         style="padding-left: {{ 1 + $f['depth'] * 1.1 }}rem">
                         <span class="text-truncate"><i class="bi bi-folder{{ $current?->id === $f['id'] ? '2-open' : '' }} me-1"></i>{{ $f['name'] }}</span>
                         <span class="badge bg-secondary ms-2" title="questions in this folder and below">{{ $total[$f['id']] ?? 0 }}</span>
@@ -78,7 +82,7 @@
             <div class="row g-2 mb-3">
                 @foreach ($subfolders as $s)
                     <div class="col-6 col-md-4">
-                        <a href="{{ $base }}?folder={{ $s['id'] }}" class="card bg-transparent border rounded-3 text-decoration-none h-100">
+                        <a href="{{ $base }}?folder={{ $s['id'] }}" class="qlib-folder card bg-transparent border rounded-3 text-decoration-none h-100">
                             <div class="card-body py-2 d-flex justify-content-between align-items-center">
                                 <span class="text-truncate"><i class="bi bi-folder me-1 text-warning"></i>{{ $s['name'] }}</span>
                                 <span class="badge bg-secondary">{{ $total[$s['id']] ?? 0 }}</span>
@@ -159,7 +163,8 @@
                 </div>
             </div>
         </form>
-        <div class="mt-3">{{ $questions->links() }}</div>
+        <div class="mt-3">@include('admin.partials.per-page', ['p' => $questions])
+{{ $questions->links() }}</div>
     </div>
 </div>
 

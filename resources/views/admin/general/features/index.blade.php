@@ -26,7 +26,7 @@
                 <tbody>
                     @forelse ($features as $f)
                         <tr>
-                            <td>{{ $f->id }}</td>
+                            <td>{{ $loop->iteration }}</td>
                             <td>
                                 @include('admin.partials.feature-icon', ['feature' => $f, 'size' => 28])<strong>{{ $f->name }}</strong>
                                 @if ($f->is_system)<span class="badge bg-light text-dark border">built-in</span>@endif

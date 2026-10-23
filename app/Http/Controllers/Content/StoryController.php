@@ -22,7 +22,7 @@ class StoryController extends Controller
         $list = Banner::with('exams:id,short_name,name,color')
             ->when($request->filled('exam'), fn ($q) => $q->forExam($request->exam))
             ->when($request->filled('status') && in_array($request->status, ['0', '1'], true), fn ($q) => $q->where('status', $request->status))
-            ->orderByDesc('position')->orderByDesc('id')->paginate(24)->withQueryString();
+            ->orderByDesc('position')->orderByDesc('id')->paginate(per_page(24))->withQueryString();
 
         // stories synced from the Instagram highlights live here too
         $achievements = \App\Models\ContentItem::with('exams:id,short_name,name,color')->ofKind('achievement')

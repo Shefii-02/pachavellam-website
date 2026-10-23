@@ -49,7 +49,7 @@
                                 $badge = ['verified' => 'success', 'sent' => 'primary', 'expired' => 'secondary', 'failed' => 'danger'][$status] ?? 'secondary';
                             @endphp
                             <tr>
-                                <td>{{ $log->id }}</td>
+                                <td>{{ $logs->firstItem() + $loop->index }}</td>
                                 <td>{{ $log->phone }}</td>
                                 <td>{{ $log->otp ?? '—' }}</td>
                                 <td>
@@ -76,7 +76,8 @@
                     </tbody>
                 </table>
             </div>
-            <div class="mt-3">{{ $logs->links() }}</div>
+            <div class="mt-3">@include('admin.partials.per-page', ['p' => $logs])
+{{ $logs->links() }}</div>
         </div>
     </div>
 @endsection

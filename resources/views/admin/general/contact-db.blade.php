@@ -39,7 +39,7 @@
                     <tbody>
                         @forelse ($list as $row)
                             <tr>
-                                <td>{{ $row->id }}</td>
+                                <td>{{ $list->firstItem() + $loop->index }}</td>
                                 <td>{{ $row->name }}</td>
                                 <td>{{ $row->email }}</td>
                                 <td>{{ $row->mobile }}</td>
@@ -60,7 +60,8 @@
                     </tbody>
                 </table>
             </div>
-            <div class="mt-3">{{ $list->links('pagination::bootstrap-5') }}</div>
+            <div class="mt-3">@include('admin.partials.per-page', ['p' => $list])
+{{ $list->links('pagination::bootstrap-5') }}</div>
         </div>
     </div>
 @endsection

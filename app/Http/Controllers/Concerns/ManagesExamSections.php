@@ -56,7 +56,7 @@ trait ManagesExamSections
             $query->where($categoryField, $request->category);
         }
 
-        $list = $query->orderBy('position')->orderByDesc('id')->paginate(20)->withQueryString();
+        $list = $query->orderBy('position')->orderByDesc('id')->paginate(per_page(20))->withQueryString();
 
         return view('admin.exam-content.index', $this->sectionViewData($section, [
             'list' => $list,

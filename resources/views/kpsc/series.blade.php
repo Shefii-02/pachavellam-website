@@ -53,9 +53,9 @@
                     @if ($se->basis)<span>{{ $se->basis }}</span>@endif
                     @if ($se->paid)
                         <span>· <b>₹{{ $se->price }}</b>@if ($se->oldPrice) <s>₹{{ $se->oldPrice }}</s>@endif · {{ $se->validity }}@if ($se->freeN) · <b>{{ $se->freeN }}</b> free exam{{ $se->freeN == 1 ? '' : 's' }}@endif</span>
-                        @if ($se->owns)<span class="sr-buy own">✓ You have this</span>@else<a class="sr-buy" href="{{ auth()->check() ? url('seasons/' . $se->id . '/buy') : url('sign-in') }}">Buy session</a>@endif
+                        @if ($se->owns)<span class="sr-buy own">✓ You have this</span>@else<a class="sr-buy" href="{{ auth()->check() ? url('seasons/' . $se->id . '/buy') : url('sign-in') }}">Buy season</a>@endif
                     @endif
-                    <a href="{{ $se->url }}" style="margin-left:{{ $se->paid ? '0' : 'auto' }}">Session details <i class="bi bi-arrow-right"></i></a>
+                    <a href="{{ $se->url }}" style="margin-left:{{ $se->paid ? '0' : 'auto' }}">Season details <i class="bi bi-arrow-right"></i></a>
                 </div>
             @endif
             <div class="sr-list">

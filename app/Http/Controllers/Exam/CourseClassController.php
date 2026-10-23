@@ -47,7 +47,7 @@ class CourseClassController extends Controller
             ->when($folderIds, fn ($q) => $q->whereIn('folder_id', $folderIds))
             ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w->where('title', 'like', '%' . $request->q . '%')->orWhere('instructor', 'like', '%' . $request->q . '%')))
             ->when($request->input('hide_used', '1') === '1', fn ($q) => $q->whereNotIn('id', $inCourse))
-            ->with('folder:id,name')->orderByDesc('id')->paginate(30)->withQueryString();
+            ->with('folder:id,name')->orderByDesc('id')->paginate(per_page(30))->withQueryString();
 
         return view('admin.exam.course-classes.pick', $this->data($request, $course, $feature) + [
             'classes' => $classes, 'inCourse' => $inCourse, 'tree' => ClassFolder::flatTree($course->exam_id),

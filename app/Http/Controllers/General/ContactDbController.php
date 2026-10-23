@@ -23,7 +23,7 @@ class ContactDbController extends Controller
                     ->orWhere('district', 'like', $like));
             })
             ->latest('id')
-            ->paginate(25)
+            ->paginate(per_page(25))->withQueryString()
             ->withQueryString();
 
         return view('admin.general.contact-db', compact('list', 'term'));

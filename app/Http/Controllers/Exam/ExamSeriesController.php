@@ -53,7 +53,7 @@ class ExamSeriesController extends Controller
         $seasons = ExamSeason::where('exam_id', $exam->id)->where('kind', $kind)->orderByDesc('starts_on')->orderByDesc('id')->get();
         $counts = CourseExam::where('course_id', $course->id)->where('feature_id', $feature->id)->selectRaw('season_id, count(*) c, sum(status = "published") p')->groupBy('season_id')->get()->keyBy('season_id');
 
-        // old KPSC exams placed in a session
+        // old KPSC exams placed in a season
         $legacyCounts = ($exam->slug === 'kpsc' && (self::LEGACY[$kind] ?? null) && \Illuminate\Support\Facades\Schema::hasTable('kpsc_daily_exams'))
             ? \App\Models\DailyExam::where('section', self::LEGACY[$kind])->whereNotNull('series_season_id')->selectRaw('series_season_id, count(*) c')->groupBy('series_season_id')->pluck('c', 'series_season_id') : collect();
 
@@ -73,7 +73,7 @@ class ExamSeriesController extends Controller
         $this->cover($request, $season);
         app(\App\Services\SeasonAccess::class)->syncCourse($season->fresh(), $request->user()->id);
 
-        return redirect($exam->examUrl('series/' . $kind . '/seasons/' . $season->id))->with('success', 'Session created. Now add its exams below.');
+        return redirect($exam->examUrl('series/' . $kind . '/seasons/' . $season->id))->with('success', 'Season created. Now add its exams below.');
     }
 
     public function update(Request $request, $examSlug, $kind, $id)
@@ -84,7 +84,7 @@ class ExamSeriesController extends Controller
         $this->cover($request, $season);
         app(\App\Services\SeasonAccess::class)->syncCourse($season->fresh(), $request->user()->id);
 
-        return redirect($request->input('back') === 'session' ? $exam->examUrl('series/' . $kind . '/seasons/' . $season->id) : $exam->examUrl('series/' . $kind))->with('success', 'Session saved.');
+        return redirect($request->input('back') === 'session' ? $exam->examUrl('series/' . $kind . '/seasons/' . $season->id) : $exam->examUrl('series/' . $kind))->with('success', 'Season saved.');
     }
 
     public function destroy(Request $request, $examSlug, $kind, $id)
@@ -103,7 +103,7 @@ class ExamSeriesController extends Controller
 
     private const LEGACY = ['daily' => 'Daily Exam', 'omr' => 'Model Exam', 'ca' => 'CA-Daily-Exam'];
 
-    /** One session: its details and its exams (add, edit, publish, free access, delete). */
+    /** One season: its details and its exams (add, edit, publish, free access, delete). */
     public function show(Request $request, $examSlug, $kind, $id)
     {
         [$exam, $course, $feature] = $this->scope($request, $examSlug, $kind);
@@ -113,7 +113,7 @@ class ExamSeriesController extends Controller
         $courseExams = CourseExam::where('course_id', $course->id)->where('feature_id', $feature->id)->where('season_id', $season->id)
             ->withCount('links', 'sections')->orderBy('position')->orderByDesc('id')->get();
 
-        // the old KPSC daily / OMR / CA exams can sit in a session too
+        // the old KPSC daily / OMR / CA exams can sit in a season too
         $section = self::LEGACY[$kind] ?? null;
         $legacy = collect();
         $attachable = collect();
@@ -130,7 +130,7 @@ class ExamSeriesController extends Controller
         ]);
     }
 
-    /** Put old KPSC exams into this session. */
+    /** Put old KPSC exams into this season. */
     public function attach(Request $request, $examSlug, $kind, $id)
     {
         [$exam] = $this->scope($request, $examSlug, $kind);
@@ -138,19 +138,19 @@ class ExamSeriesController extends Controller
         $data = $request->validate(['ids' => 'required|array|min:1|max:200', 'ids.*' => 'integer'], ['ids.required' => 'Tick at least one exam.']);
         $n = \App\Models\DailyExam::where('section', self::LEGACY[$kind] ?? '-')->whereNull('series_season_id')->whereIn('id', $data['ids'])->update(['series_season_id' => $season->id]);
 
-        return back()->with('success', $n . ' exam(s) added to this session.');
+        return back()->with('success', $n . ' exam(s) added to this season.');
     }
 
-    /** Take an old exam out of the session (the exam itself is kept). */
+    /** Take an old exam out of the season (the exam itself is kept). */
     public function detach(Request $request, $examSlug, $kind, $id, $examId)
     {
         [$exam] = $this->scope($request, $examSlug, $kind);
         \App\Models\DailyExam::where('series_season_id', $id)->where('id', $examId)->update(['series_season_id' => null]);
 
-        return back()->with('success', 'Exam taken out of the session.');
+        return back()->with('success', 'Exam taken out of the season.');
     }
 
-    /** Free access on / off for one exam of a paid session ($type: course = builder exam, legacy = old KPSC exam). */
+    /** Free access on / off for one exam of a paid season ($type: course = builder exam, legacy = old KPSC exam). */
     public function free(Request $request, $examSlug, $kind, $id, $type, $examId)
     {
         [$exam, $course] = $this->scope($request, $examSlug, $kind);
@@ -160,10 +160,10 @@ class ExamSeriesController extends Controller
         $row->free_access = !$row->free_access;
         $row->save();
 
-        return back()->with('success', $row->free_access ? 'This exam is now free for everyone.' : 'This exam now follows the session.');
+        return back()->with('success', $row->free_access ? 'This exam is now free for everyone.' : 'This exam now follows the season.');
     }
 
-    /** Publish / hide an old KPSC exam from the session page. */
+    /** Publish / hide an old KPSC exam from the season page. */
     public function legacyStatus(Request $request, $examSlug, $kind, $id, $examId)
     {
         [$exam] = $this->scope($request, $examSlug, $kind);

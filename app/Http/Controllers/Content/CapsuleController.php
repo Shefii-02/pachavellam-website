@@ -28,7 +28,7 @@ class CapsuleController extends Controller
             ->when($request->filled('type'), fn ($q) => $q->where('type', $request->type))
             ->when($request->filled('status') && in_array($request->status, ['0', '1'], true), fn ($q) => $q->where('status', $request->status))
             ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w->where('content', 'like', '%' . $request->q . '%')->orWhere('tag', 'like', '%' . $request->q . '%')))
-            ->orderByDesc('id')->paginate(20)->withQueryString();
+            ->orderByDesc('id')->paginate(per_page(20))->withQueryString();
 
         return view('admin.content.capsule.index', ['list' => $list, 'exams' => CompetitiveExam::orderBy('position')->get()]);
     }

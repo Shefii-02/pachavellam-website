@@ -38,7 +38,7 @@
                 @forelse ($list as $a)
                     @php [$stLabel, $stColor] = \App\Models\CourseAdmission::STATUSES[$a->displayStatus()]; @endphp
                     <tr>
-                        <td>{{ $a->id }}</td>
+                        <td>{{ $list->firstItem() + $loop->index }}</td>
                         <td><div class="fw-semibold">{{ $a->user?->name ?: 'Student #' . $a->user_id }}</div><div class="small text-muted">{{ $a->user?->mobile ?: $a->user?->email }}</div></td>
                         <td><div>{{ $a->course?->title }}</div><div class="small text-muted">{{ $a->exam?->short_name ?: $a->exam?->name }}</div></td>
                         <td>{{ $money($a->amount_paid) }}@if ($a->refunded_amount > 0)<div class="small text-danger">− {{ $money($a->refunded_amount) }} refunded</div>@endif @if ($a->discount_amount > 0)<div class="small text-muted">coupon/discount {{ $money($a->discount_amount) }}</div>@endif @if ($a->status === 'active' && $a->amount - $a->amount_paid > 0.009)<div class="small text-warning">due {{ $money($a->amount - $a->amount_paid) }}</div>@endif</td>
@@ -55,6 +55,7 @@
             </table>
         </div>
     </div>
-    <div class="mt-3">{{ $list->links() }}</div>
+    <div class="mt-3">@include('admin.partials.per-page', ['p' => $list])
+{{ $list->links() }}</div>
 </div>
 @endsection

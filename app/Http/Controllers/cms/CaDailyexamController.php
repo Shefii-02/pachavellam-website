@@ -252,7 +252,7 @@ class CaDailyexamController extends Controller
             $exam->period_end = $request->period_end ?: null;
         }
         $exam->status = $request->has('status') ? 1 : 0;
-        $exam->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;   // session (free / paid)
+        $exam->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;   // season (free / paid)
         $exam->free_access = $request->boolean('free_access');
         $exam->save();
 

@@ -76,7 +76,7 @@
                         <!-- Table item -->
                             <tr>
                                
-                                <td>{{$list->id}}</td>
+                                <td>{{ $loop->iteration }}</td>
                                 <!-- Table data -->
                                 <td>{{ucwords($list->university_name)}}</td>
                                 <td>{{$list->position}}</td>

@@ -255,7 +255,7 @@
 						<li class="nav-item ms-2 ms-md-3 dropdown">
 							<!-- Avatar -->
 							<a class="avatar avatar-sm p-0" href="#" id="profileDropdown" role="button" data-bs-auto-close="outside" data-bs-display="static" data-bs-toggle="dropdown" aria-expanded="false">
-								<img class="avatar-img rounded-circle" src="{{asset('storage/users/'.Auth::user()->image)}}" alt="avatar">
+								<img class="avatar-img rounded-circle" src="{{ Auth::user()->photoUrl() ?: asset('assets/images/user.png') }}" alt="avatar">
 							</a>
 
 							<!-- Profile dropdown START -->
@@ -265,7 +265,7 @@
 									<div class="d-flex align-items-center">
 										<!-- Avatar -->
 										<div class="avatar me-3">
-											<img class="avatar-img rounded-circle shadow" src="{{asset('storage/users/'.Auth::user()->image)}}" alt="avatar">
+											<img class="avatar-img rounded-circle shadow" src="{{ Auth::user()->photoUrl() ?: asset('assets/images/user.png') }}" alt="avatar">
 										</div>
 										<div>
 											<a class="h6 mt-2 mt-sm-0" href="#">{{Auth::user()->name}}</a>

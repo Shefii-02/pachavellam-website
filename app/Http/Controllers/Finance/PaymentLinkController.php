@@ -33,7 +33,7 @@ class PaymentLinkController extends Controller
             ->when($status === 'active', fn ($q) => $q->where('status', 'active')->where(fn ($w) => $w->whereNull('expires_at')->orWhere('expires_at', '>=', now())))
             ->when(in_array($status, ['paid', 'cancelled'], true), fn ($q) => $q->where('status', $status))
             ->when($request->filled('q'), fn ($q) => $q->whereHas('user', fn ($u) => $u->where('name', 'like', '%' . $request->q . '%')->orWhere('mobile', 'like', '%' . $request->q . '%')))
-            ->orderByDesc('id')->paginate(25)->withQueryString();
+            ->orderByDesc('id')->paginate(per_page(25))->withQueryString();
 
         return view('admin.finance.links.index', ['list' => $list, 'exams' => StaffAccess::scope(CompetitiveExam::orderBy('position'), $request->user(), 'id')->get()]);
     }

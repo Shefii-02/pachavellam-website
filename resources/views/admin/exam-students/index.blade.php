@@ -138,7 +138,8 @@
                 </tbody>
             </table>
         </div>
-        <div class="mt-3">{{ $list->links('pagination::bootstrap-5') }}</div>
+        <div class="mt-3">@include('admin.partials.per-page', ['p' => $list])
+{{ $list->links('pagination::bootstrap-5') }}</div>
         @if ($hasPerformance)
             <p class="small text-muted mb-0 mt-2">Rank is among this exam's interested students, by the selected measure over the selected period. Accuracy = right ÷ (right + wrong + skipped). Marks include negative marking. Only finished attempts count.</p>
         @endif

@@ -15,7 +15,7 @@
             <tbody>
             @forelse ($batches as $b)
                 <tr>
-                    <td>{{ $b->id }}</td>
+                    <td>{{ $batches->firstItem() + $loop->index }}</td>
                     <td class="text-truncate" style="max-width:220px">{{ $b->file_name }}</td>
                     <td>{{ $b->folder?->name ?? '—' }}</td>
                     <td class="small">{{ config("question_library.types.{$b->file_type}.label") }} · {{ strtoupper($b->file_format) }}</td>
@@ -34,5 +34,6 @@
         </table>
     </div>
 </div>
-<div class="mt-3">{{ $batches->links() }}</div>
+<div class="mt-3">@include('admin.partials.per-page', ['p' => $batches])
+{{ $batches->links() }}</div>
 @endsection

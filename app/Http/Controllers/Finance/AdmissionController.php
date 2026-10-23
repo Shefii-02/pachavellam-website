@@ -59,7 +59,7 @@ class AdmissionController extends Controller
 
         $base = self::filtered($request);
         $totals = (clone $base)->whereNotNull('admitted_at')->selectRaw('count(*) c, coalesce(sum(amount_paid),0) paid, coalesce(sum(refunded_amount),0) refunded, coalesce(sum(commission_amount),0) commission, coalesce(sum(case when status = "active" then amount else 0 end),0) value, coalesce(sum(case when status = "active" then greatest(amount - amount_paid, 0) else 0 end),0) due')->first();
-        $list = (clone $base)->with(['user:id,name,mobile,email', 'course:id,title', 'exam:id,short_name,name'])->orderByDesc('id')->paginate(25)->withQueryString();
+        $list = (clone $base)->with(['user:id,name,mobile,email', 'course:id,title', 'exam:id,short_name,name'])->orderByDesc('id')->paginate(per_page(25))->withQueryString();
 
         return view('admin.finance.admissions.index', [
             'list' => $list, 'totals' => $totals, 'exams' => $this->examsFor($request),

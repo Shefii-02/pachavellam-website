@@ -21,7 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * The website's pages as JSON for the apps (Flutter): home, exam type page, exam series with sessions, a session, bought courses, ranking.
+ * The website's pages as JSON for the apps (Flutter): home, exam type page, exam series with seasons, a season, bought courses, ranking.
  * Same data and same rules as the web pages - they share the controllers' data methods.
  *   GET  api/app/home
  *   GET  api/app/exams/{slug}
@@ -168,7 +168,7 @@ class AppCatalogController extends Controller
         ]]);
     }
 
-    // ------------------------------------------------------------------ an exam series with its sessions
+    // ------------------------------------------------------------------ an exam series with its seasons
 
     public function series(Request $request, $slug, $series)
     {
@@ -186,7 +186,7 @@ class AppCatalogController extends Controller
         ]]);
     }
 
-    // ------------------------------------------------------------------ a session
+    // ------------------------------------------------------------------ a season
 
     public function season(Request $request, $id)
     {
@@ -205,25 +205,25 @@ class AppCatalogController extends Controller
         ]]);
     }
 
-    /** Buy a paid session: answers with the payment page to open. */
+    /** Buy a paid season: answers with the payment page to open. */
     public function seasonBuy(Request $request, $id, SeasonAccess $access, PaymentLinkService $links)
     {
         $season = ExamSeason::where('status', 'published')->findOrFail($id);
         if (!$access->isPaid($season)) {
-            return response()->json(['status' => 422, 'message' => 'This session is free.'], 422);
+            return response()->json(['status' => 422, 'message' => 'This season is free.'], 422);
         }
         $access->syncCourse($season);
         $course = ExamCourse::find($season->fresh()->course_id);
         if (!$course || $course->status !== 'published') {
-            return response()->json(['status' => 422, 'message' => 'This session cannot be bought right now.'], 422);
+            return response()->json(['status' => 422, 'message' => 'This season cannot be bought right now.'], 422);
         }
         if ($access->owns($request->user(), $season)) {
-            return response()->json(['status' => 200, 'owned' => true, 'message' => 'You already have this session.']);
+            return response()->json(['status' => 200, 'owned' => true, 'message' => 'You already have this season.']);
         }
         try {
             $link = PaymentLink::where('user_id', $request->user()->id)->where('course_id', $course->id)->where('channel', 'web')->where('status', 'active')->latest('id')->first();
             if (!$link || !$link->isUsable()) {
-                $link = $links->create($request->user(), $course, 'web', null, 48, 'Bought from the app (exam session)', null);
+                $link = $links->create($request->user(), $course, 'web', null, 48, 'Bought from the app (exam season)', null);
             }
 
             return response()->json(['status' => 200, 'owned' => false, 'url' => $link->url()]);

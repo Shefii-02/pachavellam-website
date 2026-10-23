@@ -21,7 +21,7 @@ class SignInLogController extends Controller
                 };
             })
             ->latest('id')
-            ->paginate(25)
+            ->paginate(per_page(25))->withQueryString()
             ->withQueryString();
 
         return view('admin.general.otp-logs', compact('logs'));
@@ -51,7 +51,7 @@ class SignInLogController extends Controller
                 $q->where(fn ($w) => $w->where('name', 'like', $term)->orWhere('email', 'like', $term)->orWhere('mobile', 'like', $term));
             })
             ->latest('id')
-            ->paginate(25)
+            ->paginate(per_page(25))->withQueryString()
             ->withQueryString();
 
         return view('admin.general.provider-signins', compact('users', 'column', 'title', 'idLabel'));

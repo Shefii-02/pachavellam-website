@@ -98,7 +98,7 @@
                             <tr>
                                
                                 <!-- Table data -->
-                                <td>{{$list3->id}}</td>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{remove_slug($list3->university_name)}}</td>
                                 <td>{{remove_slug($list3->level_name)}}</td>
                                 <td>{{remove_slug($list3->course_name)}}</td>

@@ -20,7 +20,7 @@ class PushController extends Controller
         StaffAccess::authorize($request, 'Content manage');
 
         return view('admin.content.push', [
-            'history' => PushCampaign::orderByDesc('id')->paginate(20),
+            'history' => PushCampaign::orderByDesc('id')->paginate(per_page(20))->withQueryString(),
             'exams' => CompetitiveExam::orderBy('position')->get(),
             'devices' => DeviceToken::select('platform', DB::raw('count(*) as n'), DB::raw('count(distinct user_id) as people'))->groupBy('platform')->get()->keyBy('platform'),
             'people' => DeviceToken::distinct('user_id')->count('user_id'),

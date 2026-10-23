@@ -296,7 +296,21 @@ class QuestionImporter
             }
         }
 
-        return null;
+        // "B) Kerala", "(b) 1 and 3 only", "2. Kerala", "Option C - text": the leading letter / number is the key
+        if (preg_match('/^\(?([A-Da-d1-4])\s*[\)\.\:\-]\s*\S/u', $a) || preg_match('/^\(?([A-Da-d1-4])\)\s*\S/u', $a)) {
+            $k = strtoupper($a[0] === '(' ? $a[1] : $a[0]);
+            return ctype_digit($k) ? (int) $k : ord($k) - 64;
+        }
+
+        // the answer text is the start of / contained in exactly one option
+        $hit = [];
+        foreach ($options as $n => $text) {
+            if ($text !== '' && $norm($a) !== '' && (str_starts_with($norm($text), $norm($a)) || str_starts_with($norm($a), $norm($text)))) {
+                $hit[] = $n;
+            }
+        }
+
+        return count($hit) === 1 ? $hit[0] : null;
     }
 
     private function difficulty(?string $v): ?string

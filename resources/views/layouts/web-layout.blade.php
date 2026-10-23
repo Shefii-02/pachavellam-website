@@ -143,6 +143,11 @@
             }
         }
     </style>
+    <style>
+        .modal { z-index: 1060; }
+        .modal-backdrop { z-index: 1050; }
+        .list-group-item-action.bg-transparent:not(.active), .list-group-item-action.bg-transparent:not(.active):hover { color: var(--bs-body-color); }
+    </style>
     @yield('styles')
 
 
@@ -207,7 +212,7 @@
 <script src="{{ asset('assets/vendor/purecounterjs/dist/purecounter_vanilla.js') }}"></script>
 
 <!-- Template Functions -->
-<script src="{{ asset('assets/js/functions.js') }}"></script>
+<script src="{{ asset('assets/js/functions.js') }}?v={{ filemtime(public_path('assets/js/functions.js')) }}"></script>
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
@@ -320,6 +325,12 @@
                 
             ]
         });
+    });
+</script>
+<script>
+    // keep modals out of stacking contexts so the backdrop never covers them (inputs stay clickable/typable)
+    document.addEventListener('show.bs.modal', function (e) {
+        if (e.target.parentElement !== document.body) document.body.appendChild(e.target);
     });
 </script>
 @include('admin.media._boot')

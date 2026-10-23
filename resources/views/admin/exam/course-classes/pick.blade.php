@@ -53,7 +53,8 @@
         <div class="row">@include('admin.exam.partials.also-courses', ['otherCourses' => $otherCourses, 'what' => 'class selection'])</div>
     @endif
 </form>
-<div class="mt-3">{{ $classes->links() }}</div>
+<div class="mt-3">@include('admin.partials.per-page', ['p' => $classes])
+{{ $classes->links() }}</div>
 <script>
 var all = document.getElementById('checkAll');
 all.addEventListener('change', function () { document.querySelectorAll('.row-check:not(:disabled)').forEach(function (c) { c.checked = all.checked; }); });

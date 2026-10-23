@@ -87,7 +87,7 @@
                             <tr>
                                
                                 <!-- Table data -->
-                                <td>{{$list2->id}}</td>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{ucwords($list2->level_name)}}</td>
                                 <td>{{remove_slug($list2->university_name)}}</td>
                                 <td>{{$list2->position}}</td>

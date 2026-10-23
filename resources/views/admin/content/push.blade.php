@@ -48,7 +48,8 @@
         @endforelse
         </tbody>
     </table></div>
-    <div class="mt-3">{{ $history->links() }}</div>
+    <div class="mt-3">@include('admin.partials.per-page', ['p' => $history])
+{{ $history->links() }}</div>
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
