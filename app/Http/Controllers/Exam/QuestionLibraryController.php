@@ -161,7 +161,19 @@ class QuestionLibraryController extends Controller
 
         $count = LibraryQuestion::withTrashed()->whereIn('folder_id', $ids)->count();   // items in Trash still sit in the folder
         if ($count > 0) {
-            return back()->withErrors(['folder' => "This folder (with its sub folders) still has {$count} question(s). Move or delete them first."]);
+            if (!$request->boolean('clear_all')) {
+                return back()->withErrors(['folder' => "This folder (with its sub folders) still has {$count} question(s). Tick \"Also delete everything inside\" to delete them with the folder."]);
+            }
+            DB::transaction(function () use ($ids, $folder, $exam, $count) {
+                \App\Services\ActivityLogger::quietly(function () use ($ids) {
+                    LibraryQuestion::withTrashed()->whereIn('folder_id', $ids)->chunkById(200, function ($questions) {
+                        foreach ($questions as $q) {
+                            \App\Services\TrashPurger::purge($q);   // pictures are removed too
+                        }
+                    });
+                });
+                \App\Services\ActivityLogger::record('deleted', 'Question library', "Deleted folder \"{$folder->name}\" with {$count} question(s) inside", null, $exam->id);
+            });
         }
 
         $parentId = $folder->parent_id;

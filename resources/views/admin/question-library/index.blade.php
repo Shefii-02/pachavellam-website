@@ -68,10 +68,7 @@
                     <div class="d-flex gap-1">
                         <button class="btn btn-sm btn-light mb-0" data-bs-toggle="modal" data-bs-target="#folderModal" data-parent="{{ $current->id }}" data-title="New sub folder in {{ $current->name }}"><i class="bi bi-folder-plus me-1"></i>Sub folder</button>
                         <button class="btn btn-sm btn-light mb-0" data-bs-toggle="modal" data-bs-target="#editFolderModal"><i class="bi bi-pencil me-1"></i>Rename / move</button>
-                        <form action="{{ $base }}/folders/{{ $current->id }}" method="POST" class="d-inline" onsubmit="return confirm('Delete the folder {{ addslashes($current->name) }} and its empty sub folders?')">
-                            @csrf @method('DELETE')
-                            <button class="btn btn-sm btn-outline-danger mb-0"><i class="bi bi-trash"></i></button>
-                        </form>
+                        <button class="btn btn-sm btn-outline-danger mb-0" data-bs-toggle="modal" data-bs-target="#deleteFolderModal" title="Delete folder"><i class="bi bi-trash"></i></button>
                     </div>
                 @endif
             </div>
@@ -203,6 +200,24 @@
         <textarea name="description" class="form-control" rows="2" maxlength="500">{{ $current->description }}</textarea>
     </div>
     <div class="modal-footer"><button class="btn btn-primary mb-0">Save</button></div>
+</form></div></div>
+{{-- delete folder --}}
+<div class="modal fade" id="deleteFolderModal" tabindex="-1"><div class="modal-dialog"><form class="modal-content" action="{{ $base }}/folders/{{ $current->id }}" method="POST">
+    @csrf @method('DELETE')
+    <div class="modal-header"><h5 class="modal-title">Delete folder "{{ $current->name }}"</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+        <p class="mb-2">This folder and its sub folders will be deleted.</p>
+        @if (($total[$current->id] ?? 0) > 0)
+            <div class="alert alert-warning small">It still has <b>{{ $total[$current->id] }}</b> question(s) (including sub folders). Tick the box below to delete them with the folder.</div>
+        @else
+            <div class="small text-muted mb-2">Questions that are only in Trash also keep a folder from being deleted.</div>
+        @endif
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" name="clear_all" value="1" id="clearAll">
+            <label class="form-check-label" for="clearAll">Also delete everything inside (all questions with their pictures, including those in Trash, and all sub folders). This cannot be undone.</label>
+        </div>
+    </div>
+    <div class="modal-footer"><button type="button" class="btn btn-light mb-0" data-bs-dismiss="modal">Cancel</button><button class="btn btn-danger mb-0">Delete folder</button></div>
 </form></div></div>
 @endif
 

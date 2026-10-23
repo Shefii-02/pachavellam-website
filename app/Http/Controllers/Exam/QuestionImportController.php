@@ -187,9 +187,14 @@ class QuestionImportController extends Controller
         }
 
         $count = DB::transaction(function () use ($batch) {
-            $questions = LibraryQuestion::where('import_batch_id', $batch->id)->get();
-            \App\Services\ActivityLogger::quietly(fn () => QuestionLibraryController::deleteQuestions($questions));
-            \App\Services\ActivityLogger::record('deleted', 'Question import', "Undid import #{$batch->id}: {$questions->count()} question(s) moved to Trash", null, $exam->id);
+            $questions = LibraryQuestion::withTrashed()->where('import_batch_id', $batch->id)->get();
+            // removed for good (not to Trash): an undone import must leave no questions or pictures behind, and Trash would keep the folder "in use"
+            \App\Services\ActivityLogger::quietly(function () use ($questions) {
+                foreach ($questions as $q) {
+                    \App\Services\TrashPurger::purge($q);
+                }
+            });
+            \App\Services\ActivityLogger::record('deleted', 'Question import', "Undid import #{$batch->id}: {$questions->count()} question(s) removed", null, $exam->id);
             $batch->update(['status' => 'undone', 'undone_at' => now()]);
 
             return $questions->count();
