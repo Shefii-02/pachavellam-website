@@ -146,6 +146,8 @@
     <style>
         .modal { z-index: 1060; }
         .modal-backdrop { z-index: 1050; }
+        /* a <form> wrapped around header/body/footer must not break the scrolling body */
+        .modal-dialog-scrollable .modal-content > form { display: flex; flex-direction: column; min-height: 0; max-height: 100%; overflow: hidden; }
         .list-group-item-action.bg-transparent:not(.active), .list-group-item-action.bg-transparent:not(.active):hover { color: var(--bs-body-color); }
     </style>
     @yield('styles')
