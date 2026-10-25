@@ -38,7 +38,7 @@ class PublicCatalogController extends Controller
      * its price (free or paid) and which exams are locked for this student. KPSC's old CA seasons are included for the CA series.
      * Returns [] when there is no active season (the card then shows the latest exams instead).
      */
-    private function seasonsFor(CompetitiveExam $exam, string $kind, bool $kpsc): array
+    private function seasonsFor(CompetitiveExam $exam, string $kind, bool $kpsc, int $seasonLimit = 3, int $itemLimit = 6): array
     {
         $today = today();
         $user = auth()->user();
@@ -50,7 +50,7 @@ class PublicCatalogController extends Controller
         if (\Illuminate\Support\Facades\Schema::hasTable('exam_seasons')) {
             $seasons = \App\Models\ExamSeason::where('exam_id', $exam->id)->where('kind', $kind)->where('status', 'published')
                 ->where(fn ($w) => $w->whereNull('starts_on')->orWhere('starts_on', '<=', $today))->where(fn ($w) => $w->whereNull('ends_on')->orWhere('ends_on', '>=', $today))
-                ->orderByDesc('starts_on')->orderByDesc('id')->limit(3)->get();
+                ->orderByDesc('starts_on')->orderByDesc('id')->limit($seasonLimit)->get();
             $now = now();
             foreach ($seasons as $se) {
                 $items = collect();
@@ -75,15 +75,15 @@ class PublicCatalogController extends Controller
                 $paid = $access->isPaid($se);
                 $out[] = (object) ['title' => $se->title, 'sub' => trim(($se->starts_on ? $se->starts_on->format('d M Y') : '') . ($se->ends_on ? ' - ' . $se->ends_on->format('d M Y') : ' - running')),
                     'paid' => $paid, 'price' => $paid ? $money($access->effectivePrice($se)) : null, 'url' => url('seasons/' . $se->id),
-                    'total' => $items->count(), 'live' => $items->contains('live', true), 'items' => $items->sortByDesc('sort')->values()->take(6)->all()];
+                    'total' => $items->count(), 'live' => $items->contains('live', true), 'items' => $items->sortByDesc('sort')->values()->take($itemLimit)->all()];
             }
         }
 
         // KPSC's old current-affairs seasons (free)
         if ($kpsc && $kind === 'ca' && \Illuminate\Support\Facades\Schema::hasTable('kpsc_ca_seasons')) {
-            foreach (\App\Models\CaSeason::where('status', 'active')->orderByDesc('is_featured')->orderByDesc('id')->limit(3)->get() as $cs) {
+            foreach (\App\Models\CaSeason::where('status', 'active')->orderByDesc('is_featured')->orderByDesc('id')->limit($seasonLimit)->get() as $cs) {
                 $q = fn () => \App\Models\DailyExam::where('season_id', $cs->id)->where('section', 'CA-Daily-Exam')->where('status', 1)->whereNull('series_season_id');
-                $rows = $q()->orderByDesc('exam_date')->orderByDesc('slot_no')->orderByDesc('id')->limit(6)->get();
+                $rows = $q()->orderByDesc('exam_date')->orderByDesc('slot_no')->orderByDesc('id')->limit($itemLimit)->get();
                 $out[] = (object) ['title' => $cs->name, 'sub' => trim(($cs->starts_on ? \Illuminate\Support\Carbon::parse($cs->starts_on)->format('d M Y') : '') . ($cs->ends_on ? ' - ' . \Illuminate\Support\Carbon::parse($cs->ends_on)->format('d M Y') : ' - running')),
                     'paid' => false, 'price' => null, 'url' => null, 'total' => $q()->count(), 'live' => $rows->contains(fn ($d) => $d->started_at && $d->ended_at && now()->between($d->started_at, $d->ended_at)),
                     'items' => $rows->map(function ($d) {
@@ -106,54 +106,55 @@ class PublicCatalogController extends Controller
     {
         $kpsc = $exam->slug === 'kpsc' && \Illuminate\Support\Facades\Schema::hasTable('kpsc_daily_exams');
         $now = now();
-        $exams = function (string $section, string $base) use ($now) {
+        $exams = function (string $section, string $base, int $n) use ($now) {
             $q = fn () => \App\Models\DailyExam::where('section', $section)->where('status', 1);
-            $on = $q()->where('started_at', '<=', $now)->where('ended_at', '>=', $now)->orderBy('ended_at')->limit(3)->get();
-            $rows = $on->count() ? $on : $q()->orderByDesc('exam_date')->orderByDesc('id')->limit(3)->get();
+            $on = $q()->where('started_at', '<=', $now)->where('ended_at', '>=', $now)->orderBy('ended_at')->limit($n)->get();
+            $rows = $on->count() ? $on : $q()->orderByDesc('exam_date')->orderByDesc('id')->limit($n)->get();
             $isOn = $on->count() > 0;
 
             return ['total' => $q()->count(), 'live' => $isOn, 'items' => $rows->map(fn ($d) => (object) [
                 'title' => $d->examtitle ?: $section, 'sub' => $d->exam_date ? \Illuminate\Support\Carbon::parse($d->exam_date)->format('d M Y') : '',
                 'tag' => $isOn ? 'Live now' : 'Latest', 'url' => url($base . '/' . $d->exam_date . '/' . $d->id)])->all()];
         };
-        $content = fn (string $kind, callable $row) => (function () use ($kind, $row, $exam) {
+        $content = fn (string $kind, callable $row, int $n) => (function () use ($kind, $row, $exam, $n) {
             $q = fn () => ContentItem::ofKind($kind)->live($exam->slug);
 
-            return ['total' => $q()->count(), 'live' => false, 'items' => $q()->orderByDesc('published_at')->orderByDesc('id')->limit(3)->get()->map($row)->all()];
+            return ['total' => $q()->count(), 'live' => false, 'items' => $q()->orderByDesc('published_at')->orderByDesc('id')->limit($n)->get()->map($row)->all()];
         })();
 
         $out = [];
         foreach ($features as $f) {
+            $n = (int) ($f->list_limit ?? 3);
             $d = ['total' => 0, 'live' => false, 'items' => [], 'seasons' => [], 'all' => null, 'icon' => 'bi-check2-circle'];
             switch ($f->slug) {
                 case 'daily-exams':
-                    $d = ['icon' => 'bi-calendar-check', 'all' => url($exam->slug . '/daily-exams')] + ($kpsc ? $exams('Daily Exam', 'kpsc/daily-exam') : $d);
+                    $d = ['icon' => 'bi-calendar-check', 'all' => url($exam->slug . '/daily-exams')] + ($kpsc ? $exams('Daily Exam', 'kpsc/daily-exam', $n) : $d);
                     break;
                 case 'omr-exams':
-                    $d = ['icon' => 'bi-ui-checks-grid', 'all' => url($exam->slug . '/omr-exams')] + ($kpsc ? $exams('Model Exam', 'kpsc/model-exam') : $d);
+                    $d = ['icon' => 'bi-ui-checks-grid', 'all' => url($exam->slug . '/omr-exams')] + ($kpsc ? $exams('Model Exam', 'kpsc/model-exam', $n) : $d);
                     break;
                 case 'premium-daily-ca':
-                    $d = ['icon' => 'bi-newspaper', 'all' => url($exam->slug . '/ca-exams')] + ($kpsc ? $exams('CA-Daily-Exam', 'kpsc/psc-daily-current-affairs') : $d);
+                    $d = ['icon' => 'bi-newspaper', 'all' => url($exam->slug . '/ca-exams')] + ($kpsc ? $exams('CA-Daily-Exam', 'kpsc/psc-daily-current-affairs', $n) : $d);
                     break;
                 case 'free-classes':
                     $q = fn () => ContentItem::ofKind('promo_class')->live($exam->slug);
-                    $liveNow = $q()->where('mode', 'live')->whereBetween('scheduled_at', [$now->copy()->subHours(3), $now->copy()->addDays(7)])->orderBy('scheduled_at')->limit(3)->get();
-                    $rows = $liveNow->count() ? $liveNow : $q()->orderByDesc('id')->limit(3)->get();
+                    $liveNow = $q()->where('mode', 'live')->whereBetween('scheduled_at', [$now->copy()->subHours(3), $now->copy()->addDays(7)])->orderBy('scheduled_at')->limit($n)->get();
+                    $rows = $liveNow->count() ? $liveNow : $q()->orderByDesc('id')->limit($n)->get();
                     $d = ['icon' => 'bi-play-btn', 'all' => url('free-classes'), 'total' => $q()->count(), 'live' => $liveNow->count() > 0,
                         'items' => $rows->map(fn ($c) => (object) ['title' => $c->title, 'sub' => $c->mode === 'live' && $c->scheduled_at ? $c->scheduled_at->format('d M, h:i a') : 'Recorded class',
                             'tag' => $c->mode === 'live' ? ($c->scheduled_at && $c->scheduled_at->isPast() ? 'Live now' : 'Upcoming') : 'Free', 'url' => $c->publicUrl()])->all()];
                     break;
                 case 'articles':
-                    $d = ['icon' => 'bi-journal-text', 'all' => url('articles')] + $content('article', fn ($a) => (object) ['title' => $a->title, 'sub' => optional($a->published_at ?? $a->created_at)->format('d M Y'), 'tag' => 'New', 'url' => url('articles/' . $a->id)]);
+                    $d = ['icon' => 'bi-journal-text', 'all' => url('articles')] + $content('article', fn ($a) => (object) ['title' => $a->title, 'sub' => optional($a->published_at ?? $a->created_at)->format('d M Y'), 'tag' => 'New', 'url' => url('articles/' . $a->id)], $n);
                     break;
                 case 'materials':
                     $d = ['icon' => 'bi-file-earmark-arrow-down', 'all' => null] + $content('material', fn ($m) => (object) ['title' => $m->title, 'sub' => optional($m->published_at ?? $m->created_at)->format('d M Y'),
-                        'tag' => 'Download', 'url' => $m->attachment ? Storage::url('files/' . $m->attachment) : ($m->landing_url ?: '#')]);
+                        'tag' => 'Download', 'url' => $m->attachment ? Storage::url('files/' . $m->attachment) : ($m->landing_url ?: '#')], $n);
                     break;
                 case 'paid-classes':
                     $c = ExamCourse::where('exam_id', $exam->id)->where('status', 'published')->where('slug', 'not like', 'series-%');
                     $d = ['icon' => 'bi-collection-play', 'all' => url('courses'), 'total' => (clone $c)->count(), 'live' => false,
-                        'items' => (clone $c)->orderByDesc('id')->limit(3)->get()->map(fn ($x) => (object) ['title' => $x->title, 'sub' => 'Course', 'tag' => 'Course', 'url' => url('courses/' . ($x->slug ?: $x->id))])->all()];
+                        'items' => (clone $c)->orderByDesc('id')->limit($n)->get()->map(fn ($x) => (object) ['title' => $x->title, 'sub' => 'Course', 'tag' => 'Course', 'url' => url('courses/' . ($x->slug ?: $x->id))])->all()];
                     break;
                 case 'previous-questions':
                     $d = ['icon' => 'bi-folder2-open', 'all' => $kpsc ? url('kpsc/prev-qstn-ans') : null] + $d;
@@ -171,7 +172,7 @@ class PublicCatalogController extends Controller
             $d += ['seasons' => [], 'items' => [], 'total' => 0, 'live' => false, 'all' => null];
             // the series are kept in seasons: show the active seasons, each with its exams newest first
             $seriesKind = ['daily-exams' => 'daily', 'omr-exams' => 'omr', 'premium-daily-ca' => 'ca', 'gk-exams' => 'gk', 'special-exams' => 'special'][$f->slug] ?? null;
-            if ($seriesKind && ($seasons = $this->seasonsFor($exam, $seriesKind, $kpsc))) {
+            if ($seriesKind && ($seasons = $this->seasonsFor($exam, $seriesKind, $kpsc, (int) ($f->season_limit ?? 3), (int) ($f->season_items_limit ?? 6)))) {
                 $d['seasons'] = $seasons;
                 $d['items'] = [];
                 $d['total'] = array_sum(array_map(fn ($x) => $x->total, $seasons));
@@ -180,8 +181,8 @@ class PublicCatalogController extends Controller
             // exam type series (daily / OMR / CA / GK ... built in the admin for this exam type) when the old KPSC tables have nothing
             if (!count($d['items']) && !count($d['seasons']) && $f->content_kind === 'exam') {
                 $q = fn () => \App\Models\CourseExam::with('course:id,slug')->where('exam_id', $exam->id)->where('feature_id', $f->id)->where('status', 'published');
-                $on = $q()->where(fn ($w) => $w->whereNull('start_at')->orWhere('start_at', '<=', $now))->where(fn ($w) => $w->whereNull('end_at')->orWhere('end_at', '>=', $now))->orderByDesc('id')->limit(3)->get();
-                $rows = $on->count() ? $on : $q()->orderByDesc('start_at')->orderByDesc('id')->limit(3)->get();
+                $on = $q()->where(fn ($w) => $w->whereNull('start_at')->orWhere('start_at', '<=', $now))->where(fn ($w) => $w->whereNull('end_at')->orWhere('end_at', '>=', $now))->orderByDesc('id')->limit($n)->get();
+                $rows = $on->count() ? $on : $q()->orderByDesc('start_at')->orderByDesc('id')->limit($n)->get();
                 if ($rows->count()) {
                     $d['total'] = $q()->count();
                     $d['live'] = $on->count() > 0 && $on->contains(fn ($t) => $t->start_at && $t->end_at);
@@ -217,7 +218,7 @@ class PublicCatalogController extends Controller
     {
         $exam = CompetitiveExam::where('slug', $slug)->where('status', 1)->firstOrFail();
         \App\Support\Seo::set(['key' => 'exam:' . $exam->slug]);
-        $features = \App\Models\ExamFeature::where('status', 1)->orderBy('position')->get();
+        $features = \App\Models\ExamFeature::active()->forExam($exam->id)->get();
         // special tabs shown for this exam type, and its subject categories
         $tabs = ContentItem::ofKind('whats_new')->live($exam->slug)->orderBy('position')->get();
         $subjects = $exam->slug === 'kpsc'

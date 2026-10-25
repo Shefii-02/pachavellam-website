@@ -32,6 +32,21 @@
                     <label class="form-label">Position</label>
                     <input class="form-control" type="number" min="0" name="position" value="{{ old('position', $feature->position ?? 0) }}">
                 </div>
+                <div class="col-md-4">
+                    <label class="form-label">Items shown on the card</label>
+                    <input class="form-control" type="number" min="0" max="20" name="list_limit" value="{{ old('list_limit', $feature->list_limit ?? 3) }}">
+                    <small class="text-muted">Latest items listed on the exam page. 0 = show only the description. Max 20.</small>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Seasons shown</label>
+                    <input class="form-control" type="number" min="0" max="20" name="season_limit" value="{{ old('season_limit', $feature->season_limit ?? 3) }}">
+                    <small class="text-muted">Active seasons listed (daily / OMR / CA / GK / special series). Max 20.</small>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Exams shown per season</label>
+                    <input class="form-control" type="number" min="0" max="20" name="season_items_limit" value="{{ old('season_items_limit', $feature->season_items_limit ?? 6) }}">
+                    <small class="text-muted">Newest exams listed inside each season. Max 20.</small>
+                </div>
                 <div class="col-md-6">
                     <label class="form-label">Type <span class="text-danger">*</span></label>
                     <select class="form-control" name="content_kind" id="kind">

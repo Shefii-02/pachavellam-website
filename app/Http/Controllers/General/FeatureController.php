@@ -121,6 +121,9 @@ class FeatureController extends Controller
             'exam_ids' => [$request->exam_scope === 'selected' ? 'required' : 'nullable', 'array'],
             'exam_ids.*' => 'integer|exists:competitive_exams,id',
             'position' => 'nullable|integer|min:0',
+            'list_limit' => 'nullable|integer|min:0|max:20',
+            'season_limit' => 'nullable|integer|min:0|max:20',
+            'season_items_limit' => 'nullable|integer|min:0|max:20',
         ], [
             'image.max' => 'The picture can be at most 1 MB.',
             'exam_ids.required' => 'Tick at least one exam type, or choose "All exam types".',
@@ -129,6 +132,9 @@ class FeatureController extends Controller
         unset($data['image']);   // the upload is handled separately
         $data['description'] = $data['description'] ?? null;
         $data['position'] = $data['position'] ?? 0;
+        $data['list_limit'] = $data['list_limit'] ?? 3;
+        $data['season_limit'] = $data['season_limit'] ?? 3;
+        $data['season_items_limit'] = $data['season_items_limit'] ?? 6;
         // category / subject based exams are not offered; the supports_subjects column stays parked (always off)
         $data['supports_subjects'] = false;
         $data['status'] = $request->boolean('status');

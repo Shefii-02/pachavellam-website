@@ -64,6 +64,17 @@
         <div class="lp-strip">@foreach ($stories as $st)<a class="lp-story" href="{{ \App\Support\Landing::url($st->target_type, $st->target_value, $st->redirection) ?: '#' }}" style="background-image:url('{{ Storage::url('files/' . $st->image) }}')"></a>@endforeach</div>
     @endif
 
+    @if ($tabs->count())
+        <h5 class="mb-2">Special tabs</h5>
+        <div class="ex-tabs mb-4">
+            @foreach ($tabs as $w)
+                <a class="ex-tab" href="{{ $w->landing_url ?: '#' }}" @if ($w->new_tab) target="_blank" rel="noopener" @endif style="background:{{ $w->bg_color ?: '#fff' }};color:{{ $w->text_color ?: '#1b2a41' }}">
+                    @if ($w->image)<img src="{{ Storage::url('files/' . $w->image) }}" alt="">@endif{{ $w->title }}
+                </a>
+            @endforeach
+        </div>
+    @endif
+
     {{-- upcoming: live classes, tests, courses (free or paid) --}}
     @if ($liveClasses->count())
         <div class="lp-h"><h5>Upcoming live classes</h5><a href="{{ url('free-classes') }}" class="small fw-semibold">Show all</a></div>
@@ -168,17 +179,6 @@
                     @endif
                     <footer>@if ($f->all)<a href="{{ $f->all }}">See all <i class="bi bi-arrow-right"></i></a>@elseif (!count($f->items))<span>Coming soon</span>@endif</footer>
                 </section>
-            @endforeach
-        </div>
-    @endif
-
-    @if ($tabs->count())
-        <h5 class="mb-2">Special tabs</h5>
-        <div class="ex-tabs mb-4">
-            @foreach ($tabs as $w)
-                <a class="ex-tab" href="{{ $w->landing_url ?: '#' }}" @if ($w->new_tab) target="_blank" rel="noopener" @endif style="background:{{ $w->bg_color ?: '#fff' }};color:{{ $w->text_color ?: '#1b2a41' }}">
-                    @if ($w->image)<img src="{{ Storage::url('files/' . $w->image) }}" alt="">@endif{{ $w->title }}
-                </a>
             @endforeach
         </div>
     @endif
