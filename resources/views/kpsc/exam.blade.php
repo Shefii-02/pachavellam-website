@@ -118,22 +118,6 @@
         </div>
     @endif
 
-    @if ($recorded->count())
-        <div class="lp-h"><h5>Free classes</h5><a href="{{ url('free-classes') }}" class="small fw-semibold">Show all</a></div>
-        <div class="lp-strip">
-            @foreach ($recorded as $c)
-                @php $v = \App\Services\ClassSource::youtubeId((string) $c->link_url); @endphp
-                <a class="lp-card" href="{{ $c->publicUrl() }}"><div class="im" style="background-image:url('{{ $c->image ? Storage::url('files/' . $c->image) : ($v ? 'https://img.youtube.com/vi/' . $v . '/hqdefault.jpg' : '') }}')"><span class="lp-tag free">FREE</span></div>
-                    <div class="bd"><div class="tt">{{ $c->title }}</div></div></a>
-            @endforeach
-        </div>
-    @endif
-
-    @if (($rankRows ?? collect())->count())
-        <div class="lp-h"><h5>{{ $exam->short_name ?: $exam->name }} ranking</h5></div>
-        @include('kpsc.partials.rank-list', ['rankRows' => $rankRows, 'rankTitle' => ($exam->short_name ?: $exam->name) . ' top learners', 'rankSub' => 'From ' . ($exam->short_name ?: $exam->name) . ' tests · 5 coins for every test + 1 for every right answer'])
-    @endif
-
     @if ($announcements->count())
         <div class="lp-h"><h5>Announcements</h5><a href="{{ url('announcements') }}" class="small fw-semibold">Show all</a></div>
         <div class="cc-grid">@foreach ($announcements as $n)@include('kpsc.partials.content-card', ['item' => $n, 'href' => url('announcements/' . $n->id), 'icon' => 'bi-megaphone'])@endforeach</div>
@@ -183,6 +167,17 @@
         </div>
     @endif
 
+    @if ($recorded->count())
+        <div class="lp-h"><h5>Free classes</h5><a href="{{ url('free-classes') }}" class="small fw-semibold">Show all</a></div>
+        <div class="lp-strip">
+            @foreach ($recorded as $c)
+                @php $v = \App\Services\ClassSource::youtubeId((string) $c->link_url); @endphp
+                <a class="lp-card" href="{{ $c->publicUrl() }}"><div class="im" style="background-image:url('{{ $c->image ? Storage::url('files/' . $c->image) : ($v ? 'https://img.youtube.com/vi/' . $v . '/hqdefault.jpg' : '') }}')"><span class="lp-tag free">FREE</span></div>
+                    <div class="bd"><div class="tt">{{ $c->title }}</div></div></a>
+            @endforeach
+        </div>
+    @endif
+
     @if ($subjects->count())
         <h5 class="mb-2">Subject categories</h5>
         <div class="ex-subj mb-4">
@@ -190,6 +185,11 @@
                 <a href="{{ $sj->url }}" style="{{ $sj->color ? 'background:' . $sj->color : '' }}"><span>{{ $sj->title }}</span>@if ($sj->image)<img src="{{ $sj->image }}" alt="" loading="lazy">@endif</a>
             @endforeach
         </div>
+    @endif
+
+    @if (($rankRows ?? collect())->count())
+        <div class="lp-h"><h5>{{ $exam->short_name ?: $exam->name }} ranking</h5></div>
+        @include('kpsc.partials.rank-list', ['rankRows' => $rankRows, 'rankTitle' => ($exam->short_name ?: $exam->name) . ' top learners', 'rankSub' => 'From ' . ($exam->short_name ?: $exam->name) . ' tests · 5 coins for every test + 1 for every right answer'])
     @endif
 
 </div></div>
