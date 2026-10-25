@@ -123,11 +123,6 @@
         <div class="cc-grid">@foreach ($announcements as $n)@include('kpsc.partials.content-card', ['item' => $n, 'href' => url('announcements/' . $n->id), 'icon' => 'bi-megaphone'])@endforeach</div>
     @endif
 
-    @if ($articles->count())
-        <div class="lp-h"><h5>Free articles</h5><a href="{{ url('articles') }}" class="small fw-semibold">Show all</a></div>
-        <div class="cc-grid">@foreach ($articles as $n)@include('kpsc.partials.content-card', ['item' => $n, 'href' => url('articles/' . $n->id), 'icon' => 'bi-newspaper'])@endforeach</div>
-    @endif
-
     @if (!empty($provide))
         <div class="lp-h"><h5>What we provide for {{ $exam->short_name ?: $exam->name }}</h5></div>
         <div class="pv-grid mb-4">
@@ -190,6 +185,11 @@
     @if (($rankRows ?? collect())->count())
         <div class="lp-h"><h5>{{ $exam->short_name ?: $exam->name }} ranking</h5></div>
         @include('kpsc.partials.rank-list', ['rankRows' => $rankRows, 'rankTitle' => ($exam->short_name ?: $exam->name) . ' top learners', 'rankSub' => 'From ' . ($exam->short_name ?: $exam->name) . ' tests · 5 coins for every test + 1 for every right answer'])
+    @endif
+
+    @if ($articles->count())
+        <div class="lp-h"><h5>Free articles</h5><a href="{{ url('articles') }}" class="small fw-semibold">Show all</a></div>
+        <div class="cc-grid">@foreach ($articles as $n)@include('kpsc.partials.content-card', ['item' => $n, 'href' => url('articles/' . $n->id), 'icon' => 'bi-newspaper'])@endforeach</div>
     @endif
 
 </div></div>
