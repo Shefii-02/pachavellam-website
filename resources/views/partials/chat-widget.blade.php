@@ -1,2 +1,2 @@
-{{-- Teamzo website chat widget --}}
-<script async src="https://api.teamzo.io/api/v1/public/widget/wgt_SDRFEwKm6bT9kzqVugBNLEabCvlY.js"></script>
+{{-- Teamzo website chat widget (served through /chat-widget.js, which makes its API calls https) --}}
+<script async src="{{ url('chat-widget.js') }}"></script>

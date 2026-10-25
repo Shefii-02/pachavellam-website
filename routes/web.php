@@ -52,6 +52,18 @@ Route::post('account-settings', 'UserController@account_settings_submit')->name(
 // Route::get('/', 'HomeController@index');
 Route::get('/', 'cms\HomeController@homepage');
 
+// Teamzo chat widget loader. Their script hardcodes http:// for its API calls, which browsers block on an https site,
+// so it is fetched here, pointed at https, and cached for an hour.
+Route::get('chat-widget.js', function () {
+    $js = \Illuminate\Support\Facades\Cache::remember('teamzo_widget_js', 3600, function () {
+        $r = \Illuminate\Support\Facades\Http::timeout(8)->get('https://api.teamzo.io/api/v1/public/widget/wgt_SDRFEwKm6bT9kzqVugBNLEabCvlY.js');
+
+        return $r->successful() ? str_replace(['http:\/\/api.teamzo.io', 'http://api.teamzo.io'], ['https:\/\/api.teamzo.io', 'https://api.teamzo.io'], $r->body()) : null;
+    });
+
+    return response($js ?: '/* chat unavailable */', 200, ['Content-Type' => 'application/javascript; charset=utf-8', 'Cache-Control' => 'public, max-age=3600']);
+});
+
 // Route::get("new-home", function(){
 //   return view("test.new-home");
 // });
