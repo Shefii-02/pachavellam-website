@@ -16,7 +16,9 @@
         <style>
             .sidenav-wrapper { overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:90px; }
             .dr-user { display:flex; align-items:center; gap:12px; padding:18px 16px 14px; margin-bottom:6px; background:var(--pv-brand-soft, #e7f6ef); }
-            .dr-av { width:46px; height:46px; border-radius:50%; background:var(--pv-green, #0a8f5b); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.2rem; overflow:hidden; flex:none; } .dr-av img { width:100%; height:100%; object-fit:cover; }
+            .dr-av { width:46px; height:46px; border-radius:50%;
+                /* background:var(--pv-green, #0a8f5b);  */
+                color:#fff; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.2rem; overflow:hidden; flex:none; } .dr-av img { width:100%; height:100%; object-fit:cover; }
             .dr-user b { display:block; color:var(--pv-text, #1b2a41); line-height:1.2; } .dr-user small { color:var(--pv-muted, #6b7280); }
             .dr-user a.dr-btn { margin-left:auto; background:var(--pv-green, #0a8f5b); color:#fff !important; border-radius:20px; padding:6px 16px; font-weight:700; font-size:.82rem; text-decoration:none; }
             .dr-h { text-transform:uppercase; letter-spacing:.06em; font-size:.68rem; font-weight:800; color:var(--pv-muted, #6b7280); padding:12px 18px 4px; }
