@@ -97,12 +97,28 @@
 
         @endif
 
+        @php $drMenu = \Illuminate\Support\Facades\Schema::hasTable('menu_items') ? \Illuminate\Support\Facades\Cache::remember('drawer_menu', 60, fn () => \App\Models\MenuItem::tree()) : collect(); @endphp
+        @if ($drMenu->count())
+            <div class="dr-h">Menu</div>
+            <ul class="dr-l">
+                @foreach ($drMenu as $mi)
+                    @if ($mi->children->count())
+                        <li><details class="dr-g"><summary><i class="bi {{ $mi->icon ?: 'bi-list' }}"></i>{{ $mi->label }}<i class="bi bi-chevron-down ch"></i></summary>
+                            <ul class="dr-l">@foreach ($mi->children as $ch)@if ($ch->url())<li><a href="{{ $ch->url() }}" @if ($ch->new_tab) target="_blank" rel="noopener" @endif><i class="bi {{ $ch->icon ?: 'bi-dot' }}"></i>{{ $ch->label }}</a></li>@endif @endforeach</ul></details></li>
+                    @elseif ($mi->url())
+                        <li><a href="{{ $mi->url() }}" @if ($mi->new_tab) target="_blank" rel="noopener" @endif><i class="bi {{ $mi->icon ?: 'bi-list' }}"></i>{{ $mi->label }}</a></li>
+                    @endif
+                @endforeach
+            </ul>
+        @endif
+
         <div class="dr-h">My space</div>
         <ul class="dr-l">
             <li><a class="{{ $drIs('my-account') }}" href="{{ $drUser ? url('my-account') : url('sign-in') }}"><i class="bi bi-person-circle"></i>My account</a></li>
             <li><a href="{{ $drUser ? url('my-account') . '#pf-referral' : url('sign-in') }}"><i class="bi bi-gift"></i>Refer &amp; earn<span class="bd" style="background:#d97706">Coins</span></a></li>
             <li><a href="{{ $drUser ? url('my-account') . '#pf-ranking' : url('/') . '#ranking' }}"><i class="bi bi-trophy"></i>Overall ranking</a></li>
             <li><a href="{{ url('learn') }}"><i class="bi bi-calendar-check"></i>My classes &amp; tests</a></li>
+            @if ($drUser)<li><a href="{{ url('devices') }}"><i class="bi bi-phone"></i>My devices</a></li>@endif
         </ul>
 
         <div class="dr-h">More</div>

@@ -20,6 +20,21 @@
                         </select>@error('folder_id')<div class="text-danger small">{{ $message }}</div>@enderror
                         <div class="form-text">Make folders on the list page. The folder must be of an exam type ticked above.</div></div>
                 @endif
+                @if ($has('category_id'))
+                    @php $catRows = \App\Models\ExamCategory::with('exam:id,short_name,name')->where('status', 1)->orderBy('exam_id')->orderBy('position')->orderBy('id')->get(); $selCat = old('category_id', $item->category_id ?? ''); @endphp
+                    <div class="col-md-6"><label class="form-label">Category / sub category</label>
+                        <select name="category_id" id="itCat" class="form-select"><option value="">Not in a category</option>
+                            @foreach ($catRows as $cr)<option value="{{ $cr->id }}" data-exam="{{ $cr->exam_id }}" {{ (string) $selCat === (string) $cr->id ? 'selected' : '' }}>{{ ($cr->exam->short_name ?? $cr->exam->name) . ' / ' . $cr->ancestors()->push($cr)->pluck('name')->implode(' › ') }}</option>@endforeach
+                        </select>@error('category_id')<div class="text-danger small">{{ $message }}</div>@enderror
+                        <div class="form-text">Shows on the category's own page (/c/category-slug) with its sub categories.</div></div>
+                    <script>document.addEventListener('DOMContentLoaded', function () { var s = document.getElementById('itCat'); function f() { var on = [].map.call(document.querySelectorAll('.exam-box:checked'), function (b) { return b.value; }); [].forEach.call(s.options, function (o) { if (!o.value) return; var show = !on.length || on.indexOf(o.getAttribute('data-exam')) > -1 || o.selected; o.hidden = !show; o.disabled = !show; }); } document.addEventListener('change', function (e) { if (e.target.classList && e.target.classList.contains('exam-box')) f(); }); f(); });</script>
+                @endif
+                @if ($has('audio_url'))
+                    <div class="col-md-6"><label class="form-label">Recorded voice - link</label><input class="form-control" type="url" name="audio_url" maxlength="500" value="{{ $v('audio_url') }}" placeholder="https://… .mp3">@error('audio_url')<div class="text-danger small">{{ $message }}</div>@enderror</div>
+                    <div class="col-md-6"><label class="form-label">…or upload the voice file</label><input class="form-control" type="file" name="audio" accept="audio/*">@error('audio')<div class="text-danger small">{{ $message }}</div>@enderror
+                        @if ($editing && $item->audio)<div class="form-check mt-1"><input class="form-check-input" type="checkbox" name="remove_audio" value="1" id="rmAudio"><label class="form-check-label small" for="rmAudio">Remove the uploaded voice ({{ basename($item->audio) }})</label></div>@endif
+                        <div class="form-text">Leave both empty and the website / app reads the article aloud (text-to-speech).</div></div>
+                @endif
                 @if ($has('title'))<div class="col-md-8"><label class="form-label">{{ ['partner' => 'Company name', 'faq' => 'Question'][$m['kind']] ?? 'Title' }} @if ($m['kind'] !== 'banner')<span class="text-danger">*</span>@endif</label><input class="form-control" name="title" maxlength="255" value="{{ $v('title') }}" {{ $m['kind'] !== 'banner' ? 'required' : '' }}>@error('title')<div class="text-danger small">{{ $message }}</div>@enderror</div>@endif
                 @if ($has('type'))
                     @if ($m['kind'] === 'team_member')

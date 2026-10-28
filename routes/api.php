@@ -20,6 +20,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::get('exams', 'Api\ExamInterestController@exams');
 
+// our own captcha: a new picture, and whether a form needs one right now
+Route::get('captcha', 'CaptchaController@show')->middleware('throttle:60,1');
+Route::get('captcha/status', 'CaptchaController@status')->middleware('throttle:60,1');
+
 // the website's pages as JSON for the apps (a student's token is optional: with it, locks and purchases are known)
 Route::prefix('app')->group(function () {
     Route::get('home', 'Api\AppCatalogController@home');
@@ -28,6 +32,13 @@ Route::prefix('app')->group(function () {
     Route::get('seasons/{id}', 'Api\AppCatalogController@season')->whereNumber('id');
     Route::get('ranking', 'Api\AppCatalogController@ranking');
     Route::get('stories', 'Api\AppCatalogController@stories');
+    Route::get('ads', 'Api\AppCatalogController@ads');
+    Route::get('courses', 'Api\AppCatalogController@courses');
+    Route::get('categories/{slug}', 'Api\AppCatalogController@category')->where('slug', '[a-z0-9-]+');
+    Route::get('articles', 'Api\AppCatalogController@articles');
+    Route::get('courses/{slug}', 'Api\AppCatalogController@courseDetail')->where('slug', '[A-Za-z0-9_-]+');
+    Route::get('classes', 'Api\AppCatalogController@classes');
+    Route::get('class-playlists', 'Api\AppCatalogController@playlists');
     Route::get('articles/{id}', 'Api\AppCatalogController@article')->whereNumber('id');
     Route::get('announcements/{id}', 'Api\AppCatalogController@announcement')->whereNumber('id');
     Route::get('classes/{uid}/chat', 'Api\ClassChatApiController@messages')->where('uid', '[a-z0-9]{8,14}')->middleware('throttle:90,1');
@@ -35,10 +46,11 @@ Route::prefix('app')->group(function () {
 
 Route::group(['prefix' => 'auth'], function () {
     Route::post('google-sign-in', 'Api\AuthController@googleSignIn');
-    Route::post('signin', 'Api\AuthController@SignIn');
-    Route::post('signup', 'Api\AuthController@SignUp');
-    Route::post('send-otp', 'Api\AuthController@sendOtp')->middleware('throttle:20,1');
+    Route::post('signin', 'Api\AuthController@SignIn')->middleware(['throttle:30,1', 'captcha:login']);
+    Route::post('signup', 'Api\AuthController@SignUp')->middleware(['throttle:20,1', 'captcha:signup']);
+    Route::post('send-otp', 'Api\AuthController@sendOtp')->middleware(['throttle:20,1', 'captcha:otp']);
     Route::post('verify-otp', 'Api\AuthController@verifyOtp')->middleware('throttle:20,1');
+    Route::post('devices/release', 'Api\AuthController@releaseDevices')->middleware('throttle:20,1');   // too many devices: remove some, then sign in
 
     // Route::post('forget-password', 'Api\AuthController@forgetPassword');
     Route::post("forget-password", function () {
@@ -47,6 +59,9 @@ Route::group(['prefix' => 'auth'], function () {
 
     Route::middleware('auth:api')->group(function () {
         Route::post('refresh', 'Api\AuthController@refresh');
+        Route::get('devices', 'Api\AuthController@devices');
+        Route::delete('devices/{id}', 'Api\AuthController@removeDevice')->whereNumber('id');
+        Route::post('devices/logout-others', 'Api\AuthController@logoutOthers');
         Route::post('logout', 'Api\AuthController@logout');
         Route::get('me', 'Api\AuthController@me');
         Route::post('update-profile', 'Api\AuthController@UpdateProfile');
@@ -58,6 +73,9 @@ Route::group(['prefix' => 'auth'], function () {
         Route::post('classes/{uid}/chat', 'Api\ClassChatApiController@send')->where('uid', '[a-z0-9]{8,14}')->middleware('throttle:20,1');
         Route::get('my-courses/{id}', 'Api\AppCatalogController@myCourse')->whereNumber('id');
         Route::post('referral/apply', 'ReferralController@applyApi')->middleware('throttle:10,1');
+        Route::post('courses/{id}/join', 'Api\AppCatalogController@courseJoin')->whereNumber('id')->middleware('throttle:20,1');
+        Route::get('push-preference', 'Api\DeviceTokenController@preference');
+        Route::post('push-preference', 'Api\DeviceTokenController@setPreference');
         Route::post('device-tokens', 'Api\DeviceTokenController@register');
         Route::delete('device-tokens', 'Api\DeviceTokenController@destroy');
 

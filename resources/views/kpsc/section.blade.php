@@ -3,7 +3,8 @@
     <div class="header-area" id="headerArea">
         <div class="container h-100 d-flex align-items-center justify-content-between">
             <!-- Back Button-->
-            <div class="logo-wrapper"><a href="/"><img src="{{ url('images/logo.png') }}" alt=""></a></div>
+            <div class="logo-wrapper"><a href="/"><img class="pv-logo-light" src="{{ \App\Models\SiteSetting::logo('light') }}" alt="Pachavellam"><img class="pv-logo-dark" src="{{ \App\Models\SiteSetting::logo('dark') }}" alt="Pachavellam"></a></div>
+            <style>.pv-logo-dark{display:none}[data-theme="dark"] .pv-logo-light{display:none}[data-theme="dark"] .pv-logo-dark{display:inline-block}</style>
             <!-- Navbar Toggler-->
             <!-- Page Title-->
             <div class="page-heading">

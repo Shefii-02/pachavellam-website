@@ -144,8 +144,21 @@ class HomeController extends Controller
         $freeTests = \App\Models\CourseExam::with('course:id,slug,title')->where('status', 'published')->where('is_paid', false)
             ->where(fn ($q) => $q->whereNull('end_at')->orWhere('end_at', '>=', now()))->whereNotNull('start_at')->where('start_at', '<=', now()->addDays(15))
             ->orderBy('start_at')->limit(12)->get()
-            ->map(fn ($t) => (object) ['title' => $t->title, 'by' => $t->course->title ?? '', 'url' => url('tests/' . $t->id), 'thumb' => null,
+            ->map(fn ($t) => (object) ['id' => $t->id, 'title' => $t->title, 'by' => $t->course->title ?? '', 'url' => url('tests/' . $t->id), 'thumb' => null,
                 'starts' => $t->start_at, 'ends' => $t->end_at, 'exams' => [$t->exam_id], 'tag' => ($t->duration_minutes ? $t->duration_minutes . ' min · ' : '') . 'Free test']);
+        // tests of free seasons (a season is free when it has no price); the season name is shown on the card
+        if (\Illuminate\Support\Facades\Schema::hasTable('exam_seasons')) {
+            $access = app(\App\Services\SeasonAccess::class);
+            $freeSeasons = \App\Models\ExamSeason::where('status', 'published')->get()->reject(fn ($se) => $access->isPaid($se))->keyBy('id');
+            if ($freeSeasons->count()) {
+                $seasonal = \App\Models\CourseExam::with('course:id,slug,title')->where('status', 'published')->whereIn('season_id', $freeSeasons->keys())
+                    ->where(fn ($q) => $q->whereNull('end_at')->orWhere('end_at', '>=', now()))->whereNotNull('start_at')->where('start_at', '<=', now()->addDays(15))
+                    ->whereNotIn('id', $freeTests->pluck('id'))->orderBy('start_at')->limit(12)->get()
+                    ->map(fn ($t) => (object) ['id' => $t->id, 'title' => $t->title, 'by' => $freeSeasons[$t->season_id]->title, 'url' => url('tests/' . $t->id), 'thumb' => null,
+                        'starts' => $t->start_at, 'ends' => $t->end_at, 'exams' => [$t->exam_id], 'tag' => 'Season · Free test']);
+                $freeTests = $freeTests->concat($seasonal);
+            }
+        }
         if (\Illuminate\Support\Facades\Schema::hasTable('kpsc_daily_exams')) {
             $kpscId = $examTypes->firstWhere('slug', 'kpsc')?->id;
             $freeTests = $freeTests->concat(DailyExam::where('section', 'Daily Exam')->where('status', 1)->where('ended_at', '>', now())->orderBy('started_at')->limit(8)->get()

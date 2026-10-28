@@ -36,6 +36,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // devices: website sign in / sign out are recorded (the app does it in Api\AuthController)
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Login::class, [\App\Listeners\WebDeviceSession::class, 'login']);
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Logout::class, [\App\Listeners\WebDeviceSession::class, 'logout']);
+
         // Unnamed routes inside a group that has `as` inherit the bare group prefix as their name
         // (admingeneral, adminkpsc., ...), so dozens of routes share one name and `route:cache` fails.
         // Keep the name on the last route using it (the one route() resolves today), clear it on the rest.

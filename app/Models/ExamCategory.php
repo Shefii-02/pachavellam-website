@@ -53,6 +53,18 @@ class ExamCategory extends Model
         return $query->where('status', 1);
     }
 
+    /** slug/slug/slug from the top category down to this one. */
+    public function urlPath(): string
+    {
+        return $this->ancestors()->push($this)->pluck('slug')->implode('/');
+    }
+
+    /** The page of this category (and sub category): its articles, free videos and courses. */
+    public function publicUrl(): string
+    {
+        return url('c/' . $this->urlPath());
+    }
+
     /** Parents from the root down to (and excluding) this category. */
     public function ancestors()
     {

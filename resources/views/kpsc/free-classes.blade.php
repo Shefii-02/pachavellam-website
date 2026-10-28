@@ -14,19 +14,21 @@
 @endsection
 @section('content')
 <div class="page-content-wrapper"><div class="container py-3">
-    <h3 class="fw-bold mb-2">Free classes</h3>
+    @php $q = fn ($extra = []) => url('free-classes' . ($extra + ($exam ? ['exam' => $exam->slug] : []) ? '?' . http_build_query($extra + ($exam ? ['exam' => $exam->slug] : [])) : '')); @endphp
+    <h3 class="fw-bold mb-2">Free classes{{ $exam ? ' - ' . ($exam->short_name ?: $exam->name) : '' }}</h3>
     @if ($current)
-        <div class="small mb-3"><a href="{{ url('free-classes') }}"><i class="bi bi-house"></i> All</a>@foreach ($trail as $t) <span class="text-muted">/</span> @if ($loop->last)<b>{{ $t->title }}</b>@else<a href="{{ url('free-classes?folder=' . $t->id) }}">{{ $t->title }}</a>@endif @endforeach</div>
+        <div class="small mb-3"><a href="{{ $q() }}"><i class="bi bi-house"></i> All</a>@foreach ($trail as $t) <span class="text-muted">/</span> @if ($loop->last)<b>{{ $t->title }}</b>@else<a href="{{ $q(['folder' => $t->id]) }}">{{ $t->title }}</a>@endif @endforeach</div>
     @endif
-    <div class="fc-chips" id="chips"><span class="fc-chip on" data-x="all">All exams</span>@foreach ($exams as $e)<span class="fc-chip" data-x="{{ $e->id }}">{{ $e->short_name ?: $e->name }}</span>@endforeach</div>
+    <div class="fc-chips"><a class="fc-chip {{ !$exam ? 'on' : '' }}" href="{{ url('free-classes') }}">All exams</a>@foreach ($exams as $e)<a class="fc-chip {{ $exam && $exam->id === $e->id ? 'on' : '' }}" href="{{ url('free-classes?exam=' . $e->slug) }}" style="text-decoration:none">{{ $e->short_name ?: $e->name }}</a>@endforeach</div>
     @if ($folders->count())
         <div class="row g-3 mb-3" id="folders">
             @foreach ($folders as $f)
-                <div class="col-6 col-md-4 col-lg-3" data-x="{{ implode(' ', $f->exam_ids) }}"><a class="fc-card" href="{{ url('free-classes?folder=' . $f->id) }}" style="padding:12px 14px;display:flex;align-items:center;gap:10px">
-                    <i class="bi bi-folder-fill" style="font-size:1.8rem;color:#f5b301"></i><div style="min-width:0"><div class="fw-bold text-truncate">{{ $f->title }}</div><div class="small text-muted">{{ $f->classes_count }} class{{ $f->classes_count == 1 ? '' : 'es' }}</div></div></a></div>
+                <div class="col-6 col-md-4 col-lg-3"><a class="fc-card" href="{{ $q(['folder' => $f->id]) }}" style="padding:12px 14px;display:flex;align-items:center;gap:10px">
+                    <i class="bi bi-folder-fill" style="font-size:1.8rem;color:#f5b301"></i><div style="min-width:0"><div class="fw-bold text-truncate">{{ $f->title }}</div><div class="small text-muted">{{ $f->items_count }} class{{ $f->items_count == 1 ? '' : 'es' }}</div></div></a></div>
             @endforeach
         </div>
     @endif
+    @if ($classes->currentPage() === 1)@include('partials.ad-slot', ['type' => 'web_banner', 'page' => 'classes'])@endif
     <div class="row g-3" id="grid">
         @forelse ($classes as $c)
             @php $vid = \App\Services\ClassSource::youtubeId((string) $c->link_url); @endphp
@@ -35,18 +37,11 @@
                     @if ($c->mode === 'live')<span class="fc-live">LIVE</span>@if ($c->scheduled_at)<span class="fc-when">{{ $c->scheduled_at->format('d M, h:i a') }}</span>@endif @endif
                     <i class="bi bi-play-circle-fill"></i></div>
                 <div class="tx">{{ $c->title }}</div></a></div>
+            @include('partials.ad-slot', ['type' => 'web_infeed', 'page' => 'classes', 'pos' => $loop->iteration, 'pageNo' => $classes->currentPage()])
         @empty
-            @if (!$folders->count())<div class="text-muted">No free classes yet.</div>@endif
+            @if (!$folders->count())<div class="text-muted">No free classes here yet.</div>@endif
         @endforelse
     </div>
+    @include('kpsc.partials.load-more', ['paginator' => $classes, 'target' => '#grid'])
 </div></div>
-@endsection
-@section('scripts')
-<script>
-    document.getElementById('chips').addEventListener('click', function (e) {
-        var c = e.target.closest('[data-x]'); if (!c) return;
-        [].forEach.call(this.children, function (x) { x.classList.toggle('on', x === c); });
-        [].forEach.call(document.querySelectorAll('#grid [data-x], #folders [data-x]'), function (a) { a.style.display = (c.dataset.x === 'all' || (' ' + a.dataset.x + ' ').indexOf(' ' + c.dataset.x + ' ') >= 0) ? '' : 'none'; });
-    });
-</script>
 @endsection

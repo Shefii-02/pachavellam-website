@@ -166,13 +166,41 @@ Route::group(['prefix' => 'admin', 'middleware' => ['admin.area']], function () 
     Route::delete('stories/{id}', 'Content\StoryController@destroy')->whereNumber('id');
     Route::post('stories/{id}/toggle', 'Content\StoryController@toggle')->whereNumber('id');
 
+    // custom pages (/p/{slug}) and prebuilt pages; menu setup
+    Route::get('pages', 'Content\\SitePageController@index');
+    Route::get('pages/create', 'Content\\SitePageController@create');
+    Route::post('pages', 'Content\\SitePageController@store');
+    Route::get('pages/{id}/edit', 'Content\\SitePageController@edit')->whereNumber('id');
+    Route::put('pages/{id}', 'Content\\SitePageController@update')->whereNumber('id');
+    Route::post('pages/{id}/toggle', 'Content\\SitePageController@toggle')->whereNumber('id');
+    Route::delete('pages/{id}', 'Content\\SitePageController@destroy')->whereNumber('id');
+    Route::get('devices', 'Content\\DeviceAdminController@index');
+    Route::post('devices/settings', 'Content\\DeviceAdminController@settings');
+    Route::post('devices/{id}/remove', 'Content\\DeviceAdminController@remove')->whereNumber('id');
+    Route::post('devices/user/{id}/remove-all', 'Content\\DeviceAdminController@removeAll')->whereNumber('id');
+    Route::post('devices/user/{id}/limit', 'Content\\DeviceAdminController@userLimit')->whereNumber('id');
+    Route::get('security', 'Content\\SecurityController@index');
+    Route::post('security/captcha', 'Content\\SecurityController@captcha');
+    Route::post('security/limits', 'Content\\SecurityController@limits');
+    Route::post('security/ips', 'Content\\SecurityController@addIp');
+    Route::delete('security/ips/{id}', 'Content\\SecurityController@removeIp')->whereNumber('id');
+    Route::get('ads', 'Content\\AdsController@index');
+    Route::post('ads', 'Content\\AdsController@save');
+    Route::get('branding', 'Content\\BrandingController@index');
+    Route::post('branding', 'Content\\BrandingController@save');
+    Route::get('menu', 'Content\\MenuItemController@index');
+    Route::post('menu', 'Content\\MenuItemController@store');
+    Route::put('menu/{id}', 'Content\\MenuItemController@update')->whereNumber('id');
+    Route::post('menu/{id}/toggle', 'Content\\MenuItemController@toggle')->whereNumber('id');
+    Route::delete('menu/{id}', 'Content\\MenuItemController@destroy')->whereNumber('id');
+
     Route::get('push', 'Content\\PushController@index');
     Route::post('push', 'Content\\PushController@send');
     Route::get('push/preview', 'Content\\PushController@preview');
 
     // Banners, What's New, Announcements, Articles, Notifications: common to all exam types (exam types chosen on each item)
     Route::get('content', fn () => redirect(url('admin/content/banners')));
-    Route::prefix('content/{section}/folders')->where(['section' => 'free-classes|syllabus|materials|results'])->group(function () {
+    Route::prefix('content/{section}/folders')->where(['section' => 'free-classes|articles|syllabus|materials|results'])->group(function () {
         Route::post('/', 'Content\\ContentFolderController@store');
         Route::put('{id}', 'Content\\ContentFolderController@update')->whereNumber('id');
         Route::delete('{id}', 'Content\\ContentFolderController@destroy')->whereNumber('id');

@@ -218,7 +218,7 @@ class ContentItemController extends Controller
             'type' => ['nullable', 'in:exam,other'], 'bg_color' => ['nullable', 'string', 'max:20'], 'text_color' => ['nullable', 'string', 'max:20'],
             'starts_at' => ['nullable', 'date'], 'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'], 'published_at' => ['nullable', 'date'], 'last_date' => ['nullable', 'date'],
             'position' => ['nullable', 'integer', 'min:0'],
-            'subject_id' => ['nullable', 'integer', 'exists:exam_subjects,id'], 'folder_id' => ['nullable', 'integer', 'exists:content_folders,id'], 'mode' => ['nullable', 'in:live,recorded'], 'chat_mode' => ['nullable', 'in:off,live,always'], 'scheduled_at' => ['nullable', 'date'],
+            'subject_id' => ['nullable', 'integer', 'exists:exam_subjects,id'], 'folder_id' => ['nullable', 'integer', 'exists:content_folders,id'], 'category_id' => ['nullable', 'integer', 'exists:exam_categories,id'], 'audio_url' => ['nullable', 'url', 'max:500'], 'audio' => ['nullable', 'file', 'mimes:mp3,m4a,aac,wav,ogg', 'max:40960'], 'mode' => ['nullable', 'in:live,recorded'], 'chat_mode' => ['nullable', 'in:off,live,always'], 'scheduled_at' => ['nullable', 'date'],
             'image' => [$item && $item->image || $request->filled('image_media') || !in_array('image', $m['fields']) ? 'nullable' : ($m['kind'] === 'banner' ? 'required' : 'nullable'), 'image', 'mimes:jpg,jpeg,png,webp,gif', 'max:4096'],
             'image_media' => ['nullable', 'string', 'max:400'], 'attachment_media' => ['nullable', 'string', 'max:400'],
             'attachment' => ['nullable', 'file', 'mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png', 'max:10240'],
@@ -259,7 +259,13 @@ class ContentItemController extends Controller
                 throw \Illuminate\Validation\ValidationException::withMessages(['folder_id' => 'Choose a folder of one of the ticked exam types.']);
             }
         }
-        $fields = collect($data)->only(array_merge($m['fields'], ['position']))->except(['image', 'attachment', 'new_tab', 'is_pinned'])->all();
+        if (!empty($data['category_id'])) {
+            $cat = \App\Models\ExamCategory::find($data['category_id']);
+            if (!$cat || !in_array($cat->exam_id, array_map('intval', $data['exam_ids'] ?? []), true)) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['category_id' => 'Choose a category of one of the ticked exam types.']);
+            }
+        }
+        $fields = collect($data)->only(array_merge($m['fields'], ['position']))->except(['image', 'attachment', 'audio', 'new_tab', 'is_pinned'])->all();
         $fields['new_tab'] = $request->boolean('new_tab');
         $fields['is_pinned'] = $request->boolean('is_pinned');
         if ($m['kind'] === 'promo_class') {
@@ -278,7 +284,7 @@ class ContentItemController extends Controller
      */
     private function files(Request $request, ContentItem $item): void
     {
-        foreach (['image' => 'content', 'attachment' => 'content-files'] as $field => $dir) {
+        foreach (['image' => 'content', 'attachment' => 'content-files', 'audio' => 'content-audio'] as $field => $dir) {
             $old = $item->{$field};
             $chosen = trim((string) $request->input($field . '_media'));
             if ($chosen !== '' && \App\Models\Media::where('path', 'files/' . $chosen)->exists() && !str_contains($chosen, '..')) {

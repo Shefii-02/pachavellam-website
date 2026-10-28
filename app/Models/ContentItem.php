@@ -50,8 +50,8 @@ class ContentItem extends Model
 
     /** url segment => [kind, label, icon, form fields] */
     public const KINDS = [
-        'free-classes' => ['kind' => 'promo_class', 'label' => 'Free promo classes', 'one' => 'promo class', 'icon' => 'bi-play-btn', 'folders' => true, 'fields' => ['title', 'link_url', 'mode', 'chat_mode', 'scheduled_at', 'folder_id', 'on_home', 'image', 'description']],
-        'articles' => ['kind' => 'article', 'label' => 'Free articles', 'one' => 'article', 'icon' => 'bi-newspaper', 'fields' => ['title', 'image', 'description', 'published_at', 'link_url']],
+        'free-classes' => ['kind' => 'promo_class', 'label' => 'Free promo classes', 'one' => 'promo class', 'icon' => 'bi-play-btn', 'folders' => true, 'fields' => ['title', 'link_url', 'mode', 'chat_mode', 'scheduled_at', 'folder_id', 'on_home', 'category_id', 'image', 'description']],
+        'articles' => ['kind' => 'article', 'label' => 'Free articles', 'one' => 'article', 'icon' => 'bi-newspaper', 'folders' => true, 'fields' => ['title', 'image', 'description', 'published_at', 'link_url', 'folder_id', 'category_id', 'audio_url']],
         'banners' => ['kind' => 'banner', 'label' => 'Banners', 'one' => 'banner', 'icon' => 'bi-card-image', 'fields' => ['image', 'title', 'link_url', 'starts_at', 'ends_at']],
         'whats-new' => ['kind' => 'whats_new', 'label' => "What's New", 'one' => "what's new item", 'icon' => 'bi-plus-circle', 'fields' => ['title', 'description', 'link_url', 'image', 'bg_color', 'text_color', 'new_tab']],
         'announcements' => ['kind' => 'announcement', 'label' => 'Announcements', 'one' => 'announcement', 'icon' => 'bi-megaphone', 'fields' => ['title', 'type', 'image', 'description', 'published_at', 'link_url', 'attachment', 'is_pinned']],
@@ -82,6 +82,27 @@ class ContentItem extends Model
     public function getLandingUrlAttribute(): ?string
     {
         return $this->landing()['url'];
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(ExamCategory::class, 'category_id');
+    }
+
+    /** The article's recorded voice: an uploaded file or a link; null when there is none (then it is read aloud by text-to-speech). */
+    public function audioSrc(): ?string
+    {
+        if ($this->audio) {
+            return url(\Illuminate\Support\Facades\Storage::url('files/' . $this->audio));
+        }
+
+        return $this->audio_url ?: null;
+    }
+
+    /** Plain text for reading aloud. */
+    public function speakText(): string
+    {
+        return trim(preg_replace('/\s+/', ' ', html_entity_decode(strip_tags((string) $this->title . '. ' . preg_replace('/<\/(p|div|li|h\d|br)>/i', '$0 ', (string) $this->description)))));
     }
 
     public function folder()

@@ -74,6 +74,7 @@
                 </select>
                 <input type="tel" inputmode="numeric" id="otpMobile" maxlength="12" placeholder="Mobile number" required autocomplete="tel-national">
             </div>
+            @include('partials.captcha', ['form' => 'otp'])
             <button type="submit" class="hb-btn si-btn" id="sendOtpBtn">Send OTP</button>
         </form>
 
@@ -114,7 +115,7 @@
         if (data.errors) { data.message = Object.values(data.errors)[0][0]; }
         return {ok: res.ok, data: data};
     }
-    function payload() { return {country_code: $('otpCountry').value, mobile: $('otpMobile').value}; }
+    function payload() { return Object.assign({country_code: $('otpCountry').value, mobile: $('otpMobile').value}, window.PvCap ? PvCap.fields() : {}); }
     function validNumber() { var n = $('otpMobile').value; if ($('otpCountry').value === '91') return /^[6-9]\d{9}$/.test(n); return n.length >= 6 && n.length <= 12; }
 
     function updateResendUi(retryAfter) {
@@ -139,6 +140,7 @@
         var r = await post('{{ url("send-otp") }}', payload());
         btn.disabled = false;
         if (!r.ok) {
+            if (r.data.code === 'captcha' && window.PvCap) { PvCap.again(r.data); }
             notify('error', r.data.message);
             if (r.data.retry_after) { resendsLeft = 0; $('numberStep').style.display = 'none'; $('otpStep').style.display = ''; $('otpSentTo').textContent = '+' + $('otpCountry').value + ' ' + $('otpMobile').value; updateResendUi(r.data.retry_after); }
             return;

@@ -270,7 +270,7 @@
             ]],
         ]);
     }
-    $examsWithLive = $examTypes->whereIn('id', $liveClasses->concat($freeTests)->flatMap(fn ($x) => $x->exams)->unique());
+    $examsWithLive = $examTypes->whereIn('id', $freeTests->flatMap(fn ($x) => $x->exams)->unique());
 @endphp
 <div class="page-content-wrapper">
     <div class="container pb-4">
@@ -328,44 +328,39 @@
             </section>
         @endif
 
-        {{-- ================= Try out our live experience ================= --}}
+        {{-- ================= Free live tests (exam type and season based). The latest classes are on each exam type's own page. ================= --}}
+        @if ($freeTests->count())
         <section class="hm-sec" aria-labelledby="lxTitle">
-            <div class="hm-head"><h4 id="lxTitle">Try Out Our <em>Live Experience</em></h4></div>
+            <div class="hm-head"><h4 id="lxTitle">Free <em>Live Tests</em></h4></div>
             <div class="lx-bar">
-                <div role="tablist" aria-label="Live classes and tests" class="d-flex gap-2 flex-wrap">
-                    <button type="button" role="tab" class="lx-tab" id="lxTabC" aria-controls="lxC" aria-selected="true">Free Live Classes <span>{{ $liveClasses->count() }}</span></button>
-                    <button type="button" role="tab" class="lx-tab" id="lxTabT" aria-controls="lxT" aria-selected="false" tabindex="-1">Free Live Tests <span>{{ $freeTests->count() }}</span></button>
-                </div>
+                <div class="d-flex gap-2 flex-wrap"><span class="lx-tab" aria-selected="true">Free Live Tests <span>{{ $freeTests->count() }}</span></span></div>
                 @if ($examsWithLive->count() > 1)
                     <label class="lx-filter">Exam :
                         <select id="lxExam"><option value="all">All</option>@foreach ($examsWithLive as $e)<option value="{{ $e->id }}">{{ $e->short_name ?: $e->name }}</option>@endforeach</select>
                     </label>
                 @endif
             </div>
-            @foreach (['C' => [$liveClasses, 'No live class is scheduled right now', 'free-classes', 'Watch free classes'], 'T' => [$freeTests, 'No free test is open right now', 'kpsc/daily-exam', 'See daily exams']] as $key => [$rows, $emptyText, $moreUrl, $moreLabel])
-                <div role="tabpanel" id="lx{{ $key }}" aria-labelledby="lxTab{{ $key }}" @if ($key === 'T') hidden @endif>
-                    <div class="lx-grid">
-                        @foreach ($rows as $r)
-                            <a class="lx-card" href="{{ $r->url }}" data-x="{{ implode(' ', $r->exams) }}">
-                                <div class="th" @if ($r->thumb) style="background-image:url('{{ $r->thumb }}')" @endif>
-                                    @if ($key === 'C')<span class="play"><i class="bi bi-play-fill"></i></span>@else<i class="bi bi-ui-checks"></i>@endif
+            <div id="lxT">
+                <div class="lx-grid">
+                    @foreach ($freeTests as $r)
+                        <a class="lx-card" href="{{ $r->url }}" data-x="{{ implode(' ', $r->exams) }}">
+                            <div class="th"><i class="bi bi-ui-checks"></i></div>
+                            <div class="bd">
+                                <div class="tt">{{ $r->title }}</div>
+                                @if ($r->by)<div class="by">{{ $r->by }}</div>@endif
+                                <div class="ft">
+                                    <span class="lx-tag">{{ $r->tag }}</span>
+                                    <span class="lx-when" data-start="{{ $r->starts ? $r->starts->getTimestamp() * 1000 : '' }}" data-end="{{ $r->ends ? $r->ends->getTimestamp() * 1000 : '' }}" data-kind="T">Available now</span>
                                 </div>
-                                <div class="bd">
-                                    <div class="tt">{{ $r->title }}</div>
-                                    @if ($r->by)<div class="by">{{ $r->by }}</div>@endif
-                                    <div class="ft">
-                                        <span class="lx-tag">{{ $r->tag }}</span>
-                                        <span class="lx-when" data-start="{{ $r->starts ? $r->starts->getTimestamp() * 1000 : '' }}" data-end="{{ $r->ends ? $r->ends->getTimestamp() * 1000 : '' }}" data-kind="{{ $key }}">Available now</span>
-                                    </div>
-                                </div>
-                            </a>
-                        @endforeach
-                    </div>
-                    <div class="lx-empty" @if ($rows->count()) hidden @endif><i class="bi bi-calendar-x"></i>{{ $emptyText }}. <a href="{{ url($moreUrl) }}" class="fw-bold" style="color:var(--pv-brand)">{{ $moreLabel }}</a></div>
+                            </div>
+                        </a>
+                    @endforeach
                 </div>
-            @endforeach
+            </div>
         </section>
+        @endif
 
+        <div class="container">@include('partials.ad-slot', ['type' => 'web_banner', 'page' => 'home'])</div>
         {{-- ================= What are you preparing for? : exam type tabs with their category cards ================= --}}
         @if ($examTypes->count())
             <section class="hm-sec" aria-labelledby="gpTitle">
@@ -383,7 +378,7 @@
                         <div class="gp-grid">
                             @forelse ($ex->categories as $k => $cat)
                                 @php $big = $k < 2 && $ex->categories->count() > 2; @endphp
-                                <a class="gp-card {{ $big ? 'big' : '' }}" href="{{ url('prime?exam=' . $ex->slug . '&category=' . $cat->id) }}#courses">
+                                <a class="gp-card {{ $big ? 'big' : '' }}" href="{{ $cat->publicUrl() }}">
                                     <div class="hd"><span class="ic">@if (!$big && $cat->image)<img src="{{ Storage::url($cat->image) }}" alt="" loading="lazy">@else<i class="bi {{ $cat->icon && str_starts_with($cat->icon, 'bi-') ? $cat->icon : $catIcons[$k % count($catIcons)] }}"></i>@endif</span><b>{{ $cat->name }}</b></div>
                                     <div class="subs">{{ $cat->children->count() ? $cat->children->pluck('name')->take(8)->implode(' • ') : \Illuminate\Support\Str::limit((string) $cat->description, 90) }}</div>
                                     @if ($big)
@@ -603,6 +598,7 @@
                     <div><label for="csExam">Preparing for</label><select id="csExam" name="exam_id"><option value="">Not decided yet</option>@foreach ($examTypes as $e)<option value="{{ $e->id }}">{{ $e->name }}</option>@endforeach</select></div>
                     <div><label for="csTime">Best time to call</label><select id="csTime" name="preferred_time">@foreach (\App\Models\CounsellingRequest::TIMES as $t)<option>{{ $t }}</option>@endforeach</select></div>
                     <div class="full"><label for="csMsg">Anything you want to ask? (optional)</label><textarea id="csMsg" name="message" rows="3" maxlength="1000"></textarea></div>
+                    <div class="full">@include('partials.captcha', ['form' => 'counselling'])</div>
                     <div class="full" id="csOut">@if (session('counselling'))<div class="cs-msg ok">{{ session('counselling') }}</div>@endif</div>
                     <div class="full"><button class="hm-btn" type="submit"><i class="bi bi-telephone-outbound"></i> Request call back</button></div>
                 </form>
@@ -712,20 +708,20 @@
             });
         }
         tabs(document.querySelector('.gp-tabs'), function (t) { t.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' }); });
-        tabs(document.querySelector('.lx-bar [role="tablist"]'));
         tabs(document.querySelector('.fq-tabs'));
 
         // live experience: exam filter and countdowns
         var sel = document.getElementById('lxExam');
         function filterLive() {
             var v = sel ? sel.value : 'all';
-            ['lxC', 'lxT'].forEach(function (id) {
+            ['lxT'].forEach(function (id) {
                 var box = document.getElementById(id), shown = 0;
+                if (!box) return;
                 [].forEach.call(box.querySelectorAll('.lx-card'), function (c) {
                     var ok = !c.dataset.gone && (v === 'all' || (' ' + c.dataset.x + ' ').indexOf(' ' + v + ' ') >= 0);
                     c.hidden = !ok; if (ok) shown++;
                 });
-                box.querySelector('.lx-empty').hidden = shown > 0;
+                var emp = box.querySelector('.lx-empty'); if (emp) emp.hidden = shown > 0;
             });
         }
         if (sel) sel.addEventListener('change', filterLive);
@@ -808,8 +804,9 @@
             fetch(f.action, { method: 'POST', body: new FormData(f), headers: { Accept: 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
                 .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j, status: r.status }; }); })
                 .then(function (x) {
-                    if (x.ok) { say('ok', x.j.message); el['message'].value = ''; }
+                    if (x.ok) { say('ok', x.j.message); el['message'].value = ''; var cap = f.querySelector('.pv-cap'); if (cap && !cap.hidden) cap.querySelector('.pv-cap-r').click(); }
                     else if (x.status === 429) say('err', 'Too many requests. Please try again in a minute.');
+                    else if (x.j && x.j.code === 'captcha') { if (window.PvCap) PvCap.again(x.j); say('err', x.j.message); }
                     else say('err', (x.j.errors && Object.values(x.j.errors)[0][0]) || x.j.message || 'Could not send. Please try again.');
                 })
                 .catch(function () { say('err', 'Could not send. Please check your connection and try again.'); })

@@ -23,7 +23,9 @@ class ChatPushController extends Controller
             'data' => 'array',
         ]);
 
-        $tokens = DeviceToken::whereIn('user_id', $request->recipient_user_ids)->pluck('token')->all();
+        $tokens = DeviceToken::whereIn('user_id', $request->recipient_user_ids)
+            ->whereIn('user_id', \Illuminate\Support\Facades\DB::table('users')->where('push_enabled', 1)->select('id'))   // people who turned push off get none
+            ->pluck('token')->all();
         if (empty($tokens)) {
             return response()->json(['message' => 'No registered devices for these recipients', 'sent' => false], 200);
         }

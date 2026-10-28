@@ -30,7 +30,12 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         // request log for Dev Tools (api logs + daily analytics)
+        // flood / DoS gate runs before everything else
+        $middleware->prependToGroup('web', \App\Http\Middleware\SecurityGate::class);
+        $middleware->prependToGroup('api', \App\Http\Middleware\SecurityGate::class);
         $middleware->appendToGroup('web', \App\Http\Middleware\LogRequest::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\EnforceDeviceSession::class);
+        $middleware->appendToGroup('api', \App\Http\Middleware\EnforceDeviceSession::class);
         $middleware->appendToGroup('api', \App\Http\Middleware\LogRequest::class);
 
         $middleware->alias([
@@ -40,6 +45,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin.area' => \App\Http\Middleware\EnsureAdminArea::class,
             'staff.can' => \App\Http\Middleware\StaffCan::class,
             'season.access' => \App\Http\Middleware\EnsureSeasonAccess::class,
+            'captcha' => \App\Http\Middleware\RequireCaptcha::class,
             'internal.secret' => \App\Http\Middleware\VerifyInternalSecret::class,
         ]);
     })

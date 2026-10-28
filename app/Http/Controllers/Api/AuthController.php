@@ -40,6 +40,79 @@ class AuthController extends Controller
         return response()->json($payload, $statusCode);
     }
 
+    /** Too many devices? Answer 409 with the device list and a ticket, so the person can remove one and continue. */
+    protected function deviceGate(User $user, Request $request)
+    {
+        $ds = app(\App\Services\DeviceSessions::class);
+        if (!$ds->overLimit($user)) {
+            return null;
+        }
+
+        return response()->json([
+            'code' => 'device_limit', 'message' => 'You are signed in on the most devices allowed. Sign out of one to continue.',
+            'limit' => $ds->limit($user), 'ticket' => $ds->ticket($user), 'devices' => $ds->describe($ds->live($user)),
+        ], 409);
+    }
+
+    /** Opens the device session and gives the token that carries it (so removing the device ends the token at once). */
+    protected function issueToken(User $user, Request $request): string
+    {
+        $session = app(\App\Services\DeviceSessions::class)->open($user, $request, 'app');
+
+        return auth('api')->claims(['sid' => $session->sid])->login($user);
+    }
+
+    protected function currentSid(): ?string
+    {
+        try {
+            return \PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth::parseToken()->getPayload()->get('sid');
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /** POST auth/devices/release {ticket, ids?[], all?} - remove devices (not signed in yet), then sign in on this one. */
+    public function releaseDevices(Request $request)
+    {
+        $data = $request->validate(['ticket' => 'required|string', 'ids' => 'nullable|array', 'ids.*' => 'integer', 'all' => 'nullable|boolean']);
+        $ds = app(\App\Services\DeviceSessions::class);
+        $user = $ds->userFromTicket($data['ticket']);
+        if (!$user) {
+            return response()->json(['message' => 'This took too long. Please sign in again.'], 422);
+        }
+        $ds->revoke($user, $request->boolean('all') ? null : ($data['ids'] ?? []), 'user');
+        if ($again = $this->deviceGate($user, $request)) {
+            return $again;
+        }
+        $token = $this->issueToken($user, $request);
+
+        return $this->respondWithToken($token, $user, 200, 'Signed in successfully');
+    }
+
+    /** GET auth/devices - my signed in devices. */
+    public function devices(Request $request)
+    {
+        $ds = app(\App\Services\DeviceSessions::class);
+
+        return response()->json(['status' => 200, 'limit' => $ds->limit($request->user()), 'devices' => $ds->describe($ds->live($request->user()), $this->currentSid())]);
+    }
+
+    /** DELETE auth/devices/{id} - sign one of my devices out. */
+    public function removeDevice(Request $request, $id)
+    {
+        app(\App\Services\DeviceSessions::class)->revoke($request->user(), [$id], 'user');
+
+        return response()->json(['status' => 200, 'message' => 'Device signed out']);
+    }
+
+    /** POST auth/devices/logout-others - sign out every device except this one. */
+    public function logoutOthers(Request $request)
+    {
+        $n = app(\App\Services\DeviceSessions::class)->revoke($request->user(), null, 'other-devices', $this->currentSid());
+
+        return response()->json(['status' => 200, 'message' => $n . ' device(s) signed out']);
+    }
+
     public function SignIn(Request $request)
     {
         date_default_timezone_set('Asia/Kolkata');
@@ -51,7 +124,13 @@ class AuthController extends Controller
             ], 422);
         }
 
-        $token = auth('api')->login($user);
+        if ($limited = $this->deviceGate($user, $request)) {
+
+            return $limited;
+
+        }
+
+        $token = $this->issueToken($user, $request);
 
         return $this->respondWithToken($token, $user);
     }
@@ -96,7 +175,10 @@ class AuthController extends Controller
         }
 
         [$user] = $otp->findOrCreateUser($phone, $data['country_code']);
-        $token = auth('api')->login($user);
+        if ($limited = $this->deviceGate($user, $request)) {
+            return $limited;
+        }
+        $token = $this->issueToken($user, $request);
 
         return $this->respondWithToken($token, $user, 200, 'Signed in successfully');
     }
@@ -126,7 +208,13 @@ class AuthController extends Controller
                 $newUser->email_verified_at = null;
                 $newUser->save();
 
-                $token = auth('api')->login($newUser);
+                if ($limited = $this->deviceGate($newUser, $request)) {
+
+                    return $limited;
+
+                }
+
+                $token = $this->issueToken($newUser, $request);
 
                 return $this->respondWithToken($token, $newUser, 200, 'Signup in successfully');
             } else {
@@ -162,7 +250,10 @@ class AuthController extends Controller
                     $finduser->save();
 
                     Log::info('user existed');
-                    $token = auth('api')->login($finduser);
+                    if ($limited = $this->deviceGate($finduser, $request)) {
+                        return $limited;
+                    }
+                    $token = $this->issueToken($finduser, $request);
 
                     return $this->respondWithToken($token, $finduser, 200, 'User signed in successfully');
                 } else {
@@ -186,7 +277,13 @@ class AuthController extends Controller
                     $newUser->email_verified_at = Carbon::now();
                     $newUser->save();
 
-                    $token = auth('api')->login($newUser);
+                    if ($limited = $this->deviceGate($newUser, $request)) {
+
+                        return $limited;
+
+                    }
+
+                    $token = $this->issueToken($newUser, $request);
 
                     return $this->respondWithToken($token, $newUser, 200, 'User signed in successfully');
                 }
@@ -223,6 +320,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         try {
+            app(\App\Services\DeviceSessions::class)->revokeSid($this->currentSid(), 'logout');
             auth('api')->logout();
             return response()->json(['message' => 'Logged out successfully'], 200);
         } catch (JWTException $e) {

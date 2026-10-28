@@ -67,6 +67,8 @@
                                 {!! $link(url('admin/content/' . $seg), $kind[$seg]['icon'], $kind[$seg]['label'], request()->is('admin/content/' . $seg . '*')) !!}
                             @endforeach
                             {!! $link(url('admin/push'), 'bi-send', 'Push notifications', request()->is('admin/push*')) !!}
+                            {!! $link(url('admin/pages'), 'bi-file-earmark-richtext', 'Pages (custom &amp; prebuilt)', request()->is('admin/pages*')) !!}
+                            {!! $link(url('admin/menu'), 'bi-list-nested', 'Menu setup', request()->is('admin/menu*')) !!}
                         @endif
                     @endif
 
@@ -78,6 +80,10 @@
                         @endforeach
                         {!! $link(url('admin/home-exams'), 'bi-house-heart', 'Exams on home page', request()->is('admin/home-exams*')) !!}
                         {!! $link(url('admin/media'), 'bi-images', 'Media library', request()->is('admin/media*')) !!}
+                        {!! $link(url('admin/devices'), 'bi-phone', 'Devices', request()->is('admin/devices*')) !!}
+                        {!! $link(url('admin/security'), 'bi-shield-lock', 'Security (CAPTCHA &amp; limits)', request()->is('admin/security*')) !!}
+                        {!! $link(url('admin/ads'), 'bi-badge-ad', 'Ads (Google)', request()->is('admin/ads*')) !!}
+                        {!! $link(url('admin/branding'), 'bi-brush', 'Logos (light / dark)', request()->is('admin/branding*')) !!}
                         {!! $link(url('admin/seo'), 'bi-search', 'SEO (title, tags, words)', request()->is('admin/seo*')) !!}
                         @php $newCounselling = \Illuminate\Support\Facades\Schema::hasTable('counselling_requests') ? \App\Models\CounsellingRequest::where('status', 'new')->count() : 0; @endphp
                         {!! $link(url('admin/counselling'), 'bi-headset', 'Counselling requests' . ($newCounselling ? ' <span class="badge bg-danger ms-1">' . $newCounselling . '</span>' : ''), request()->is('admin/counselling*')) !!}

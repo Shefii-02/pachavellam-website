@@ -51,7 +51,12 @@ class Landing
                 }
                 break;
             case 'page':
-                if ($value && isset(self::PAGES[$value])) {
+                // pages managed in the panel (custom pages at /p/{slug} and prebuilt pages), else the built in list
+                $pg = $value ? self::sitePage($value) : null;
+                if ($pg) {
+                    $url = $pg->url();
+                    $app = 'pachavellam://page/' . $pg->slug;
+                } elseif ($value && isset(self::PAGES[$value])) {
                     $url = url(self::PAGES[$value][1]);
                     $app = 'pachavellam://page/' . $value;
                 }
@@ -72,13 +77,20 @@ class Landing
         return self::resolve($type, $value, $link)['url'];
     }
 
+    private static function sitePage(string $slug): ?\App\Models\SitePage
+    {
+        return \Illuminate\Support\Facades\Schema::hasTable('site_pages') ? \App\Models\SitePage::active()->where('slug', $slug)->first() : null;
+    }
+
     /** Options for the form pickers. */
     public static function options(): array
     {
         return [
-            'courses' => ExamCourse::where('status', 'published')->orderBy('title')->get(['id', 'title']),
+            'courses' => ExamCourse::with('exam:id,short_name,name')->where('status', 'published')->where('slug', 'not like', 'series-%')->orderBy('title')->get(['id', 'title', 'exam_id', 'course_type', 'price', 'discount_price']),
             'exams' => CompetitiveExam::orderBy('position')->get(['id', 'slug', 'short_name', 'name']),
-            'pages' => collect(self::PAGES)->map(fn ($p) => $p[0])->all(),
+            'pages' => \Illuminate\Support\Facades\Schema::hasTable('site_pages')
+                ? \App\Models\SitePage::active()->orderBy('kind')->orderBy('title')->get()->mapWithKeys(fn ($p) => [$p->slug => $p->title . ($p->isCustom() ? ' (custom page)' : '')])->all()
+                : collect(self::PAGES)->map(fn ($p) => $p[0])->all(),
         ];
     }
 

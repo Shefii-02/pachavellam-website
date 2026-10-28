@@ -232,8 +232,8 @@ class PublicCatalogController extends Controller
             ->where(fn ($q) => $q->whereNull('starts_at')->orWhere('starts_at', '<=', $today))->where(fn ($q) => $q->whereNull('ends_at')->orWhere('ends_at', '>=', $today))
             ->orderBy('position')->get();
         $stories = \App\Models\Banner::forExam($exam->slug)->where('status', 1)->orderBy('position')->get();
-        $liveClasses = ContentItem::ofKind('promo_class')->live($exam->slug)->where('mode', 'live')->where('scheduled_at', '>=', now())->orderBy('scheduled_at')->limit(10)->get();
-        $recorded = ContentItem::ofKind('promo_class')->live($exam->slug)->where(fn ($q) => $q->where('mode', 'recorded')->orWhere('scheduled_at', '<', now()))->orderByDesc('id')->limit(10)->get();
+        $liveClasses = ContentItem::ofKind('promo_class')->live($exam->slug)->where('mode', 'live')->where('scheduled_at', '>=', now())->orderBy('scheduled_at')->limit(8)->get();
+        $recorded = ContentItem::ofKind('promo_class')->live($exam->slug)->where(fn ($q) => $q->where('mode', 'recorded')->orWhere('scheduled_at', '<', now()))->orderByDesc('id')->limit(8)->get();
         $tests = \App\Models\CourseExam::with('course:id,slug,title,course_type')->where('exam_id', $exam->id)->where('status', 'published')
             ->where(fn ($q) => $q->whereNull('end_at')->orWhere('end_at', '>=', now()))
             ->orderByRaw('start_at is null')->orderBy('start_at')->limit(16)->get();
@@ -249,29 +249,39 @@ class PublicCatalogController extends Controller
     }
 
     /** Free promo classes (YouTube live / recorded), with exam type chips. */
-    public function freeClasses(Request $request)
+    /**
+     * Playlist (folder) browsing shared by free classes and free articles: pick an exam type (?exam=kpsc), then go down folder by folder (?folder=ID).
+     * Returns the folders at this level (with how many items they hold, empty ones left out), the folder being viewed and its trail.
+     */
+    private function folderLevel(Request $request, string $kind): array
     {
-        $live = fn () => ContentItem::ofKind('promo_class')->live();
-        // folders: the page opens at the top level (folders + loose classes) and goes down one folder at a time
-        $current = $request->filled('folder') ? \App\Models\ContentFolder::where('kind', 'promo_class')->find($request->folder) : null;
-        $all = \App\Models\ContentFolder::where('kind', 'promo_class')->orderBy('position')->orderBy('title')->get(['id', 'exam_id', 'parent_id', 'title']);
-        $own = $live()->whereNotNull('folder_id')->selectRaw('folder_id, count(*) c')->groupBy('folder_id')->pluck('c', 'folder_id');
+        $exam = $request->filled('exam') ? CompetitiveExam::where('status', 1)->where('slug', $request->exam)->first() : null;
+        $current = $request->filled('folder') ? \App\Models\ContentFolder::where('kind', $kind)->find($request->folder) : null;
+        $all = \App\Models\ContentFolder::where('kind', $kind)->orderBy('position')->orderBy('title')->get(['id', 'exam_id', 'parent_id', 'title']);
+        $own = ContentItem::ofKind($kind)->live()->whereNotNull('folder_id')->selectRaw('folder_id, count(*) c')->groupBy('folder_id')->pluck('c', 'folder_id');
         $total = null;
         $total = function ($id) use (&$total, $own, $all) {
             return (int) ($own[$id] ?? 0) + $all->where('parent_id', $id)->sum(fn ($f) => $total($f->id));
         };
-        $folders = $all->where('parent_id', $current?->id)->map(function ($f) use ($total, $all) {
-            $f->classes_count = $total($f->id);
+        // a folder with nothing in it (nor in its sub folders) is not shown at all
+        $folders = $all->where('parent_id', $current?->id)->when($exam, fn ($c) => $c->where('exam_id', $exam->id))->map(function ($f) use ($total) {
+            $f->items_count = $total($f->id);
             $f->exam_ids = [$f->exam_id];
 
             return $f;
-        })->filter(fn ($f) => $f->classes_count > 0)->values();
+        })->filter(fn ($f) => $f->items_count > 0)->values();
 
-        return view('kpsc.free-classes', [
-            'classes' => $live()->with('exams:id')->where('folder_id', $current?->id)->orderByRaw("mode = 'live' desc")->orderByDesc('scheduled_at')->orderByDesc('id')->limit(120)->get(),
-            'folders' => $folders, 'current' => $current, 'trail' => $current ? $current->trail() : [],
-            'exams' => CompetitiveExam::where('status', 1)->orderBy('position')->get(), 'title' => 'Free classes',
-        ]);
+        return [$exam, $current, $current ? $current->trail() : [], $folders];
+    }
+
+    public function freeClasses(Request $request)
+    {
+        [$exam, $current, $trail, $folders] = $this->folderLevel($request, 'promo_class');
+        $classes = ContentItem::ofKind('promo_class')->live()->with('exams:id')->when($exam, fn ($q) => $q->forExam($exam->slug))->where('folder_id', $current?->id)
+            ->orderByRaw("mode = 'live' desc")->orderByDesc('scheduled_at')->orderByDesc('id')->paginate(24)->withQueryString();
+
+        return view('kpsc.free-classes', ['classes' => $classes, 'folders' => $folders, 'current' => $current, 'trail' => $trail, 'exam' => $exam,
+            'exams' => CompetitiveExam::where('status', 1)->orderBy('position')->get(), 'title' => 'Free classes']);
     }
 
     public function freeClassById($id)
@@ -456,11 +466,36 @@ class PublicCatalogController extends Controller
     }
 
     /** Free articles (the common Articles content), filtered by exam type. */
-    public function articles()
+    public function articles(Request $request)
     {
-        return view('kpsc.articles', [
-            'articles' => ContentItem::ofKind('article')->live()->with('exams:id,slug,short_name,name,color')->orderByDesc('published_at')->orderByDesc('id')->limit(120)->get(),
-            'exams' => CompetitiveExam::where('status', 1)->orderBy('position')->get(), 'title' => 'Free articles',
+        [$exam, $current, $trail, $folders] = $this->folderLevel($request, 'article');
+        $articles = ContentItem::ofKind('article')->live()->with('exams:id,slug,short_name,name,color')->when($exam, fn ($q) => $q->forExam($exam->slug))->where('folder_id', $current?->id)
+            ->orderByDesc('published_at')->orderByDesc('id')->paginate(24)->withQueryString();
+
+        return view('kpsc.articles', ['articles' => $articles, 'folders' => $folders, 'current' => $current, 'trail' => $trail, 'exam' => $exam,
+            'exams' => CompetitiveExam::where('status', 1)->orderBy('position')->get(), 'title' => 'Free articles']);
+    }
+
+    /** /c/{category}/{sub category}: an exam category (or sub category) by slug - its sub categories, articles, free videos and courses. */
+    public function category($path)
+    {
+        $slug = collect(explode('/', trim($path, '/')))->filter()->last();
+        $cat = \App\Models\ExamCategory::with('exam')->where('status', 1)->where('slug', $slug)->firstOrFail();
+        abort_unless($cat->exam && $cat->exam->status, 404);
+        // the address must be the real chain of slugs (/c/parent/child); anything else goes to it
+        if (trim($path, '/') !== $cat->urlPath()) {
+            return redirect($cat->publicUrl(), 301);
+        }
+        $ids = array_merge([$cat->id], $cat->descendantIds());
+        $items = fn ($kind) => ContentItem::ofKind($kind)->live()->whereIn('category_id', $ids)->with('exams:id,short_name,name,color');
+        \App\Support\Seo::set(['key' => 'category:' . $cat->id, 'title' => $cat->name . ' - ' . ($cat->exam->short_name ?: $cat->exam->name) . ' | Pachavellam', 'description' => \Illuminate\Support\Str::limit(strip_tags((string) $cat->description), 160) ?: null]);
+
+        return view('kpsc.category', [
+            'cat' => $cat, 'trail' => $cat->ancestors()->push($cat), 'title' => $cat->name,
+            'children' => $cat->children()->where('status', 1)->get(),
+            'articles' => $items('article')->orderByDesc('published_at')->orderByDesc('id')->limit(12)->get(),
+            'videos' => $items('promo_class')->orderByRaw('COALESCE(scheduled_at, created_at) desc')->limit(12)->get(),
+            'courses' => ExamCourse::with('exam:id,short_name,name,color')->where('status', 'published')->where('slug', 'not like', 'series-%')->inCategory($cat->id)->orderByDesc('is_featured')->orderByDesc('id')->limit(12)->get(),
         ]);
     }
 

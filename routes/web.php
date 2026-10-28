@@ -36,7 +36,9 @@ require __DIR__ . '/admin/ugc_net.php';
 require __DIR__ . '/admin/ktet.php';
 
 
-Route::post('/send-otp', 'MobileNumberController@sendOTP')->middleware('throttle:20,1');
+Route::get('captcha', 'CaptchaController@show')->middleware('throttle:60,1');
+Route::get('captcha/status', 'CaptchaController@status')->middleware('throttle:60,1');
+Route::post('/send-otp', 'MobileNumberController@sendOTP')->middleware(['throttle:20,1', 'captcha:otp']);
 Route::post('/verify-otp', 'MobileNumberController@verifyOTP')->middleware('throttle:20,1');
 
 Route::post('mobile-number-verification', 'MobileNumberController@mobileNoVerification');
@@ -211,6 +213,14 @@ Route::middleware(['auth', 'throttle:60,1'])->group(function () {
     Route::post('my-account/profile','StudentHubController@updateProfile');
     Route::post('my-account/password', 'StudentHubController@updatePassword');
 });
+// signed in devices: the sign in stopped because of the device limit; my devices
+Route::get('devices/limit', 'DeviceController@limit');
+Route::post('devices/limit/release', 'DeviceController@release')->middleware('throttle:20,1');
+Route::middleware('auth')->group(function () {
+    Route::get('devices', 'DeviceController@index');
+    Route::post('devices/{id}/remove', 'DeviceController@remove')->whereNumber('id');
+    Route::post('devices/logout-others', 'DeviceController@logoutOthers');
+});
 Route::get('r/{code}', 'ReferralController@landing')->where('code', '[A-Za-z0-9]{4,12}');   // refer & earn link, shared from My account
 Route::get('free-classes', 'PublicCatalogController@freeClasses');
 Route::get('free-classes/{id}', 'PublicCatalogController@freeClassById')->whereNumber('id');   // old numeric links go to the random-id address
@@ -219,6 +229,8 @@ Route::get('player/{uid}/chat', 'ClassChatController@messages')->where('uid', '[
 Route::post('player/{uid}/chat', 'ClassChatController@send')->where('uid', '[a-z0-9]{8,14}')->middleware(['auth', 'throttle:20,1']);
 Route::get('watch/{vid}', 'PublicCatalogController@watch')->where('vid', '[a-z0-9]{8,14}');
 Route::get('player/{uid}', 'PublicCatalogController@player')->where('uid', '[a-z0-9]{8,14}');
+Route::get('p/{slug}', 'Content\SitePageController@show')->where('slug', '[a-z0-9-]+');   // custom pages written in the panel
+Route::get('c/{path}', 'PublicCatalogController@category')->where('path', '[a-z0-9\-/]+');   // exam category / sub category by slug: its articles, free videos, courses
 Route::get('articles', 'PublicCatalogController@articles');
 Route::get('articles/{id}', 'PublicCatalogController@article')->whereNumber('id');
 Route::get('courses/{slug}', 'PublicCatalogController@course');
@@ -228,7 +240,7 @@ Route::get('exam/{slug}', fn ($slug) => redirect(url($slug), 301));
 // Prime: landing page of the paid courses; buying needs a signed in student (the sign in page brings them back here)
 Route::get('prime', 'PrimeController@index');
 Route::get('prime/buy/{id}', 'PrimeController@buy')->whereNumber('id')->middleware(['auth', 'throttle:20,1']);
-Route::post('counselling', 'Content\CounsellingController@store')->middleware('throttle:5,1');
+Route::post('counselling', 'Content\CounsellingController@store')->middleware(['throttle:5,1', 'captcha:counselling']);
 
 // Payment links: a student pays for one course on a web page (sent on WhatsApp, or opened from the website / apps)
 Route::get('pay/{token}', 'Finance\PayLinkPageController@show')->where('token', '[A-Za-z0-9]{40}');

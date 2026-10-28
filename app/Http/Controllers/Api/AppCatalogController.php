@@ -123,22 +123,20 @@ class AppCatalogController extends Controller
         auth()->shouldUse('api');
         $today = today();
         $live = fn ($kind) => ContentItem::ofKind($kind)->live()->where(fn ($q) => $q->whereNull('starts_at')->orWhere('starts_at', '<=', $today))->where(fn ($q) => $q->whereNull('ends_at')->orWhere('ends_at', '>=', $today));
-        $examTypes = CompetitiveExam::where('status', 1)->orderBy('position')->get();
-        $classQ = fn () => ContentItem::ofKind('promo_class')->live()->with('exams:id,short_name,name,color');
-        $upcoming = $classQ()->where('mode', 'live')->where('scheduled_at', '>=', now())->orderBy('scheduled_at')->limit(12)->get();
-        $classes = $upcoming->concat($classQ()->whereNotIn('id', $upcoming->pluck('id'))->orderByDesc('scheduled_at')->orderByDesc('id')->limit(max(0, 12 - $upcoming->count()))->get())->values();
+        $examTypes = CompetitiveExam::where('status', 1)->orderBy('position')->with(['categories' => fn ($q) => $q->whereNull('parent_id')->where('status', 1)->orderBy('position')->orderBy('id')->with(['children' => fn ($c) => $c->where('status', 1)])])->get();
         $courses = ExamCourse::with('exam:id,short_name,name,color,slug')->where('status', 'published')->where('slug', 'not like', 'series-%')->orderByDesc('id')->limit(8)->get();
 
         return response()->json(['status' => 200, 'data' => [
-            'examTypes' => $examTypes->map(fn ($e) => $this->examType($e))->values(),
+            'examTypes' => $examTypes->map(fn ($e) => $this->examType($e) + ['categories' => $e->categories->map(fn ($c) => $this->categoryCard($c))->values()])->values(),
             'banners' => $live('banner')->orderBy('position')->get()->map(fn ($b) => ['image' => $this->img($b->image), 'title' => $b->title, 'url' => $this->abs($b->landing_url), 'ref' => $this->ref($b->landing_url)])->values(),
             'announcements' => $live('announcement')->with('exams:id,short_name,name,color')->orderByDesc('is_pinned')->orderByDesc('published_at')->orderByDesc('id')->limit(8)->get()->map(fn ($c) => $this->content($c))->values(),
             'articles' => ContentItem::ofKind('article')->live()->with('exams:id,short_name,name,color')->orderByDesc('published_at')->orderByDesc('id')->limit(8)->get()->map(fn ($c) => $this->content($c, 'article') + ['url' => url('articles/' . $c->id)])->values(),
-            'freeClasses' => $classes->map(fn ($c) => $this->promo($c))->values(),
+            // the latest classes live on each exam type's own page, not on the home
+            'freeTests' => $this->freeTests(),
             'courses' => $courses->map(fn ($c) => $this->course($c))->values(),
             'examSeries' => array_map(fn ($c) => $this->card($c), app(HomeController::class)->homeSeriesCards()),
             'ranking' => app(StudentProgress::class)->publicBoard(null, 20)->map(fn ($b) => ['pos' => $b->pos, 'name' => $b->name, 'coins' => $b->coins, 'tests' => $b->attempts, 'me' => auth()->check() && $b->uid === auth()->id()])->values(),
-            'links' => ['android' => config('app_links.android'), 'ios' => config('app_links.ios'), 'site' => url('/')],
+            'links' => ['android' => config('app_links.android'), 'ios' => config('app_links.ios'), 'site' => url('/'), 'logoLight' => \App\Models\SiteSetting::logo('light'), 'logoDark' => \App\Models\SiteSetting::logo('dark')],
         ]]);
     }
 
@@ -303,6 +301,232 @@ class AppCatalogController extends Controller
         ]]);
     }
 
+    private function categoryCard($c): array
+    {
+        return ['id' => $c->id, 'slug' => $c->slug, 'name' => $c->name, 'image' => $c->image ? url(Storage::url($c->image)) : null, 'icon' => $c->icon,
+            'subs' => $c->relationLoaded('children') ? $c->children->pluck('name')->take(8)->values() : [], 'url' => $c->publicUrl()];
+    }
+
+    /** Open free tests: free tests of an exam type and of free seasons, soonest first (each knows its exam type, so the app can filter). */
+    private function freeTests(): array
+    {
+        $now = now();
+        $exams = CompetitiveExam::pluck('slug', 'id');
+        $rows = \App\Models\CourseExam::with('course:id,slug,title')->where('status', 'published')->where('is_paid', false)
+            ->where(fn ($q) => $q->whereNull('end_at')->orWhere('end_at', '>=', $now))->whereNotNull('start_at')->where('start_at', '<=', $now->copy()->addDays(15))->orderBy('start_at')->limit(12)->get()
+            ->map(fn ($t) => ['id' => $t->id, 'title' => $t->title, 'by' => $t->course->title ?? '', 'exam' => $exams[$t->exam_id] ?? null, 'start' => optional($t->start_at)->toIso8601String(), 'end' => optional($t->end_at)->toIso8601String(),
+                'minutes' => $t->duration_minutes, 'tag' => 'Free test', 'url' => url('tests/' . $t->id)]);
+        if (\Illuminate\Support\Facades\Schema::hasTable('exam_seasons')) {
+            $access = app(SeasonAccess::class);
+            $free = ExamSeason::where('status', 'published')->get()->reject(fn ($se) => $access->isPaid($se))->keyBy('id');
+            if ($free->count()) {
+                $rows = $rows->concat(\App\Models\CourseExam::where('status', 'published')->whereIn('season_id', $free->keys())->whereNotIn('id', $rows->pluck('id'))
+                    ->where(fn ($q) => $q->whereNull('end_at')->orWhere('end_at', '>=', $now))->whereNotNull('start_at')->where('start_at', '<=', $now->copy()->addDays(15))->orderBy('start_at')->limit(12)->get()
+                    ->map(fn ($t) => ['id' => $t->id, 'title' => $t->title, 'by' => $free[$t->season_id]->title, 'exam' => $exams[$t->exam_id] ?? null, 'start' => optional($t->start_at)->toIso8601String(), 'end' => optional($t->end_at)->toIso8601String(),
+                        'minutes' => $t->duration_minutes, 'tag' => 'Season · Free test', 'url' => url('tests/' . $t->id)]));
+            }
+        }
+
+        return $rows->sortBy('start')->values()->all();
+    }
+
+    // ------------------------------------------------------------------ categories (slug based)
+
+    /** GET api/app/categories/{slug} - a category / sub category: its sub categories, articles, free videos, courses. */
+    public function category(Request $request, $slug)
+    {
+        auth()->shouldUse('api');
+        $cat = \App\Models\ExamCategory::with('exam')->where('status', 1)->where('slug', $slug)->first();
+        if (!$cat || !$cat->exam || !$cat->exam->status) {
+            return response()->json(['status' => 404, 'message' => 'Category not found.'], 404);
+        }
+        $ids = array_merge([$cat->id], $cat->descendantIds());
+        $items = fn ($kind) => ContentItem::ofKind($kind)->live()->whereIn('category_id', $ids)->with('exams:id,short_name,name,color');
+
+        return response()->json(['status' => 200, 'data' => [
+            'id' => $cat->id, 'slug' => $cat->slug, 'name' => $cat->name, 'description' => strip_tags((string) $cat->description), 'exam' => $this->examType($cat->exam),
+            'trail' => $cat->ancestors()->push($cat)->map(fn ($c) => ['slug' => $c->slug, 'name' => $c->name])->values(),
+            'children' => $cat->children()->where('status', 1)->get()->map(fn ($c) => $this->categoryCard($c))->values(),
+            'articles' => $items('article')->orderByDesc('published_at')->orderByDesc('id')->limit(12)->get()->map(fn ($c) => $this->content($c, 'article') + ['url' => url('articles/' . $c->id)])->values(),
+            'videos' => $items('promo_class')->orderByRaw('COALESCE(scheduled_at, created_at) desc')->limit(12)->get()->map(fn ($c) => $this->promo($c))->values(),
+            'courses' => ExamCourse::with('exam:id,short_name,name,color,slug')->where('status', 'published')->where('slug', 'not like', 'series-%')->inCategory($cat->id)->orderByDesc('is_featured')->orderByDesc('id')->limit(12)->get()->map(fn ($c) => $this->course($c))->values(),
+        ]]);
+    }
+
+    // ------------------------------------------------------------------ free articles with playlists
+
+    /** GET api/app/articles?exam=&folder=&page= - like api/app/classes: playlists (folders) at this level + the articles in it. */
+    public function articles(Request $request)
+    {
+        $exam = $request->filled('exam') ? CompetitiveExam::where(fn ($q) => ctype_digit((string) $request->exam) ? $q->where('id', $request->exam) : $q->where('slug', $request->exam))->first() : null;
+        $folder = $request->filled('folder') ? \App\Models\ContentFolder::where('kind', 'article')->find($request->folder) : null;
+        $all = \App\Models\ContentFolder::where('kind', 'article')->get(['id', 'parent_id']);
+        $own = ContentItem::ofKind('article')->live()->whereNotNull('folder_id')->selectRaw('folder_id, count(*) c')->groupBy('folder_id')->pluck('c', 'folder_id');
+        $count = function ($id) use (&$count, $own, $all) {
+            return (int) ($own[$id] ?? 0) + $all->where('parent_id', $id)->sum(fn ($f) => $count($f->id));
+        };
+        $lists = \App\Models\ContentFolder::where('kind', 'article')->where('parent_id', $folder?->id)->when($exam, fn ($q) => $q->where('exam_id', $exam->id))->orderBy('position')->orderBy('title')->get()->filter(fn ($f) => $count($f->id) > 0)->values();
+        $page = ContentItem::ofKind('article')->live()->with('exams:id,short_name,name,color')->when($exam, fn ($w) => $w->forExam($exam->slug))->where('folder_id', $folder?->id)
+            ->orderByDesc('published_at')->orderByDesc('id')->paginate(min(30, max(4, (int) $request->query('per', 12))));
+
+        return response()->json(['status' => 200, 'data' => [
+            'playlist' => $folder ? ['id' => $folder->id, 'title' => $folder->title, 'parent' => $folder->parent_id] : null,
+            'playlists' => $request->integer('page', 1) > 1 ? [] : $lists->map(fn ($f) => ['id' => $f->id, 'title' => $f->title, 'count' => $count($f->id), 'image' => null])->values(),
+            'items' => $page->getCollection()->map(fn ($c) => $this->content($c, 'article') + ['url' => url('articles/' . $c->id), 'audio' => (bool) $c->audioSrc()])->values(),
+            'page' => $page->currentPage(), 'lastPage' => $page->lastPage(), 'total' => $page->total(),
+        ]]);
+    }
+
+    // ------------------------------------------------------------------ courses (list + Udemy style detail)
+
+    private function courseQuery(Request $request)
+    {
+        $exam = $request->filled('exam') ? CompetitiveExam::where('status', 1)->where(fn ($q) => ctype_digit((string) $request->exam) ? $q->where('id', $request->exam) : $q->where('slug', $request->exam))->first() : null;
+
+        return ExamCourse::with('exam:id,short_name,name,color,slug,image')->where('status', 'published')->where('slug', 'not like', 'series-%')
+            ->whereIn('exam_id', CompetitiveExam::where('status', 1)->select('id'))
+            ->when($request->filled('exam'), fn ($q) => $q->where('exam_id', $exam?->id ?? 0))
+            ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w->where('title', 'like', '%' . $request->q . '%')->orWhere('short_description', 'like', '%' . $request->q . '%')))
+            ->when(in_array($request->type, ['free', 'paid'], true), fn ($q) => $q->where('course_type', $request->type))
+            ->orderByDesc('is_featured')->orderBy('position')->orderByDesc('id');
+    }
+
+    /** GET api/app/courses?exam=kpsc&q=&type=free|paid&page=1&per=12 - published courses, newest / featured first, searchable, per exam type. */
+    public function courses(Request $request)
+    {
+        auth()->shouldUse('api');
+        $page = $this->courseQuery($request)->paginate(min(30, max(4, (int) $request->query('per', 12))));
+        $mine = auth()->check() ? auth()->user()->activeAdmissions()->pluck('course_id')->all() : [];
+
+        return response()->json(['status' => 200, 'data' => [
+            'items' => $page->getCollection()->map(fn ($c) => $this->course($c) + ['short' => $c->short_description, 'level' => $c->level, 'hours' => $c->duration_hours, 'featured' => (bool) $c->is_featured, 'owned' => in_array($c->id, $mine)])->values(),
+            'page' => $page->currentPage(), 'lastPage' => $page->lastPage(), 'total' => $page->total(),
+        ]]);
+    }
+
+    /** GET api/app/courses/{slugOrId} - everything a course page shows: price, what you learn, what is included, tests (free ones can be tried), teachers. */
+    public function courseDetail(Request $request, $slugOrId)
+    {
+        auth()->shouldUse('api');
+        $c = ExamCourse::with(['exam:id,short_name,name,color,slug,image', 'features', 'members' => fn ($m) => $m->wherePivot('member_role', 'teacher')->select('users.id', 'users.name', 'users.image')])
+            ->where('status', 'published')->where(fn ($q) => $q->where('slug', $slugOrId)->orWhere('id', ctype_digit((string) $slugOrId) ? $slugOrId : 0))->first();
+        if (!$c) {
+            return response()->json(['status' => 404, 'message' => 'Course not found.'], 404);
+        }
+
+        $user = auth()->user();
+        $owned = $user && \App\Models\CourseAdmission::where('user_id', $user->id)->where('course_id', $c->id)->where('status', 'active')->get()->contains(fn ($a) => $a->grantsAccess());
+        $engine = app(\App\Services\TestEngine::class);
+        $tests = \App\Models\CourseExam::with('feature:id,name')->withCount('links')->where('course_id', $c->id)->where('status', 'published')->orderBy('position')->orderBy('id')->get()
+            ->filter(fn ($t) => $t->links_count > 0)->each(fn ($t) => $t->free = $engine->access($user, $t)['state'] === 'free');
+        $list = fn ($v) => collect(is_array($v) ? $v : (json_decode((string) $v, true) ?: []))->map(fn ($x) => is_array($x) ? ($x['text'] ?? $x['title'] ?? '') : (string) $x)->filter()->values();
+        $off = $c->price > 0 && !$c->isFree() ? max(0, (int) round((1 - $c->effectivePrice() / $c->price) * 100)) : 0;
+
+        return response()->json(['status' => 200, 'data' => $this->course($c) + [
+            'short' => $c->short_description, 'description' => $c->description, 'audience' => $c->audience, 'level' => $c->level, 'language' => $c->language, 'hours' => $c->duration_hours,
+            'certificate' => (bool) $c->certificate_enabled, 'promoVideo' => $c->promo_video_url, 'off' => $off, 'owned' => $owned, 'tags' => $c->tags ?? [],
+            'learn' => $list($c->highlights), 'requirements' => $list($c->requirements),
+            'includes' => $c->features->map(fn ($f) => ['name' => $f->name, 'image' => method_exists($f, 'imageUrl') ? $f->imageUrl() : null])->values(),
+            'teachers' => $c->members->map(fn ($m) => ['name' => $m->name, 'image' => $m->image ? url('storage/users/' . $m->image) : null])->values(),
+            'testCount' => $tests->count(), 'freeTests' => $tests->where('free', true)->count(),
+            'groups' => $tests->groupBy(fn ($t) => $t->feature->name ?? 'Tests')->map(fn ($g, $name) => ['name' => $name, 'items' => $g->map(fn ($t) => ['title' => $t->title, 'free' => (bool) $t->free, 'minutes' => $t->duration_minutes ?? null])->values()])->values(),
+        ]]);
+    }
+
+    /** POST api/auth/courses/{id}/join - free course: joined at once; paid: { url } payment page to open. */
+    public function courseJoin(Request $request, $id, PaymentLinkService $links, \App\Services\Payments\AdmissionService $admissions)
+    {
+        $course = ExamCourse::where('status', 'published')->findOrFail($id);
+        $user = $request->user();
+        if (\App\Models\CourseAdmission::where('user_id', $user->id)->where('course_id', $course->id)->where('status', 'active')->get()->contains(fn ($a) => $a->grantsAccess())) {
+            return response()->json(['status' => 200, 'owned' => true, 'message' => 'You already have this course.']);
+        }
+        try {
+            if ($course->isFree()) {
+                $admissions->checkout($user, $course, null, null, 'android');
+
+                return response()->json(['status' => 200, 'owned' => true, 'message' => 'You have joined the course.']);
+            }
+            $link = $links->create($user, $course, 'android', $request->input('coupon_code'), 48, 'Bought from the app (course page)', null);
+
+            return response()->json(['status' => 200, 'owned' => false, 'url' => $link->url()]);
+        } catch (PaymentException $e) {
+            return response()->json(['status' => 422, 'message' => $e->getMessage()], 422);
+        }
+    }
+
+    // ------------------------------------------------------------------ free / live classes + playlists
+
+    /** Number of live classes in a playlist and everything below it. */
+    private function playlistCounts(): array
+    {
+        $all = \App\Models\ContentFolder::where('kind', 'promo_class')->get(['id', 'parent_id']);
+        $own = ContentItem::ofKind('promo_class')->live()->whereNotNull('folder_id')->selectRaw('folder_id, count(*) c')->groupBy('folder_id')->pluck('c', 'folder_id');
+        $count = function ($id) use (&$count, $own, $all) {
+            return (int) ($own[$id] ?? 0) + $all->where('parent_id', $id)->sum(fn ($f) => $count($f->id));
+        };
+
+        return $all->mapWithKeys(fn ($f) => [$f->id => $count($f->id)])->all();
+    }
+
+    /**
+     * GET api/app/classes?exam=kpsc&folder=&mode=live|recorded&page=1&per=12
+     * Free classes, newest first, for one exam type (or all). A playlist = a folder of free classes: without ?folder the answer lists
+     * the top level playlists + the loose classes; with ?folder=ID the playlists inside it + the classes in it.
+     */
+    public function classes(Request $request)
+    {
+        $exam = $request->filled('exam') ? CompetitiveExam::where(fn ($q) => ctype_digit((string) $request->exam) ? $q->where('id', $request->exam) : $q->where('slug', $request->exam))->first() : null;
+        $folder = $request->filled('folder') ? \App\Models\ContentFolder::where('kind', 'promo_class')->find($request->folder) : null;
+        $counts = $this->playlistCounts();
+
+        $lists = \App\Models\ContentFolder::where('kind', 'promo_class')->where('parent_id', $folder?->id)->when($exam, fn ($q) => $q->where('exam_id', $exam->id))->orderBy('position')->orderBy('title')->get()
+            ->filter(fn ($f) => ($counts[$f->id] ?? 0) > 0)->values();
+        $covers = ContentItem::ofKind('promo_class')->live()->whereIn('folder_id', $lists->pluck('id'))->whereNotNull('image')->orderByDesc('id')->get(['folder_id', 'image'])->unique('folder_id')->pluck('image', 'folder_id');
+
+        $q = ContentItem::ofKind('promo_class')->live()->with('exams:id,short_name,name,color')
+            ->when($exam, fn ($w) => $w->forExam($exam->slug))
+            ->when(in_array($request->mode, ['live', 'recorded'], true), fn ($w) => $w->where('mode', $request->mode))
+            ->when($request->filled('q'), fn ($w) => $w->where('title', 'like', '%' . $request->q . '%'))
+            // without a search, the list is the level being browsed; a search looks through every playlist
+            ->when(!$request->filled('q'), fn ($w) => $w->where('folder_id', $folder?->id))
+            ->orderByRaw('COALESCE(content_items.scheduled_at, content_items.created_at) desc')->orderByDesc('content_items.id');
+        $page = $q->paginate(min(30, max(4, (int) $request->query('per', 12))));
+
+        return response()->json(['status' => 200, 'data' => [
+            'exam' => $exam ? $this->examType($exam) : null,
+            'playlist' => $folder ? ['id' => $folder->id, 'title' => $folder->title, 'parent' => $folder->parent_id] : null,
+            'playlists' => $request->integer('page', 1) > 1 ? [] : $lists->map(fn ($f) => ['id' => $f->id, 'title' => $f->title, 'count' => $counts[$f->id] ?? 0, 'image' => !empty($covers[$f->id]) ? $this->img($covers[$f->id]) : null])->values(),
+            'items' => $page->getCollection()->map(fn ($c) => $this->promo($c) + ['exams' => $c->exams->map(fn ($e) => $e->short_name ?: $e->name)->values()])->values(),
+            'page' => $page->currentPage(), 'lastPage' => $page->lastPage(), 'total' => $page->total(),
+        ]]);
+    }
+
+    /** GET api/app/classes/playlists?exam=kpsc - the top level playlists of free classes (for the home / exam page strip). */
+    public function playlists(Request $request)
+    {
+        $request->query->set('page', 1);
+
+        return $this->classes($request);
+    }
+
+    // ------------------------------------------------------------------ ads
+
+    /** GET api/app/ads - what the app may show (only what the panel has switched on; a student who bought a course may be exempt). */
+    public function ads(Request $request)
+    {
+        auth()->shouldUse('api');
+        $on = \App\Support\Ads::platformOn('app');
+        $paid = $on && auth()->check() && auth()->user()->activeAdmissions()->isNotEmpty();
+        $units = $on ? \App\Support\Ads::units('app')->filter(fn ($u) => $u->enabled && !($paid && $u->hide_for_paid))->map(fn ($u) => [
+            'type' => $u->type, 'android' => $u->unit_android, 'ios' => $u->unit_ios, 'pages' => array_values((array) $u->pages),
+            'everyN' => (int) $u->every_n, 'maxPerPage' => (int) $u->max_per_page, 'startPage' => (int) $u->start_page, 'capMinutes' => (int) $u->cap_minutes,
+        ])->values() : [];
+
+        return response()->json(['status' => 200, 'data' => ['enabled' => $on && count($units) > 0, 'units' => $units,
+            'quietMinutes' => (int) \App\Models\SiteSetting::get('ads_quiet_minutes', '3'), 'sessionMax' => (int) \App\Models\SiteSetting::get('ads_session_max', '3')]]);
+    }
+
     // ------------------------------------------------------------------ stories
 
     /** GET api/app/stories?exam=kpsc&page=1&per=10 - the pictures / videos strip of the home and exam type pages. */
@@ -326,6 +550,7 @@ class AppCatalogController extends Controller
             'id' => $c->id, 'kind' => $kind, 'title' => $c->title, 'image' => $this->img($c->image), 'date' => optional($c->published_at ?? $c->created_at)->toDateString(),
             'exams' => $c->exams->map(fn ($e) => $e->short_name ?: $e->name)->values(), 'html' => $c->descriptionHtml(), 'link' => $c->link_url,
             'attachment' => $c->attachment ? url(Storage::url('files/' . $c->attachment)) : null, 'url' => url($kind === 'article' ? 'articles/' . $c->id : 'announcements/' . $c->id),
+            'audio' => $kind === 'article' ? $c->audioSrc() : null, 'speak' => $kind === 'article' ? $c->speakText() : null,
         ]]);
     }
 

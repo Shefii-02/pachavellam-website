@@ -29,6 +29,7 @@
 
     @include('partials.theme')
     @yield('styles')
+    @include('partials.adsense')
     <style>
         /* width */
         ::-webkit-scrollbar {

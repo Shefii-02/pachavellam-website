@@ -27,7 +27,7 @@ class PushNotifier
     /** Device token rows for the campaign's audience. */
     public function devices(PushCampaign $c)
     {
-        $q = DeviceToken::query()->join('users', 'users.id', '=', 'device_tokens.user_id')->select('device_tokens.*');
+        $q = DeviceToken::query()->join('users', 'users.id', '=', 'device_tokens.user_id')->where('users.push_enabled', 1)->select('device_tokens.*');
         if ($c->audience === 'interested') {
             $q->whereIn('device_tokens.user_id', DB::table('student_exam_interests')->select('user_id'));   // interested in any exam type
         } elseif ($c->audience === 'exams' && $c->audience_exam_ids) {
