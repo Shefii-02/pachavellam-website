@@ -348,11 +348,37 @@ class PublicCatalogController extends Controller
             'at' => $a->answer_uploaded ? \Illuminate\Support\Carbon::parse($a->answer_uploaded)->format('d M Y, h:i a') : ''];
         $mine = $user ? \App\Models\ModelExamAttempt::where('exam_id', $exam->id)->where('user_id', $user->id)->orderByDesc('id')->limit(20)->get()->map($fmt)->values() : collect();
         $ended = $exam->ended_at && \Illuminate\Support\Carbon::parse($exam->ended_at)->isPast();
-        $top = $ended ? \App\Models\ModelExamAttempt::where('exam_id', $exam->id)->where('answer_uploaded', '<=', $exam->ended_at)
-            ->orderByDesc('total_mark')->orderBy('created_at')->limit(10)->get()->map($fmt)->values() : collect();
+        return response()->json(['loggedIn' => (bool) $user, 'ended' => $ended, 'mine' => $mine, 'title' => $exam->exam_title ?: ($exam->examtitle ?: 'Exam')]);
+    }
 
-        return response()->json(['loggedIn' => (bool) $user, 'ended' => $ended, 'mine' => $mine, 'top' => $top,
-            'leaderboardUrl' => url('kpsc/model-exam/' . $exam->exam_date . '/' . $exam->id . '/leaderboard')]);
+    /** The leaderboard drawer of an OMR exam: 25 students per page (ranked), plus the signed-in student's own best rank. Opens once the exam has ended. */
+    public function omrLeaderboard(Request $request, $id)
+    {
+        $exam = \App\Models\DailyExam::where('section', 'Model Exam')->where('status', 1)->findOrFail($id);
+        if (!$exam->ended_at || !\Illuminate\Support\Carbon::parse($exam->ended_at)->isPast()) {
+            return response()->json(['ended' => false, 'rows' => [], 'total' => 0, 'more' => false, 'me' => null]);
+        }
+        $per = 25;
+        $page = max(1, (int) $request->query('page', 1));
+        $base = fn () => \App\Models\ModelExamAttempt::where('exam_id', $exam->id)->where('answer_uploaded', '<=', $exam->ended_at);
+        $total = $base()->count();
+        $user = auth()->user();
+        $rows = $base()->orderByDesc('total_mark')->orderBy('created_at')->orderBy('id')->skip(($page - 1) * $per)->take($per)->get();
+        $meId = $user ? $user->id : null;
+        $out = $rows->values()->map(fn ($a, $i) => ['rank' => ($page - 1) * $per + $i + 1, 'name' => $a->full_name ?: 'Student', 'right' => (int) $a->right_answer, 'wrong' => (int) $a->wrong_answer,
+            'mark' => round((float) $a->total_mark, 2), 'me' => $meId && $a->user_id == $meId]);
+
+        $me = null;
+        if ($user) {
+            $best = $base()->where('user_id', $user->id)->orderByDesc('total_mark')->orderBy('created_at')->orderBy('id')->first();
+            if ($best) {
+                $rank = $base()->where(fn ($q) => $q->where('total_mark', '>', $best->total_mark)
+                    ->orWhere(fn ($w) => $w->where('total_mark', $best->total_mark)->where(fn ($x) => $x->where('created_at', '<', $best->created_at)->orWhere(fn ($y) => $y->where('created_at', $best->created_at)->where('id', '<', $best->id)))))->count() + 1;
+                $me = ['rank' => $rank, 'name' => $best->full_name ?: 'You', 'mark' => round((float) $best->total_mark, 2), 'right' => (int) $best->right_answer, 'wrong' => (int) $best->wrong_answer];
+            }
+        }
+
+        return response()->json(['ended' => true, 'rows' => $out, 'total' => $total, 'more' => $page * $per < $total, 'me' => $me, 'loggedIn' => (bool) $user]);
     }
 
     /** Everything a series page shows: active seasons and the other exams (also read by the app API). */
@@ -429,7 +455,7 @@ class PublicCatalogController extends Controller
             $paid = $access->isPaid($se);
             $eff = $access->effectivePrice($se);
             $active[] = (object) [
-                'id' => $se->id, 'title' => $se->title, 'sub' => ($se->starts_on ? $se->starts_on->format('d M Y') : '') . ($se->ends_on ? ' - ' . $se->ends_on->format('d M Y') : ' - running'),
+                'id' => $se->id, 'cover' => $se->cover_image ? \Illuminate\Support\Facades\Storage::url($se->cover_image) : null, 'title' => $se->title, 'sub' => ($se->starts_on ? $se->starts_on->format('d M Y') : '') . ($se->ends_on ? ' - ' . $se->ends_on->format('d M Y') : ' - running'),
                 'basis' => $se->basis ? (\App\Models\ExamSeason::BASES[$se->basis] ?? '') . ($se->basis_name ? ': ' . $se->basis_name : '') : null,
                 'paid' => $paid, 'price' => $paid ? $money($eff) : null, 'oldPrice' => $paid && $eff < $se->price ? $money($se->price) : null, 'validity' => $paid ? $access->validityLabel($se) : null,
                 'freeN' => $paid ? $items->where('state', 'free')->count() : 0, 'owns' => $paid && $access->owns($user, $se), 'url' => url('seasons/' . $se->id),

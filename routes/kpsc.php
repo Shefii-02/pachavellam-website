@@ -32,6 +32,7 @@ Route::group(['prefix' => 'kpsc', 'as' => 'kpsc'], function () {
     Route::post('model-exam/store-result/{id}', 'cms\HomeController@store_model_exam_results')->middleware('season.access');
     Route::get('model-exam/{date}/{id}/leaderboard', 'cms\HomeController@model_exam_leaderboard');
     Route::get('model-exam-summary/{id}', 'PublicCatalogController@omrSummary')->whereNumber('id');   // drawers on the OMR listing: my attempts + leaderboard
+    Route::get('model-exam-leaderboard-data/{id}', 'PublicCatalogController@omrLeaderboard')->whereNumber('id');
     Route::get('model-exam/{date}/{id}/answerkey', 'cms\HomeController@model_exam_answerkey');
 
 

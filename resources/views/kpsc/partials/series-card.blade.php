@@ -11,7 +11,7 @@
             <span class="small text-muted ms-auto omr-last"></span>
         </div>
         <details class="omr-dr mt-2" data-w="mine"><summary><i class="bi bi-clock-history"></i> My attempts</summary><div class="omr-body small">Loading…</div></details>
-        <details class="omr-dr" data-w="top"><summary><i class="bi bi-bar-chart"></i> Leaderboard</summary><div class="omr-body small">Loading…</div></details>
+        <button type="button" class="omr-lb-btn mt-2" data-lb="{{ $r->omrId }}" data-title="{{ $r->title }}"><i class="bi bi-trophy-fill"></i> Leaderboard <i class="bi bi-chevron-right ms-auto"></i></button>
     </div>
 </div></div>
 @else
