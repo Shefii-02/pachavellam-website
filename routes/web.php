@@ -269,7 +269,7 @@ Route::get('seasons/{id}/buy', 'SeasonController@buy')->whereNumber('id')->middl
 
 // exam series of an exam type: /kpsc/daily-exams, /rrb/omr-exams, /ssc/gk-exams, /kpsc/ca-exams
 foreach (['daily-exams', 'omr-exams', 'gk-exams', 'ca-exams', 'special-exams'] as $seriesPage) {
-    Route::get('{examSlug}/' . $seriesPage . '/{seasonSlug}', 'SeasonController@showBySlug')->where(['examSlug' => '[a-z0-9-]+', 'seasonSlug' => '[a-z0-9-]+'])->defaults('page', $seriesPage);
+    Route::get('{examSlug}/' . $seriesPage . '/{seasonSlug}', fn (\Illuminate\Http\Request $r, $examSlug, $seasonSlug) => app(\App\Http\Controllers\SeasonController::class)->showBySlug($r, $examSlug, $seriesPage, $seasonSlug, app(\App\Services\SeasonAccess::class)))->where(['examSlug' => '[a-z0-9-]+', 'seasonSlug' => '[a-z0-9-]+']);
     Route::get('{examSlug}/' . $seriesPage, fn (\Illuminate\Http\Request $r, $examSlug) => app(\App\Http\Controllers\PublicCatalogController::class)->series($r, $examSlug, $seriesPage))->where('examSlug', '[a-z0-9-]+');
 }
 
