@@ -26,6 +26,8 @@
         --pv-danger: #ff8a80; --pv-danger-soft: rgba(255, 138, 128, .14);
         color-scheme: dark;
     }
+
+
     html, body, html[data-theme="dark"] body { background-color: var(--pv-bg); color: var(--pv-text); }
     body { transition: background-color .2s, color .2s; }
 
