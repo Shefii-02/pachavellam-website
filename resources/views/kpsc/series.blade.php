@@ -90,16 +90,7 @@
                     @endif
                 </div>
                 @if ($se->paid && $se->freeN)<div class="small text-muted mt-1"><b>{{ $se->freeN }}</b> free exam{{ $se->freeN == 1 ? '' : 's' }}</div>@endif
-                @if (count($se->items))
-                    <div class="sr-list" style="padding:8px 0 0">
-                        @foreach (array_slice($se->items, 0, 3) as $r)
-                            @include('kpsc.partials.series-row', ['r' => $r])
-                        @endforeach
-                    </div>
-                    @if ($se->url && $se->total > 3)<a class="small d-block mt-2" href="{{ $se->url }}">All {{ $se->total }} exams <i class="bi bi-arrow-right"></i></a>@endif
-                @else
-                    <div class="small text-muted mt-2">No exams in this season yet.</div>
-                @endif
+                @if ($se->url)<a class="sr-buy d-block text-center mt-3" style="margin-left:0" href="{{ $se->url }}">View all {{ $se->total }} exam{{ $se->total == 1 ? '' : 's' }} <i class="bi bi-arrow-right"></i></a>@endif
             </div>
         </div></div>
     @endforeach
