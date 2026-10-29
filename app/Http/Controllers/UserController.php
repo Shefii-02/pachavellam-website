@@ -27,6 +27,9 @@ class UserController extends Controller
         return view('');
     }
     public function register(){
+        if (!auth()->check()) {
+            return redirect('sign-in');
+        }
         $ret =  auth()->user()->check_filledform();
       
         if($ret != 'dashboard'){
