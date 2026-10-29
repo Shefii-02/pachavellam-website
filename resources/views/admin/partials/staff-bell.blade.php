@@ -3,7 +3,7 @@
 <style>
     .staff-bell-btn { width: 2.4rem; height: 2.4rem; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; line-height: 1; }
     .staff-bell-btn::before, .staff-bell-btn::after { display: none !important; }
-    .staff-bell-btn .bell-count { position: absolute; top: 0; right: 0; left: auto; transform: translate(25%, -15%); min-width: 1.15rem; height: 1.15rem; padding: 0 .3rem; border-radius: 999px; align-items: center; justify-content: center; font-size: .65rem; font-weight: 600; line-height: 1; letter-spacing: 0; color: #fff; box-shadow: 0 0 0 2px var(--bs-body-bg, #fff); display: inline-flex; }
+    .staff-bell-btn .bell-count { position: absolute; top: 1px; right: 10px; left: auto; transform: translate(25%, -15%); min-width: 1.15rem; height: 1.15rem; padding: 0 .3rem; border-radius: 999px; align-items: center; justify-content: center; font-size: .65rem; font-weight: 600; line-height: 1; letter-spacing: 0; color: #fff; box-shadow: 0 0 0 2px var(--bs-body-bg, #fff); display: inline-flex; }
 </style>
 <li class="nav-item dropdown ms-1 ms-lg-2" id="{{ $bellId }}">
     <a class="nav-notification staff-bell-btn btn p-0 position-relative" href="#" role="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Notifications">
