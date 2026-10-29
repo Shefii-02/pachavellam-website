@@ -38,6 +38,11 @@ class AppServiceProvider extends ServiceProvider
     {
         // devices: website sign in / sign out are recorded (the app does it in Api\AuthController)
         \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Login::class, [\App\Listeners\WebDeviceSession::class, 'login']);
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Login::class, function ($e) {
+            if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'last_login_at')) {
+                \Illuminate\Support\Facades\DB::table('users')->where('id', $e->user->getAuthIdentifier())->update(['last_login_at' => now()]);
+            }
+        });
         \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Logout::class, [\App\Listeners\WebDeviceSession::class, 'logout']);
 
         // Unnamed routes inside a group that has `as` inherit the bare group prefix as their name
