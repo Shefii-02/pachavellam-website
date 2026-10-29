@@ -31,6 +31,9 @@ return [
     |
     */
 
+    // rate-limiter counters change on every request; keep them off the database cache to avoid deadlocks
+    'limiter' => env('CACHE_LIMITER_STORE', 'file'),
+
     'stores' => [
 
         'array' => [

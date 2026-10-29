@@ -293,7 +293,23 @@ class ClassLibraryController extends Controller
         }
         foreach ((array) $request->input('dirs', []) as $d) {
             $dir = $browser->clean($d);
-            foreach ($fs->allFiles($browser->full($dir)) as $full) {
+            $stack = [$browser->full($dir)];
+            $seen = 0;
+            $walk = (function () use ($fs, &$stack) {
+                while ($stack) {
+                    $cur = array_pop($stack);
+                    foreach ($fs->files($cur) as $f) {
+                        yield $f;
+                    }
+                    foreach ($fs->directories($cur) as $d) {
+                        $stack[] = $d;
+                    }
+                }
+            })();
+            foreach ($walk as $full) {
+                if (++$seen > $limit * 5) {
+                    break;
+                }
                 if (in_array(strtolower(pathinfo($full, PATHINFO_EXTENSION)), $extensions, true)) {
                     $rel = $browser->full('') === '' ? $full : ltrim(substr($full, strlen($browser->full(''))), '/');
                     $paths[] = $rel;

@@ -27,7 +27,7 @@ class UserController extends Controller
         return view('');
     }
     public function register(){
-        $ret =  User::check_filledform(auth()->user()->id);
+        $ret =  auth()->user()->check_filledform();
       
         if($ret != 'dashboard'){
             return view($ret);
@@ -174,7 +174,7 @@ class UserController extends Controller
          $validator = Validator::make($request->all(), [
                 'phone' => 'bail|required|numeric|digits:10',
                 'name'      => 'bail|required',
-                'email'     => 'bail|required|email',  
+                'email'     => ['bail', 'required', 'email', \Illuminate\Validation\Rule::unique('users', 'email')->ignore(auth()->id())],
             ]);
         
             if ($validator->fails()) {
@@ -193,8 +193,8 @@ class UserController extends Controller
                     $user->save();
                     return redirect('/');
                 }
-                catch(Exception $e){
-                       dd('invalid attempt');
+                catch(\Illuminate\Database\UniqueConstraintViolationException $e){
+                    return redirect()->back()->withErrors(['email' => 'This email is already registered.'])->withInput();
                 }
            }
            else

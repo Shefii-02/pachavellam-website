@@ -552,6 +552,7 @@ class HomeController extends Controller
     public function  news_view($id){
      
         $psc_news       = Pscnews::where('id',$id)->first();
+        abort_if(!$psc_news, 404);
         $title = 'Latest News';
         $redirection = url('kpsc/news-all');
         
@@ -696,6 +697,8 @@ class HomeController extends Controller
                                 ->select('kpsc_daily_exams.*','kpsc_model_exams_details.qp_file','kpsc_model_exams_details.answer_file')
                                 ->first();
         
+        abort_if(!$examdetails, 404);
+
         return view("kpsc.model-exam-single",compact('examdetails'));
 
     }
@@ -709,6 +712,8 @@ class HomeController extends Controller
                                 ->select('kpsc_daily_exams.*','kpsc_model_exams_details.qp_file','kpsc_model_exams_details.answer_file')
                                 ->first();
         
+        abort_if(!$examdetails, 404);
+
         return view("kpsc.model-exam-answerkey",compact('examdetails'));
     }
     
