@@ -36,7 +36,7 @@
         .omr-lb-btn { display:flex; align-items:center; gap:8px; width:100%; border:0; border-radius:12px; padding:9px 12px; font-size:.84rem; font-weight:800; color:#5b3b00; background:linear-gradient(135deg,#ffe29a,#ffc247); cursor:pointer; }
         #lbDrawer { --bs-offcanvas-width:420px; max-width:100vw; background:var(--pv-surface); color:var(--pv-text); }
         #lbDrawer .lb-head { background:linear-gradient(160deg,#1b2a41,#0a8f5b); color:#fff; padding:14px 16px 0; }
-        #lbDrawer .lb-head h5 { font-size:1rem; font-weight:800; margin:0; } #lbDrawer .lb-head small { opacity:.8; }
+        #lbDrawer .lb-head h5 { font-size:1rem; font-weight:800; margin:0;color:#fff; } #lbDrawer .lb-head small { opacity:.8; }
         .lb-podium { display:flex; align-items:flex-end; justify-content:center; gap:8px; padding:16px 6px 0; min-height:190px; }
         .lb-pd { flex:1; max-width:120px; text-align:center; color:#fff; } .lb-pd .av { width:46px; height:46px; margin:0 auto 4px; border-radius:50%; background:#fff; color:#1b2a41; font-weight:800; display:flex; align-items:center; justify-content:center; border:3px solid var(--c); position:relative; }
         .lb-pd.p1 .av { width:58px; height:58px; font-size:1.2rem; } .lb-pd .crown { position:absolute; top:-18px; left:50%; transform:translateX(-50%); color:#ffd23f; font-size:1.2rem; }
@@ -51,6 +51,9 @@
         #lbMe { border-top:2px solid #22c55e; background:#e7f6ef; padding:10px 14px; display:none; } #lbMe .lb-row { margin:0; background:transparent; padding:0; } #lbMe .tag { font-size:.68rem; font-weight:800; color:#0a6b46; text-transform:uppercase; letter-spacing:.05em; }
         .lb-msg { text-align:center; color:var(--pv-muted); padding:24px 10px; font-size:.88rem; }
         .sr-pg { display:flex; justify-content:space-between; align-items:center; margin-top:14px; font-size:.85rem; color:var(--pv-muted); }
+        #lbSub{
+            font-size:.78rem; color:var(--pv-muted); display:block; margin-top:2px;
+        }
     </style>
 @endsection
 @section('content')
