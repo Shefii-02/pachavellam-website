@@ -26,6 +26,10 @@
         .sr-pr { font-size:.66rem; font-weight:800; border-radius:10px; padding:2px 10px; background:#fff3d6; color:#8a5500; } .sr-pr.fr { background:#e7f6ef; color:#0a6b46; }
         .sr-paid { font-size:.62rem; font-weight:800; background:#f59e0b; color:#fff; border-radius:8px; padding:1px 7px; margin-left:6px; }
         .sr-none { border:1px dashed var(--pv-border); border-radius:14px; padding:22px 14px; text-align:center; color:var(--pv-muted); }
+        .sr-card { height:100%; background:var(--pv-surface); border:1px solid var(--pv-border); border-radius:16px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,.06); }
+        .sr-card .im { position:relative; height:84px; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.9); font-size:2rem; }
+        .sr-card .im .act { position:absolute; top:10px; right:10px; font-size:.66rem; font-weight:800; font-style:normal; background:#e7f6ef; color:#0a6b46; border-radius:10px; padding:2px 10px; }
+        .sr-card .bd { padding:12px; }
         .sr-pg { display:flex; justify-content:space-between; align-items:center; margin-top:14px; font-size:.85rem; color:var(--pv-muted); }
     </style>
 @endsection
@@ -45,30 +49,41 @@
 
     {{-- active seasons --}}
     <div class="sr-h"><i class="bi bi-lightning-charge-fill" style="color:#0a8f5b"></i>Active seasons <span class="ct">{{ count($active) }}</span></div>
-    @forelse ($active as $se)
-        <details class="sr-season" @if ($loop->first) open @endif>
-            <summary><span class="sn"><b>{{ $se->title }}</b><small>{{ $se->sub }} · {{ $se->total }} exam{{ $se->total == 1 ? '' : 's' }}, newest first</small></span>@if ($se->paid)<em class="sr-pr">₹{{ $se->price }}</em>@elseif ($se->id)<em class="sr-pr fr">Free</em>@endif<em class="act">Active</em><i class="bi bi-chevron-down"></i></summary>
-            @if ($se->id && ($se->basis || $se->paid))
-                <div class="sr-sbar">
-                    @if ($se->basis)<span>{{ $se->basis }}</span>@endif
+    @if (count($active))
+    <div class="row g-3">
+    @foreach ($active as $se)
+        <div class="col-12 col-md-6"><div class="sr-card">
+            <div class="im" style="background:linear-gradient(135deg,{{ $accent }},#10243e)"><i class="bi {{ $icon }}"></i><em class="act">Active</em></div>
+            <div class="bd">
+                <div class="fw-bold" style="line-height:1.3">@if ($se->url)<a href="{{ $se->url }}" style="color:inherit;text-decoration:none">{{ $se->title }}</a>@else{{ $se->title }}@endif</div>
+                <div class="small text-muted">{{ $se->sub }} · {{ $se->total }} exam{{ $se->total == 1 ? '' : 's' }}@if ($se->basis) · {{ $se->basis }}@endif</div>
+                <div class="d-flex justify-content-between align-items-center mt-2">
                     @if ($se->paid)
-                        <span>· <b>₹{{ $se->price }}</b>@if ($se->oldPrice) <s>₹{{ $se->oldPrice }}</s>@endif · {{ $se->validity }}@if ($se->freeN) · <b>{{ $se->freeN }}</b> free exam{{ $se->freeN == 1 ? '' : 's' }}@endif</span>
+                        <span class="fw-bold" style="color:#0a8f5b">₹{{ $se->price }}@if ($se->oldPrice) <s class="small text-muted fw-normal">₹{{ $se->oldPrice }}</s>@endif <span class="small text-muted fw-normal">· {{ $se->validity }}</span></span>
                         @if ($se->owns)<span class="sr-buy own">✓ You have this</span>@else<a class="sr-buy" href="{{ auth()->check() ? url('seasons/' . $se->id . '/buy') : url('sign-in') }}">Buy season</a>@endif
+                    @else
+                        <span class="fw-bold" style="color:#0a8f5b">Free</span>
+                        @if ($se->url)<a class="sr-buy" href="{{ $se->url }}">Open</a>@endif
                     @endif
-                    <a href="{{ $se->url }}" style="margin-left:{{ $se->paid ? '0' : 'auto' }}">Season details <i class="bi bi-arrow-right"></i></a>
                 </div>
-            @endif
-            <div class="sr-list">
-                @forelse ($se->items as $r)
-                    @include('kpsc.partials.series-row', ['r' => $r])
-                @empty
-                    <div class="sr-none" style="border:0">No exams in this season yet.</div>
-                @endforelse
+                @if ($se->paid && $se->freeN)<div class="small text-muted mt-1"><b>{{ $se->freeN }}</b> free exam{{ $se->freeN == 1 ? '' : 's' }}</div>@endif
+                @if (count($se->items))
+                    <div class="sr-list" style="padding:8px 0 0">
+                        @foreach (array_slice($se->items, 0, 3) as $r)
+                            @include('kpsc.partials.series-row', ['r' => $r])
+                        @endforeach
+                    </div>
+                    @if ($se->url && $se->total > 3)<a class="small d-block mt-2" href="{{ $se->url }}">All {{ $se->total }} exams <i class="bi bi-arrow-right"></i></a>@endif
+                @else
+                    <div class="small text-muted mt-2">No exams in this season yet.</div>
+                @endif
             </div>
-        </details>
-    @empty
+        </div></div>
+    @endforeach
+    </div>
+    @else
         <div class="sr-none"><i class="bi bi-hourglass-split d-block fs-3 mb-1"></i>No season is running right now. The exams are listed below.</div>
-    @endforelse
+    @endif
 
     {{-- every other exam --}}
     <div class="sr-h"><i class="bi bi-list-ul"></i>{{ count($active) ? 'Other exams' : 'All exams' }} <span class="ct">{{ $others->total() }}</span></div>
@@ -76,6 +91,7 @@
         <div class="sr-list" id="srOthers" style="padding:0">
             @foreach ($rows as $r)
                 @include('kpsc.partials.series-row', ['r' => $r])
+                @include('partials.ad-slot', ['type' => 'web_infeed', 'page' => 'series', 'pos' => $loop->iteration, 'pageNo' => $others->currentPage()])
             @endforeach
         </div>
         @include('kpsc.partials.load-more', ['paginator' => $others, 'target' => '#srOthers'])

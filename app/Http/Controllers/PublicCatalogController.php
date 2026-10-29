@@ -434,13 +434,13 @@ class PublicCatalogController extends Controller
             $others = \App\Models\DailyExam::where('section', $legacy)->where('status', 1)
                 ->when($activeIds, fn ($q) => $q->where(fn ($w) => $w->whereNull('series_season_id')->orWhereNotIn('series_season_id', $activeIds)))
                 ->when($caIds, fn ($q) => $q->where(fn ($w) => $w->whereNull('season_id')->orWhereNotIn('season_id', $caIds)))
-                ->orderByDesc('exam_date')->orderByDesc('id')->paginate(24)->withQueryString();
+                ->orderByDesc('exam_date')->orderByDesc('id')->paginate(15)->withQueryString();
             $sid = fn ($e) => $e->series_season_id;
         } else {
             $feature = \App\Models\ExamFeature::where('slug', $featureSlug)->first();
             $others = \App\Models\CourseExam::with('course:id,slug')->where('exam_id', $exam->id)->where('status', 'published')->when($feature, fn ($q) => $q->where('feature_id', $feature->id), fn ($q) => $q->whereRaw('1 = 0'))
                 ->when($activeIds, fn ($q) => $q->where(fn ($w) => $w->whereNull('season_id')->orWhereNotIn('season_id', $activeIds)))
-                ->orderByDesc('start_at')->orderByDesc('entry_date')->orderByDesc('id')->paginate(24)->withQueryString();
+                ->orderByDesc('start_at')->orderByDesc('entry_date')->orderByDesc('id')->paginate(15)->withQueryString();
             $sid = fn ($e) => $e->season_id;
         }
         $rows = $others->getCollection()->map(fn ($e) => $row($e, ($k = $sid($e)) ? ($seasonMap[$k] ?? null) : null))->all();
