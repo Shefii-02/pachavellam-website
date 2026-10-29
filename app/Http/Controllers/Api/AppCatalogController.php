@@ -342,14 +342,30 @@ class AppCatalogController extends Controller
         }
         $ids = array_merge([$cat->id], $cat->descendantIds());
         $items = fn ($kind) => ContentItem::ofKind($kind)->live()->whereIn('category_id', $ids)->with('exams:id,short_name,name,color');
+        $courseQ = fn ($cids) => ExamCourse::where('status', 'published')->where('slug', 'not like', 'series-%')->whereIn('id', fn ($q) => $q->select('course_id')->from('exam_course_categories')->whereIn('category_id', $cids));
+        $children = $cat->children()->where('status', 1)->get();
+        $page = \App\Support\CategorySections::for($cat);
+        $courseIds = $courseQ($ids)->pluck('id');
+        $tests = fn ($paid) => \App\Models\CourseExam::with('course:id,slug,title')->where('status', 'published')->where('is_paid', $paid)->whereIn('course_id', $courseIds)->orderByDesc('start_at')->orderByDesc('id')->limit(24)->get()
+            ->map(fn ($t) => ['id' => $t->id, 'title' => $t->title, 'by' => $t->course->title ?? '', 'courseSlug' => $t->course->slug ?? null, 'start' => optional($t->start_at)->toIso8601String(), 'minutes' => $t->duration_minutes,
+                'url' => $paid ? url('courses/' . ($t->course->slug ?? $t->course_id)) : url('tests/' . $t->id)])->values();
+        $data = [
+            'sub_categories' => $children->map(fn ($c) => $this->categoryCard($c) + ['courses' => $courseQ(array_merge([$c->id], $c->descendantIds()))->count()])->values(),
+            'articles' => $items('article')->orderByDesc('published_at')->orderByDesc('id')->limit(24)->get()->map(fn ($c) => $this->content($c, 'article') + ['url' => url('articles/' . $c->id)])->values(),
+            'free_classes' => $items('promo_class')->orderByRaw('COALESCE(scheduled_at, created_at) desc')->limit(24)->get()->map(fn ($c) => $this->promo($c))->values(),
+            'prime_tests' => in_array('prime_tests', $page['sections'], true) ? $tests(true) : collect(),
+            'free_tests' => in_array('free_tests', $page['sections'], true) ? $tests(false) : collect(),
+        ];
+        $coursesTotal = $courseQ($ids)->count();
+        // only the sections the panel chose, in its order, and only those with something in them (courses are listed by api/app/courses?category=)
+        $sections = collect($page['sections'])->filter(fn ($k) => $k === 'courses' ? $coursesTotal > 0 : $data[$k]->count() > 0)->values();
 
         return response()->json(['status' => 200, 'data' => [
             'id' => $cat->id, 'slug' => $cat->slug, 'name' => $cat->name, 'description' => strip_tags((string) $cat->description), 'exam' => $this->examType($cat->exam),
             'trail' => $cat->ancestors()->push($cat)->map(fn ($c) => ['slug' => $c->slug, 'name' => $c->name])->values(),
-            'children' => $cat->children()->where('status', 1)->get()->map(fn ($c) => $this->categoryCard($c))->values(),
-            'articles' => $items('article')->orderByDesc('published_at')->orderByDesc('id')->limit(12)->get()->map(fn ($c) => $this->content($c, 'article') + ['url' => url('articles/' . $c->id)])->values(),
-            'videos' => $items('promo_class')->orderByRaw('COALESCE(scheduled_at, created_at) desc')->limit(12)->get()->map(fn ($c) => $this->promo($c))->values(),
-            'courses' => ExamCourse::with('exam:id,short_name,name,color,slug')->where('status', 'published')->where('slug', 'not like', 'series-%')->inCategory($cat->id)->orderByDesc('is_featured')->orderByDesc('id')->limit(12)->get()->map(fn ($c) => $this->course($c))->values(),
+            'page' => ['sections' => $sections, 'layout' => $page['layout'], 'copyLink' => $page['copy_link'], 'newTab' => $page['new_tab']],
+            'coursesTotal' => $coursesTotal, 'children' => $data['sub_categories'], 'articles' => $data['articles'], 'videos' => $data['free_classes'],
+            'primeTests' => $data['prime_tests'], 'freeTests' => $data['free_tests'], 'url' => $cat->publicUrl(),
         ]]);
     }
 
@@ -386,6 +402,12 @@ class AppCatalogController extends Controller
         return ExamCourse::with('exam:id,short_name,name,color,slug,image')->where('status', 'published')->where('slug', 'not like', 'series-%')
             ->whereIn('exam_id', CompetitiveExam::where('status', 1)->select('id'))
             ->when($request->filled('exam'), fn ($q) => $q->where('exam_id', $exam?->id ?? 0))
+            ->when($request->filled('category'), function ($q) use ($request) {
+                $cat = \App\Models\ExamCategory::where('slug', $request->category)->first();
+                $ids = $cat ? array_merge([$cat->id], $cat->descendantIds()) : [0];
+
+                return $q->whereIn('id', fn ($w) => $w->select('course_id')->from('exam_course_categories')->whereIn('category_id', $ids));
+            })
             ->when($request->filled('q'), fn ($q) => $q->where(fn ($w) => $w->where('title', 'like', '%' . $request->q . '%')->orWhere('short_description', 'like', '%' . $request->q . '%')))
             ->when(in_array($request->type, ['free', 'paid'], true), fn ($q) => $q->where('course_type', $request->type))
             ->orderByDesc('is_featured')->orderBy('position')->orderByDesc('id');

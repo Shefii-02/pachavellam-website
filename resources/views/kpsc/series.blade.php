@@ -73,18 +73,12 @@
     {{-- every other exam --}}
     <div class="sr-h"><i class="bi bi-list-ul"></i>{{ count($active) ? 'Other exams' : 'All exams' }} <span class="ct">{{ $others->total() }}</span></div>
     @if (count($rows))
-        <div class="sr-list" style="padding:0">
+        <div class="sr-list" id="srOthers" style="padding:0">
             @foreach ($rows as $r)
                 @include('kpsc.partials.series-row', ['r' => $r])
             @endforeach
         </div>
-        @if ($others->hasPages())
-            <div class="sr-pg">
-                @if ($others->onFirstPage())<span></span>@else<a class="hb-btn ghost sm" href="{{ $others->previousPageUrl() }}"><i class="bi bi-arrow-left"></i> Newer</a>@endif
-                <span>Page {{ $others->currentPage() }} of {{ $others->lastPage() }}</span>
-                @if ($others->hasMorePages())<a class="hb-btn ghost sm" href="{{ $others->nextPageUrl() }}">Older <i class="bi bi-arrow-right"></i></a>@else<span></span>@endif
-            </div>
-        @endif
+        @include('kpsc.partials.load-more', ['paginator' => $others, 'target' => '#srOthers'])
     @else
         <div class="sr-none">{{ count($active) ? 'No other exams yet.' : 'No exams here yet - they will appear as soon as they are published.' }}</div>
     @endif

@@ -72,6 +72,35 @@
                         value="{{ old('meta_description', $category->meta_description ?? '') }}">
                 </div>
             </div>
+            <div class="row g-3 mt-1">
+                @php
+                    $pg = isset($category) ? \App\Support\CategorySections::for($category) : \App\Support\CategorySections::DEFAULTS;
+                    $own = isset($category) && $category->settings && isset($category->settings['page_sections']);
+                    $orderOf = array_flip($pg['sections']);
+                @endphp
+                <div class="col-12"><hr class="my-2"><h6 class="mb-1"><i class="bi bi-layout-text-window me-1"></i>Public page: sections</h6>
+                    <div class="small text-muted mb-2">What the website's category page (/c/{{ isset($category) ? $category->slug : 'slug' }}) shows. Empty sections are hidden automatically. Sub categories use the parent's setting unless they have their own.</div>
+                    <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" name="inherit_page" value="1" id="inhPg" {{ !$own ? 'checked' : '' }}><label class="form-check-label" for="inhPg">Use the parent's / default setting</label></div>
+                    <div id="pgBox" style="{{ !$own ? 'opacity:.5' : '' }}">
+                        <div class="row g-2">
+                            @foreach (\App\Support\CategorySections::ALL as $k => $label)
+                                <div class="col-md-4"><div class="border rounded p-2 d-flex align-items-center gap-2">
+                                    <input class="form-check-input mt-0" type="checkbox" name="ps[{{ $k }}][on]" value="1" id="ps{{ $k }}" {{ isset($orderOf[$k]) ? 'checked' : '' }}>
+                                    <label class="form-check-label flex-grow-1" for="ps{{ $k }}">{{ $label }}</label>
+                                    <input type="number" min="0" class="form-control form-control-sm" style="width:64px" name="ps[{{ $k }}][order]" value="{{ $orderOf[$k] ?? array_search($k, array_keys(\App\Support\CategorySections::ALL)) + 10 }}" title="Order (small number first)">
+                                </div></div>
+                            @endforeach
+                        </div>
+                        <div class="row g-2 mt-1 align-items-center">
+                            <div class="col-md-3"><select name="page_layout" class="form-select form-select-sm"><option value="tabs" {{ $pg['layout'] === 'tabs' ? 'selected' : '' }}>Show as tabs</option><option value="stacked" {{ $pg['layout'] === 'stacked' ? 'selected' : '' }}>Show one below another</option></select></div>
+                            <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="page_new_tab" value="1" id="pgNt" {{ $pg['new_tab'] ? 'checked' : '' }}><label class="form-check-label" for="pgNt">Items open in a new tab</label></div></div>
+                            <div class="col-md-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="page_copy_link" value="1" id="pgCl" {{ $pg['copy_link'] ? 'checked' : '' }}><label class="form-check-label" for="pgCl">Show a "copy link" button</label></div></div>
+                        </div>
+                    </div>
+                    <script>document.addEventListener('DOMContentLoaded', function () { var c = document.getElementById('inhPg'), b = document.getElementById('pgBox'); c.addEventListener('change', function () { b.style.opacity = c.checked ? .5 : 1; }); });</script>
+                </div>
+            </div>
+
 
             <div class="mt-4">
                 <button type="submit" class="btn btn-success mb-0"><i class="bi bi-check me-1"></i> Save</button>

@@ -477,7 +477,7 @@ class PublicCatalogController extends Controller
     }
 
     /** /c/{category}/{sub category}: an exam category (or sub category) by slug - its sub categories, articles, free videos and courses. */
-    public function category($path)
+    public function category(Request $request, $path)
     {
         $slug = collect(explode('/', trim($path, '/')))->filter()->last();
         $cat = \App\Models\ExamCategory::with('exam')->where('status', 1)->where('slug', $slug)->firstOrFail();
@@ -487,15 +487,34 @@ class PublicCatalogController extends Controller
             return redirect($cat->publicUrl(), 301);
         }
         $ids = array_merge([$cat->id], $cat->descendantIds());
+        // courses of this category and every sub category below it; ?sub=slug narrows to one sub category (and its own sub categories)
+        $children = $cat->children()->where('status', 1)->get();
+        $sub = $request->filled('sub') ? $children->firstWhere('slug', $request->sub) : null;
+        $courseIds = $sub ? array_merge([$sub->id], $sub->descendantIds()) : $ids;
+        $courseQ = fn ($cids) => ExamCourse::where('status', 'published')->where('slug', 'not like', 'series-%')->whereIn('id', fn ($q) => $q->select('course_id')->from('exam_course_categories')->whereIn('category_id', $cids));
+        $counts = $children->mapWithKeys(fn ($ch) => [$ch->id => $courseQ(array_merge([$ch->id], $ch->descendantIds()))->count()]);
+        $courses = $courseQ($courseIds)->with('exam:id,short_name,name,color')->orderByDesc('is_featured')->orderBy('position')->orderByDesc('id')->paginate(12)->withQueryString();
         $items = fn ($kind) => ContentItem::ofKind($kind)->live()->whereIn('category_id', $ids)->with('exams:id,short_name,name,color');
         \App\Support\Seo::set(['key' => 'category:' . $cat->id, 'title' => $cat->name . ' - ' . ($cat->exam->short_name ?: $cat->exam->name) . ' | Pachavellam', 'description' => \Illuminate\Support\Str::limit(strip_tags((string) $cat->description), 160) ?: null]);
 
-        return view('kpsc.category', [
-            'cat' => $cat, 'trail' => $cat->ancestors()->push($cat), 'title' => $cat->name,
-            'children' => $cat->children()->where('status', 1)->get(),
-            'articles' => $items('article')->orderByDesc('published_at')->orderByDesc('id')->limit(12)->get(),
-            'videos' => $items('promo_class')->orderByRaw('COALESCE(scheduled_at, created_at) desc')->limit(12)->get(),
-            'courses' => ExamCourse::with('exam:id,short_name,name,color')->where('status', 'published')->where('slug', 'not like', 'series-%')->inCategory($cat->id)->orderByDesc('is_featured')->orderByDesc('id')->limit(12)->get(),
+        // tests of the courses in this category: paid ones are "prime tests", free ones "free tests"
+        $allCourseIds = $courseQ($ids)->pluck('id');
+        $tests = fn ($paid) => \App\Models\CourseExam::with('course:id,slug,title')->where('status', 'published')->where('is_paid', $paid)->whereIn('course_id', $allCourseIds)->orderByDesc('start_at')->orderByDesc('id')->limit(24)->get();
+        $page = \App\Support\CategorySections::for($cat);
+        $data = [
+            'sub_categories' => $children, 'courses' => $courses,
+            'prime_tests' => in_array('prime_tests', $page['sections'], true) ? $tests(true) : collect(),
+            'free_tests' => in_array('free_tests', $page['sections'], true) ? $tests(false) : collect(),
+            'free_classes' => $items('promo_class')->orderByRaw('COALESCE(scheduled_at, created_at) desc')->limit(24)->get(),
+            'articles' => $items('article')->orderByDesc('published_at')->orderByDesc('id')->limit(24)->get(),
+        ];
+        // only the sections the panel chose, in its order, and only those with something in them
+        $filled = fn ($k) => $k === 'courses' ? $courses->total() > 0 : $data[$k]->count() > 0;
+        $sections = collect($page['sections'])->filter($filled)->values()->all();
+
+        return view('kpsc.category', $data + [
+            'cat' => $cat, 'trail' => $cat->ancestors()->push($cat), 'title' => $cat->name, 'page' => $page, 'sections' => $sections,
+            'children' => $children, 'sub' => $sub, 'childCounts' => $counts, 'totalCourses' => $courseQ($ids)->count(),
         ]);
     }
 

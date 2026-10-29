@@ -80,6 +80,7 @@ class CategoryController extends Controller
         $data['depth'] = $this->depthFor($exam, $data['parent_id'] ?? null);
         $data['created_by'] = auth()->id();
         $data['image'] = $request->hasFile('image') ? $request->file('image')->store('exam-categories/' . $exam->slug, 'public') : null;
+        $data['settings'] = \App\Support\CategorySections::fromRequest($request, null);
 
         $category = ExamCategory::create($data);
 
@@ -111,6 +112,7 @@ class CategoryController extends Controller
             return back()->withInput()->with('error', 'A category cannot be moved under itself or its own child.');
         }
 
+        $data['settings'] = \App\Support\CategorySections::fromRequest($request, $category->settings);
         $data['depth'] = $this->depthFor($exam, $data['parent_id'] ?? null);
         $parentChanged = $category->parent_id != ($data['parent_id'] ?? null);
 
