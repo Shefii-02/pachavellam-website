@@ -52,7 +52,7 @@
         .lb-msg { text-align:center; color:var(--pv-muted); padding:24px 10px; font-size:.88rem; }
         .sr-pg { display:flex; justify-content:space-between; align-items:center; margin-top:14px; font-size:.85rem; color:var(--pv-muted); }
         #lbSub{
-            font-size:.78rem; color:var(--pv-muted); display:block; margin-top:2px;
+            font-size:.78rem; color:var(--pv-surface); display:block; margin-top:2px;
         }
     </style>
 @endsection
