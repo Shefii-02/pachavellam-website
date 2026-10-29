@@ -26,6 +26,7 @@
         .sr-go { display:inline-block; border-radius:20px; padding:5px 14px; font-size:.78rem; font-weight:800; background:var(--pv-green); color:var(--pv-on-brand) !important; }
         .sr-go.off { background:var(--pv-surface); border:1px solid var(--pv-border); color:var(--pv-muted) !important; } .sr-go.done { background:transparent; border:1px solid var(--pv-border); color:var(--pv-muted) !important; } .sr-paid { font-size:.62rem; font-weight:800; background:#f59e0b; color:#fff; border-radius:8px; padding:1px 7px; margin-left:6px; }
     </style>
+    @include('kpsc.partials.omr-card-style')
 @endsection
 @section('content')
 <div class="page-content-wrapper"><div class="container"><div class="ss-wrap">
@@ -71,4 +72,5 @@
         @endforelse
     </div>
 </div></div></div>
+@include('kpsc.partials.omr-card-assets')
 @endsection

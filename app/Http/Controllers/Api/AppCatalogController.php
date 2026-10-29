@@ -64,6 +64,9 @@ class AppCatalogController extends Controller
         if (preg_match('#kpsc/model-exam/(\d{4}-\d{2}-\d{2})/(\d+)#', $url, $m)) {
             return ['type' => 'model', 'date' => $m[1], 'id' => (int) $m[2]];
         }
+        if (preg_match('#/(?:daily|omr|gk|ca|special)-exams/([a-z0-9-]+)(?:[/?\#]|$)#', $url, $m) && ($sid = \App\Models\ExamSeason::where('slug', $m[1])->value('id'))) {
+            return ['type' => 'season', 'id' => (int) $sid];
+        }
         if (preg_match('#/seasons/(\d+)#', $url, $m)) {
             return ['type' => 'season', 'id' => (int) $m[1]];
         }

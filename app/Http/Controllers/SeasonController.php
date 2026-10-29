@@ -21,7 +21,23 @@ class SeasonController extends Controller
 
     public function show(Request $request, $id, SeasonAccess $access)
     {
+        $season = ExamSeason::with('exam')->where('status', 'published')->findOrFail($id);
+        if ($season->slug && $request->isMethod('GET')) {
+            return redirect($season->publicUrl() . ($request->getQueryString() ? '?' . $request->getQueryString() : ''), 301);
+        }
+
         return view('kpsc.season', $this->data($request, $id, $access));
+    }
+
+    /** /{exam}/{series page}/{season slug}, e.g. /kpsc/omr-exams/typist-omr-2026 */
+    public function showBySlug(Request $request, $examSlug, $page, $seasonSlug, SeasonAccess $access)
+    {
+        $season = ExamSeason::with('exam')->where('status', 'published')->where('slug', $seasonSlug)
+            ->whereHas('exam', fn ($q) => $q->where('slug', $examSlug))->get()
+            ->first(fn ($s) => (self::PAGES[$s->kind] ?? 'daily-exams') === $page);
+        abort_if(!$season, 404);
+
+        return view('kpsc.season', $this->data($request, $season->id, $access));
     }
 
     /** Everything the season page shows (also read by the app API). */
@@ -51,6 +67,8 @@ class SeasonController extends Controller
             $state = $access->state($user, $season, 'legacy', $d->id);
             $base = $d->section === 'Model Exam' ? 'kpsc/model-exam' : 'kpsc/daily-exam';
             $rows[] = (object) ['title' => $d->exam_title ?: ($d->examtitle ?: 'Exam'), 'date' => $d->exam_date ? Carbon::parse($d->exam_date)->format('d M Y') : '', 'tag' => $t, 'tagc' => $c, 'state' => $state, 'done' => false, 'paid' => false,
+                'omr' => $d->section === 'Model Exam', 'omrId' => $d->id,
+                'answerKey' => $d->section === 'Model Exam' && $state !== 'locked' ? url('kpsc/model-exam/' . $d->exam_date . '/' . $d->id . '/answerkey') : null,
                 'url' => $state === 'locked' ? null : url($base . '/' . $d->exam_date . '/' . $d->id), 'sort' => $d->exam_date . sprintf('%08d', $d->id)];
         }
         foreach (CourseExam::with('course:id,slug')->where('season_id', $season->id)->where('status', 'published')->orderByRaw('start_at is null')->orderBy('start_at')->orderBy('id')->get() as $e) {

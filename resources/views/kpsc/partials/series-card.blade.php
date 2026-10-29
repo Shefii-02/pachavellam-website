@@ -1,4 +1,9 @@
 @if (!empty($r->omr))
+@php
+    $omrLocked = ($r->state ?? 'free') === 'locked';
+    $omrHref = $omrLocked ? ($lockUrl ?? (auth()->check() ? $r->url : url('sign-in'))) : $r->url;
+    if ($omrLocked && !auth()->check()) { $omrHref = url('sign-in'); }
+@endphp
 <div class="col-12 col-md-6"><div class="sr-card sr-xc" data-omr="{{ $r->omrId }}">
     <div class="bd">
         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -6,7 +11,7 @@
         </div>
         <div class="fw-bold" style="line-height:1.3;min-height:2.6em">{{ \Illuminate\Support\Str::limit($r->title, 70) }}</div>
         <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
-            <a class="sr-go" href="{{ $r->url }}">{{ $r->tagc === 'end' ? 'Practice' : ($r->tagc === 'up' ? 'Opens soon' : 'Attempt') }}</a>
+            <a class="sr-go {{ $omrLocked ? 'off' : '' }}" href="{{ $omrHref }}">{{ $omrLocked ? 'Unlock' : ($r->tagc === 'end' ? 'Practice' : ($r->tagc === 'up' ? 'Opens soon' : 'Attempt')) }}</a>
             @if ($r->answerKey)<a class="sr-go off" href="{{ $r->answerKey }}"><i class="bi bi-key"></i> Answer key</a>@endif
             <span class="small text-muted ms-auto omr-last"></span>
         </div>

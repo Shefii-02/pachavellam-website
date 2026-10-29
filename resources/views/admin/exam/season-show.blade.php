@@ -24,7 +24,7 @@
         @if ($season->tagline)<div class="text-muted small mt-1">{{ $season->tagline }}</div>@endif
     </div>
     <div class="d-flex gap-2 flex-wrap">
-        <a href="{{ url('seasons/' . $season->id) }}" target="_blank" class="btn btn-sm btn-light mb-0"><i class="bi bi-box-arrow-up-right me-1"></i>See on website</a>
+        <a href="{{ $season->publicUrl() }}" target="_blank" class="btn btn-sm btn-light mb-0"><i class="bi bi-box-arrow-up-right me-1"></i>See on website</a>
         <button type="button" class="btn btn-sm btn-outline-primary mb-0" data-bs-toggle="modal" data-bs-target="#editSession"><i class="bi bi-pencil me-1"></i>Edit season</button>
     </div>
 </div>
@@ -105,7 +105,12 @@
                 <label class="me-3"><input type="radio" name="mode" value="move" checked> <b>Move</b> here (leaves "Other exams")</label>
                 <label><input type="radio" name="mode" value="copy"> <b>Copy</b> here (original stays; the copy is a draft)</label>
             </div>
-            <div class="list-group">
+            <div class="input-group mb-2">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="search" class="form-control" id="attachSearch" placeholder="Search exam by name" autocomplete="off">
+            </div>
+            <div class="small text-muted mb-2 d-none" id="attachNone">No exam matches your search.</div>
+            <div class="list-group" id="attachList">
                 @foreach ($otherCourse as $e)
                     <label class="list-group-item d-flex gap-2 align-items-center"><input class="form-check-input mt-0" type="checkbox" name="course_ids[]" value="{{ $e->id }}"><span class="flex-fill">{{ $e->title }}</span><span class="badge bg-{{ \App\Models\CourseExam::STATUSES[$e->status][1] ?? 'secondary' }}">{{ \App\Models\CourseExam::STATUSES[$e->status][0] ?? $e->status }}</span></label>
                 @endforeach
@@ -117,6 +122,23 @@
         <div class="modal-footer"><button type="button" class="btn btn-light mb-0" data-bs-dismiss="modal">Cancel</button><button class="btn btn-success mb-0">Apply</button></div>
     </form>
 </div></div></div>
+<script>
+    (function () {
+        var box = document.getElementById('attachSearch');
+        if (!box) return;
+        box.addEventListener('input', function () {
+            var q = box.value.trim().toLowerCase(), shown = 0;
+            document.querySelectorAll('#attachList > label').forEach(function (row) {
+                var hit = !q || row.textContent.toLowerCase().indexOf(q) !== -1;
+                row.classList.toggle('d-none', !hit);
+                if (hit) shown++;
+            });
+            document.getElementById('attachNone').classList.toggle('d-none', shown > 0);
+        });
+        box.addEventListener('keydown', function (e) { if (e.key === 'Enter') e.preventDefault(); });
+        document.getElementById('attachExams').addEventListener('shown.bs.modal', function () { box.focus(); });
+    })();
+</script>
 @endif
 
 {{-- Move / copy one exam of this season to another season --}}

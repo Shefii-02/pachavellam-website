@@ -74,7 +74,7 @@ class PublicCatalogController extends Controller
                 }));
                 $paid = $access->isPaid($se);
                 $out[] = (object) ['title' => $se->title, 'sub' => trim(($se->starts_on ? $se->starts_on->format('d M Y') : '') . ($se->ends_on ? ' - ' . $se->ends_on->format('d M Y') : ' - running')),
-                    'paid' => $paid, 'price' => $paid ? $money($access->effectivePrice($se)) : null, 'url' => url('seasons/' . $se->id),
+                    'paid' => $paid, 'price' => $paid ? $money($access->effectivePrice($se)) : null, 'url' => $se->publicUrl(),
                     'total' => $items->count(), 'live' => $items->contains('live', true), 'items' => $items->sortByDesc('sort')->values()->take($itemLimit)->all()];
             }
         }
@@ -458,7 +458,7 @@ class PublicCatalogController extends Controller
                 'id' => $se->id, 'cover' => $se->cover_image ? \Illuminate\Support\Facades\Storage::url($se->cover_image) : null, 'title' => $se->title, 'sub' => ($se->starts_on ? $se->starts_on->format('d M Y') : '') . ($se->ends_on ? ' - ' . $se->ends_on->format('d M Y') : ' - running'),
                 'basis' => $se->basis ? (\App\Models\ExamSeason::BASES[$se->basis] ?? '') . ($se->basis_name ? ': ' . $se->basis_name : '') : null,
                 'paid' => $paid, 'price' => $paid ? $money($eff) : null, 'oldPrice' => $paid && $eff < $se->price ? $money($se->price) : null, 'validity' => $paid ? $access->validityLabel($se) : null,
-                'freeN' => $paid ? $items->where('state', 'free')->count() : 0, 'owns' => $paid && $access->owns($user, $se), 'url' => url('seasons/' . $se->id),
+                'freeN' => $paid ? $items->where('state', 'free')->count() : 0, 'owns' => $paid && $access->owns($user, $se), 'url' => $se->publicUrl(),
                 'total' => $items->count(), 'items' => $items->sortByDesc('sort')->values()->take(30)->all(),
             ];
         }
