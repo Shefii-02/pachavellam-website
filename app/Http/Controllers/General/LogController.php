@@ -13,59 +13,29 @@ class LogController extends Controller
 {
     const FILES_PER_PAGE = 10;
     public function index(){
-        $files = File::files(storage_path('logs/exceptions'));
+        $dir = storage_path('logs/exceptions');
+        // plain filenames only (no per-file objects or stat calls): the folder can hold tens of thousands of files
+        $names = is_dir($dir) ? array_values(preg_grep('/\.html$/', scandir($dir, SCANDIR_SORT_NONE))) : [];
+        // names are d_m_Y_H_i_s.html, so re-key them as Y_m_d_H_i_s to sort newest first
+        usort($names, fn ($a, $b) => strcmp($this->sortKey($b), $this->sortKey($a)));
 
-        // Get the filenames only
-        $fileNames = array_map(function ($file) {
-            return $file->getFilename();
-        }, $files);
-
-        // Create a LengthAwarePaginator
-        $currentPage = request()->get('page', 1);
-        $perPage = self::FILES_PER_PAGE; // Reference the constant correctly
-        $currentPageItems = array_slice($fileNames, ($currentPage - 1) * $perPage, $perPage);
-        $filelists = new LengthAwarePaginator($currentPageItems, count($fileNames), $perPage, $currentPage, [
-            'path' => request()->url(),
-            'query' => request()->query(),
-        ]);
-
-        $files = File::files(storage_path('logs/exceptions'));
-
-        // Get the filenames and their modification times
-        $fileNames = [];
-        foreach ($files as $file) {
-            $fileNames[] = [
-                'name' => $file->getFilename(),
-                'modified' => $file->getMTime(), // Get the modification time
-            ];
-        }
-
-        // Sort files by modification time in descending order
-        usort($fileNames, function ($a, $b) {
-            return $b['modified'] <=> $a['modified']; // Descending order
-        });
-
-        // Extract only the file names for pagination
-        $fileNamesOnly = array_column($fileNames, 'name');
-
-        // Create a LengthAwarePaginator
-        $currentPage = request()->get('page', 1);
+        $currentPage = max(1, (int) request()->get('page', 1));
         $perPage = self::FILES_PER_PAGE;
-        $currentPageItems = array_slice($fileNamesOnly, ($currentPage - 1) * $perPage, $perPage);
-        $filelists = new LengthAwarePaginator($currentPageItems, count($fileNamesOnly), $perPage, $currentPage, [
+        $filelists = new LengthAwarePaginator(array_slice($names, ($currentPage - 1) * $perPage, $perPage), count($names), $perPage, $currentPage, [
             'path' => request()->url(),
             'query' => request()->query(),
         ]);
-
-     
 
         return view('admin.general.logs',compact('filelists'));
     }
 
-
+    private function sortKey(string $name): string
+    {
+        return preg_match('/^(\d{2})_(\d{2})_(\d{4})_(\d{2})_(\d{2})_(\d{2})/', $name, $m) ? "$m[3]$m[2]$m[1]$m[4]$m[5]$m[6]" : '0' . $name;
+    }
 
     public function show($id){
-        $filePath = storage_path('logs/exceptions/' . $id);
+        $filePath = storage_path('logs/exceptions/' . basename($id));
   
         // Check if the file exists
         if (!File::exists($filePath)) {
@@ -99,10 +69,8 @@ class LogController extends Controller
 
     public function destroy_all(){
  
-        $files = File::files(storage_path('logs/exceptions'));
-        
-        foreach ($files as $file) {
-            File::delete($file->getPathname()); // Delete each file
+        foreach (glob(storage_path('logs/exceptions/*.html')) ?: [] as $path) {
+            @unlink($path);
         }
 
         return redirect(route('admingenerallogs.index'));
