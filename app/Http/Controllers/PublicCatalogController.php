@@ -339,6 +339,22 @@ class PublicCatalogController extends Controller
         return view('kpsc.series', $this->seriesData($request, $slug, $series));
     }
 
+    /** JSON for the two drawers of an OMR exam card: the student's own attempts (latest first) and the leaderboard (top 10, once the exam has ended). */
+    public function omrSummary(Request $request, $id)
+    {
+        $exam = \App\Models\DailyExam::where('section', 'Model Exam')->where('status', 1)->findOrFail($id);
+        $user = auth()->user();
+        $fmt = fn ($a) => ['name' => $a->full_name, 'right' => (int) $a->right_answer, 'wrong' => (int) $a->wrong_answer, 'mark' => round((float) $a->total_mark, 2),
+            'at' => $a->answer_uploaded ? \Illuminate\Support\Carbon::parse($a->answer_uploaded)->format('d M Y, h:i a') : ''];
+        $mine = $user ? \App\Models\ModelExamAttempt::where('exam_id', $exam->id)->where('user_id', $user->id)->orderByDesc('id')->limit(20)->get()->map($fmt)->values() : collect();
+        $ended = $exam->ended_at && \Illuminate\Support\Carbon::parse($exam->ended_at)->isPast();
+        $top = $ended ? \App\Models\ModelExamAttempt::where('exam_id', $exam->id)->where('answer_uploaded', '<=', $exam->ended_at)
+            ->orderByDesc('total_mark')->orderBy('created_at')->limit(10)->get()->map($fmt)->values() : collect();
+
+        return response()->json(['loggedIn' => (bool) $user, 'ended' => $ended, 'mine' => $mine, 'top' => $top,
+            'leaderboardUrl' => url('kpsc/model-exam/' . $exam->exam_date . '/' . $exam->id . '/leaderboard')]);
+    }
+
     /** Everything a series page shows: active seasons and the other exams (also read by the app API). */
     public function seriesData(Request $request, $slug, $series): array
     {
@@ -387,6 +403,8 @@ class PublicCatalogController extends Controller
             return (object) [
                 'title' => $legacyRow ? ($e->exam_title ?: ($e->examtitle ?: 'Exam')) : $e->title,
                 'date' => $legacyRow ? ($e->exam_date ? \Illuminate\Support\Carbon::parse($e->exam_date)->format('d M Y') : '') : ($e->start_at ? $e->start_at->format('d M Y, h:i a') : ($e->entry_date ? \Illuminate\Support\Carbon::parse($e->entry_date)->format('d M Y') : '')),
+                'omr' => $legacyRow && $e->section === 'Model Exam', 'omrId' => $legacyRow ? $e->id : null,
+                'answerKey' => $legacyRow && $e->section === 'Model Exam' ? url('kpsc/model-exam/' . $e->exam_date . '/' . $e->id . '/answerkey') : null,
                 'tag' => $t, 'tagc' => $c, 'state' => $state, 'inPaid' => $se && $access->isPaid($se), 'paid' => false, 'done' => $legacyRow && in_array($e->id, $done),
                 'url' => $state === 'locked' && $se ? $access->buyUrl($se) : $examUrl,
                 'sort' => ($legacyRow ? (string) $e->exam_date : ($e->start_at ? $e->start_at->format('Y-m-d') : '0000-00-00')) . sprintf('%08d', $e->id),

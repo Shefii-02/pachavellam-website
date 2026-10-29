@@ -38,7 +38,7 @@
         <div class="d-flex gap-2 flex-wrap">
             <a href="{{ $addUrl }}" class="btn btn-sm btn-success mb-0"><i class="bi bi-plus-lg me-1"></i>Add exam</a>
             @if ($legacyAdd)<a href="{{ $legacyAdd }}" class="btn btn-sm btn-outline-success mb-0" title="The old exam form of KPSC"><i class="bi bi-plus-lg me-1"></i>Add exam (old form)</a>@endif
-            @if ($attachable->count())<button type="button" class="btn btn-sm btn-outline-secondary mb-0" data-bs-toggle="modal" data-bs-target="#attachExams"><i class="bi bi-link-45deg me-1"></i>Add existing exams</button>@endif
+            @if ($attachable->count() || $otherCourse->count())<button type="button" class="btn btn-sm btn-outline-secondary mb-0" data-bs-toggle="modal" data-bs-target="#attachExams"><i class="bi bi-link-45deg me-1"></i>Add from Other exams</button>@endif
         </div>
     </div>
     <div class="table-responsive">
@@ -55,6 +55,7 @@
                     <td class="text-end text-nowrap">
                         <a href="{{ $builder }}/{{ $e->id }}/edit" class="btn btn-sm btn-light mb-0" title="Edit"><i class="bi bi-pencil"></i></a>
                         <a href="{{ $builder }}/{{ $e->id }}" class="btn btn-sm btn-light mb-0" title="Questions"><i class="bi bi-question-circle"></i></a>
+                        <button type="button" class="btn btn-sm btn-light mb-0" title="Move / copy to another season" onclick="pvPlace('course',{{ $e->id }})"><i class="bi bi-arrow-left-right"></i></button>
                         <form class="d-inline" action="{{ $builder }}/{{ $e->id }}/status" method="POST">@csrf<input type="hidden" name="status" value="{{ $e->status === 'published' ? 'draft' : 'published' }}"><button class="btn btn-sm btn-light mb-0" title="{{ $e->status === 'published' ? 'Unpublish' : 'Publish' }}"><i class="bi {{ $e->status === 'published' ? 'bi-eye-slash' : 'bi-eye' }}"></i></button></form>
                         <form class="d-inline" action="{{ $builder }}/{{ $e->id }}" method="POST" onsubmit="return confirm('Move this exam to the Trash?')">@csrf @method('DELETE')<input type="hidden" name="back" value="{{ urldecode($back) }}"><button class="btn btn-sm btn-outline-danger mb-0" title="Delete"><i class="bi bi-trash"></i></button></form>
                     </td>
@@ -69,6 +70,7 @@
                     <td class="text-end text-nowrap">
                         @if ($kind === 'omr')<a href="{{ url('admin/kpsc/model-exam/view') }}" class="btn btn-sm btn-light mb-0" title="Edit in the OMR exam list"><i class="bi bi-pencil"></i></a>
                         @elseif ($legacyBase)<a href="{{ url($legacyBase . '/edit/' . $d->id) }}" class="btn btn-sm btn-light mb-0" title="Edit"><i class="bi bi-pencil"></i></a>@endif
+                        <button type="button" class="btn btn-sm btn-light mb-0" title="Move / copy to another season" onclick="pvPlace('legacy',{{ $d->id }})"><i class="bi bi-arrow-left-right"></i></button>
                         <form class="d-inline" action="{{ $base }}/seasons/{{ $season->id }}/legacy-status/{{ $d->id }}" method="POST">@csrf<button class="btn btn-sm btn-light mb-0" title="{{ $d->status ? 'Unpublish' : 'Publish' }}"><i class="bi {{ $d->status ? 'bi-eye-slash' : 'bi-eye' }}"></i></button></form>
                         <form class="d-inline" action="{{ $base }}/seasons/{{ $season->id }}/detach/{{ $d->id }}" method="POST" onsubmit="return confirm('Take this exam out of the season? The exam itself is kept.')">@csrf<button class="btn btn-sm btn-light mb-0" title="Take out of the season"><i class="bi bi-box-arrow-right"></i></button></form>
                         @if ($legacyBase)<a href="{{ url($legacyBase . '/delete/' . $d->id) }}" class="btn btn-sm btn-outline-danger mb-0" title="Delete the exam" onclick="return confirm('Delete this exam and its questions?')"><i class="bi bi-trash"></i></a>@endif
@@ -92,22 +94,57 @@
     </form>
 </div></div></div>
 
-{{-- Add existing old exams --}}
-@if ($attachable->count())
+{{-- Add exams of the "Other exams" list (no season): move or copy them into this season --}}
+@if ($attachable->count() || $otherCourse->count())
 <div class="modal fade" id="attachExams" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
-    <form action="{{ $base }}/seasons/{{ $season->id }}/attach" method="POST">@csrf
-        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-link-45deg me-1"></i>Add existing exams to this season</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <form action="{{ $base }}/seasons/{{ $season->id }}/place" method="POST">@csrf
+        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-link-45deg me-1"></i>Add from Other exams</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
         <div class="modal-body">
-            <div class="small text-muted mb-2">Old exams that are not in any season. Tick the ones to add.</div>
+            <div class="small text-muted mb-2">Exams that are not in any season (the "Other exams" list students see). Tick the ones to add.</div>
+            <div class="mb-3">
+                <label class="me-3"><input type="radio" name="mode" value="move" checked> <b>Move</b> here (leaves "Other exams")</label>
+                <label><input type="radio" name="mode" value="copy"> <b>Copy</b> here (original stays; the copy is a draft)</label>
+            </div>
             <div class="list-group">
+                @foreach ($otherCourse as $e)
+                    <label class="list-group-item d-flex gap-2 align-items-center"><input class="form-check-input mt-0" type="checkbox" name="course_ids[]" value="{{ $e->id }}"><span class="flex-fill">{{ $e->title }}</span><span class="badge bg-{{ \App\Models\CourseExam::STATUSES[$e->status][1] ?? 'secondary' }}">{{ \App\Models\CourseExam::STATUSES[$e->status][0] ?? $e->status }}</span></label>
+                @endforeach
                 @foreach ($attachable as $d)
-                    <label class="list-group-item d-flex gap-2 align-items-center"><input class="form-check-input mt-0" type="checkbox" name="ids[]" value="{{ $d->id }}"><span class="flex-fill">{{ $d->exam_title ?: ($d->examtitle ?: 'Exam') }}</span><span class="small text-muted">{{ $d->exam_date ? \Illuminate\Support\Carbon::parse($d->exam_date)->format('d M Y') : '' }}</span></label>
+                    <label class="list-group-item d-flex gap-2 align-items-center"><input class="form-check-input mt-0" type="checkbox" name="legacy_ids[]" value="{{ $d->id }}"><span class="flex-fill">{{ $d->exam_title ?: ($d->examtitle ?: 'Exam') }}</span><span class="badge bg-dark">old KPSC</span><span class="small text-muted">{{ $d->exam_date ? \Illuminate\Support\Carbon::parse($d->exam_date)->format('d M Y') : '' }}</span></label>
                 @endforeach
             </div>
         </div>
-        <div class="modal-footer"><button type="button" class="btn btn-light mb-0" data-bs-dismiss="modal">Cancel</button><button class="btn btn-success mb-0">Add to season</button></div>
+        <div class="modal-footer"><button type="button" class="btn btn-light mb-0" data-bs-dismiss="modal">Cancel</button><button class="btn btn-success mb-0">Apply</button></div>
     </form>
 </div></div></div>
+@endif
+
+{{-- Move / copy one exam of this season to another season --}}
+@if ($otherSeasons->count())
+<div class="modal fade" id="placeExam" tabindex="-1" aria-hidden="true"><div class="modal-dialog"><div class="modal-content">
+    <form id="placeForm" method="POST">@csrf
+        <input type="hidden" id="placeId">
+        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-arrow-left-right me-1"></i>Move / copy to another season</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+            <label class="form-label">Season</label>
+            <select class="form-select mb-3" id="placeTo">@foreach ($otherSeasons as $os)<option value="{{ $os->id }}">{{ $os->title }}</option>@endforeach</select>
+            <label class="me-3"><input type="radio" name="mode" value="move" checked> <b>Move</b></label>
+            <label><input type="radio" name="mode" value="copy"> <b>Copy</b> (draft)</label>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-light mb-0" data-bs-dismiss="modal">Cancel</button><button class="btn btn-success mb-0">Apply</button></div>
+    </form>
+</div></div></div>
+<script>
+    function pvPlace(type, id) {
+        var f = document.getElementById('placeForm');
+        f.querySelectorAll('.pv-id').forEach(function (n) { n.remove(); });
+        var i = document.createElement('input'); i.type = 'hidden'; i.className = 'pv-id'; i.name = (type === 'legacy' ? 'legacy_ids[]' : 'course_ids[]'); i.value = id; f.appendChild(i);
+        new bootstrap.Modal(document.getElementById('placeExam')).show();
+    }
+    document.getElementById('placeForm').addEventListener('submit', function () {
+        this.action = @json($base . '/seasons') + '/' + document.getElementById('placeTo').value + '/place';
+    });
+</script>
 @endif
 <script>
     function pvSeasonPaid(p) { var on = document.getElementById(p + 'p').checked; document.getElementById(p + 'box').style.display = on ? '' : 'none'; }

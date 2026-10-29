@@ -21,6 +21,10 @@
         .ss-row.lock { opacity:.85; background:var(--pv-surface-2); cursor:pointer; }
         .ss-st { font-size:.68rem; font-weight:800; border-radius:10px; padding:2px 10px; flex:none; } .ss-st.free { background:#e7f6ef; color:#0a6b46; } .ss-st.unlocked { background:#dbeafe; color:#1d4ed8; } .ss-st.locked { background:#fde8e8; color:#a4242a; }
         .ss-go { flex:none; border-radius:20px; padding:5px 14px; font-size:.78rem; font-weight:800; background:var(--pv-green); color:var(--pv-on-brand) !important; } .ss-go.lk { background:transparent; border:1px solid var(--pv-border); color:var(--pv-muted) !important; }
+        .sr-card { display:block; height:100%; background:var(--pv-surface); border:1px solid var(--pv-border); border-radius:16px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,.06); color:var(--pv-text) !important; text-decoration:none !important; } .sr-card .bd { padding:12px; }
+        .sr-chip { font-size:.66rem; font-weight:800; border-radius:10px; padding:2px 9px; background:#eef0f3; color:#4b5563; } .sr-chip.live { background:#e53935; color:#fff; } .sr-chip.up { background:#fff1d6; color:#9a5b00; } .sr-chip.lk { background:#fde8e8; color:#a4242a; } .sr-chip.unl { background:#dbeafe; color:#1d4ed8; } .sr-chip.fr { background:#e7f6ef; color:#0a6b46; }
+        .sr-go { display:inline-block; border-radius:20px; padding:5px 14px; font-size:.78rem; font-weight:800; background:var(--pv-green); color:var(--pv-on-brand) !important; }
+        .sr-go.off { background:var(--pv-surface); border:1px solid var(--pv-border); color:var(--pv-muted) !important; } .sr-go.done { background:transparent; border:1px solid var(--pv-border); color:var(--pv-muted) !important; } .sr-paid { font-size:.62rem; font-weight:800; background:#f59e0b; color:#fff; border-radius:8px; padding:1px 7px; margin-left:6px; }
     </style>
 @endsection
 @section('content')
@@ -59,20 +63,9 @@
     </div>
 
     <div class="hb-sec"><h2 style="font-size:1.05rem;font-weight:800;color:var(--pv-text)">Exams in this season</h2></div>
-    <div class="ss-list">
+    <div class="row g-3">
         @forelse ($rows as $i => $r)
-            @if ($r->state === 'locked')
-                <a class="ss-row lock" href="{{ auth()->check() ? url('seasons/' . $season->id . '/buy') : url('sign-in') }}">
-                    <span class="n">{{ $i + 1 }}</span><span class="t"><b>{{ \Illuminate\Support\Str::limit($r->title, 70) }}</b><small>{{ $r->date }}</small></span>
-                    <span class="ss-st locked"><i class="bi bi-lock-fill"></i> Paid</span><span class="ss-go lk">Unlock</span>
-                </a>
-            @else
-                <a class="ss-row" href="{{ $r->url }}">
-                    <span class="n">{{ $i + 1 }}</span><span class="t"><b>{{ \Illuminate\Support\Str::limit($r->title, 70) }}</b><small>{{ $r->date }}</small></span>
-                    <span class="ss-st {{ $r->state }}">{{ $r->state === 'free' ? ($paid ? 'Free exam' : 'Free') : 'Unlocked' }}</span>
-                    <span class="ss-go">{{ $r->tagc === 'up' ? 'Opens soon' : ($r->tagc === 'end' ? 'Practice' : 'Attempt') }}</span>
-                </a>
-            @endif
+            @include('kpsc.partials.series-card', ['r' => $r, 'n' => $i + 1, 'lockUrl' => auth()->check() ? url('seasons/' . $season->id . '/buy') : url('sign-in')])
         @empty
             <div class="hb-empty"><i class="bi bi-hourglass-split"></i>No exams in this season yet.</div>
         @endforelse

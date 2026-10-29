@@ -121,11 +121,13 @@ class ExamSeriesController extends Controller
             $legacy = \App\Models\DailyExam::where('section', $section)->where('series_season_id', $season->id)->orderByDesc('exam_date')->orderByDesc('id')->get();
             $attachable = \App\Models\DailyExam::where('section', $section)->whereNull('series_season_id')->orderByDesc('exam_date')->orderByDesc('id')->limit(150)->get();
         }
+        $otherCourse = CourseExam::where('course_id', $course->id)->where('feature_id', $feature->id)->whereNull('season_id')->orderByDesc('id')->limit(150)->get();
+        $otherSeasons = ExamSeason::where('exam_id', $exam->id)->where('kind', $kind)->where('id', '!=', $season->id)->orderByDesc('starts_on')->orderByDesc('id')->get();
         $legacyBase = ['daily' => 'admin/kpsc/daily-exam', 'omr' => 'admin/kpsc/model-exam', 'ca' => 'admin/kpsc/ca-daily-exam'][$kind] ?? null;
 
         return view('admin.exam.season-show', [
             'exam' => $exam, 'layout' => $exam->layout(), 'kind' => $kind, 'title' => self::KINDS[$kind][1], 'season' => $season, 'courseExams' => $courseExams,
-            'legacy' => $legacy, 'attachable' => $attachable, 'legacyBase' => $legacyBase, 'builder' => $builder, 'base' => $exam->examUrl('series/' . $kind),
+            'legacy' => $legacy, 'attachable' => $attachable, 'otherCourse' => $otherCourse, 'otherSeasons' => $otherSeasons, 'legacyBase' => $legacyBase, 'builder' => $builder, 'base' => $exam->examUrl('series/' . $kind),
             'special' => $kind === 'special', 'access' => app(\App\Services\SeasonAccess::class),
         ]);
     }
@@ -139,6 +141,63 @@ class ExamSeriesController extends Controller
         $n = \App\Models\DailyExam::where('section', self::LEGACY[$kind] ?? '-')->whereNull('series_season_id')->whereIn('id', $data['ids'])->update(['series_season_id' => $season->id]);
 
         return back()->with('success', $n . ' exam(s) added to this season.');
+    }
+
+    /**
+     * Move or copy exams into this season: the exams of the "Other exams" list (no season) or of another season.
+     * Move = the exam now belongs to this season. Copy = a new draft / hidden copy (settings, sections, questions) in this season; the original stays.
+     */
+    public function place(Request $request, $examSlug, $kind, $id)
+    {
+        [$exam, $course, $feature] = $this->scope($request, $examSlug, $kind);
+        $season = ExamSeason::where('exam_id', $exam->id)->where('kind', $kind)->findOrFail($id);
+        $data = $request->validate(['mode' => 'required|in:move,copy', 'course_ids' => 'nullable|array|max:200', 'course_ids.*' => 'integer', 'legacy_ids' => 'nullable|array|max:200', 'legacy_ids.*' => 'integer'],
+            ['mode.required' => 'Choose move or copy.']);
+        $copy = $data['mode'] === 'copy';
+        abort_if(empty($data['course_ids']) && empty($data['legacy_ids']), 422, 'Tick at least one exam.');
+        $n = 0;
+
+        $mine = CourseExam::where('course_id', $course->id)->where('feature_id', $feature->id)->whereIn('id', $data['course_ids'] ?? [])->get();
+        foreach ($mine as $e) {
+            if ($copy) {
+                $c = \App\Services\CourseExamBuilder::copyTo($e, $course, $request->user()->id);
+                $c->update(['season_id' => $season->id]);
+                $n++;
+            } elseif ($e->season_id !== $season->id) {
+                $e->update(['season_id' => $season->id]);
+                $n++;
+            }
+        }
+
+        $section = self::LEGACY[$kind] ?? null;
+        if ($exam->slug === 'kpsc' && $section && \Illuminate\Support\Facades\Schema::hasTable('kpsc_daily_exams') && !empty($data['legacy_ids'])) {
+            foreach (\App\Models\DailyExam::where('section', $section)->whereIn('id', $data['legacy_ids'])->get() as $d) {
+                if ($copy) {
+                    \Illuminate\Support\Facades\DB::transaction(function () use ($d, $season) {
+                        $new = $d->replicate();
+                        $new->series_season_id = $season->id;
+                        $new->status = 0;   // hidden until checked
+                        $new->save();
+                        foreach ($d->exam_details as $row) {
+                            $r = $row->replicate();
+                            $r->exam_id = $new->id;
+                            $r->save();
+                        }
+                        foreach ($d->model_exam_details as $row) {
+                            $r = $row->replicate();
+                            $r->exam_id = $new->id;
+                            $r->save();
+                        }
+                    });
+                    $n++;
+                } elseif ($d->series_season_id !== $season->id) {
+                    $d->update(['series_season_id' => $season->id]);
+                    $n++;
+                }
+            }
+        }
+
+        return back()->with('success', $n ? ($copy ? $n . ' exam(s) copied into this season (drafts / hidden; the originals stay).' : $n . ' exam(s) moved into this season.') : 'Nothing changed.');
     }
 
     /** Take an old exam out of the season (the exam itself is kept). */

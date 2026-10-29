@@ -30,6 +30,9 @@
         .sr-card .im { position:relative; height:84px; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.9); font-size:2rem; }
         .sr-card .im .act { position:absolute; top:10px; right:10px; font-size:.66rem; font-weight:800; font-style:normal; background:#e7f6ef; color:#0a6b46; border-radius:10px; padding:2px 10px; }
         .sr-card .bd { padding:12px; }
+        .sr-xc { display:block; text-decoration:none !important; color:var(--pv-text) !important; } .sr-xc.lock { opacity:.9; }
+        .omr-dr { border-top:1px solid var(--pv-border); padding:6px 0; } .omr-dr > summary { cursor:pointer; font-size:.82rem; font-weight:700; color:var(--pv-text); list-style:none; } .omr-dr > summary::-webkit-details-marker { display:none; } .omr-dr > summary::after { content:'\F282'; font-family:'bootstrap-icons'; float:right; transition:transform .2s; } .omr-dr[open] > summary::after { transform:rotate(180deg); }
+        .omr-body { padding-top:6px; color:var(--pv-muted); } .omr-body .ol { display:flex; justify-content:space-between; gap:8px; padding:3px 0; border-bottom:1px dashed var(--pv-border); } .omr-body .ol b { color:var(--pv-text); }
         .sr-pg { display:flex; justify-content:space-between; align-items:center; margin-top:14px; font-size:.85rem; color:var(--pv-muted); }
     </style>
 @endsection
@@ -88,9 +91,9 @@
     {{-- every other exam --}}
     <div class="sr-h"><i class="bi bi-list-ul"></i>{{ count($active) ? 'Other exams' : 'All exams' }} <span class="ct">{{ $others->total() }}</span></div>
     @if (count($rows))
-        <div class="sr-list" id="srOthers" style="padding:0">
+        <div class="row g-3" id="srOthers">
             @foreach ($rows as $r)
-                @include('kpsc.partials.series-row', ['r' => $r])
+                @include('kpsc.partials.series-card', ['r' => $r])
                 @include('partials.ad-slot', ['type' => 'web_infeed', 'page' => 'series', 'pos' => $loop->iteration, 'pageNo' => $others->currentPage()])
             @endforeach
         </div>
@@ -99,4 +102,36 @@
         <div class="sr-none">{{ count($active) ? 'No other exams yet.' : 'No exams here yet - they will appear as soon as they are published.' }}</div>
     @endif
 </div></div></div>
+
+<script>
+(function () {
+    var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+    var urlBase = @json(url('kpsc/model-exam-summary'));
+    function fill(card, d) {
+        var last = d.mine[0], el = card.querySelector('.omr-last');
+        if (el) el.textContent = last ? 'Last: ' + last.mark + ' marks · ' + last.at : '';
+        var mine = card.querySelector('[data-w=mine] .omr-body'), top = card.querySelector('[data-w=top] .omr-body');
+        mine.innerHTML = !d.loggedIn ? 'Sign in to see your attempts.' : (d.mine.length ? d.mine.map(function (a, i) {
+            return '<div class="ol"><span>#' + (d.mine.length - i) + ' · ' + esc(a.at) + '</span><b>' + a.mark + '</b><span>' + a.right + '✓ ' + a.wrong + '✗</span></div>';
+        }).join('') : 'No attempt yet.');
+        top.innerHTML = !d.ended ? 'Leaderboard opens when the exam ends.' : (d.top.length ? d.top.map(function (a, i) {
+            return '<div class="ol"><span>' + (i + 1) + '. ' + esc(a.name) + '</span><b>' + a.mark + '</b></div>';
+        }).join('') + '<a class="d-block mt-1" href="' + esc(d.leaderboardUrl) + '">Full leaderboard →</a>' : 'No marks uploaded yet.');
+    }
+    var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+            if (!e.isIntersecting) return;
+            io.unobserve(e.target);
+            var c = e.target;
+            fetch(urlBase + '/' + c.dataset.omr, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+                .then(function (r) { return r.json(); }).then(function (d) { fill(c, d); })
+                .catch(function () { c.querySelectorAll('.omr-body').forEach(function (b) { b.textContent = 'Could not load.'; }); });
+        });
+    }, { rootMargin: '200px' }) : null;
+    function scan(root) { if (io) [].forEach.call(root.querySelectorAll('[data-omr]:not([data-seen])'), function (c) { c.dataset.seen = 1; io.observe(c); }); }
+    scan(document);
+    var list = document.getElementById('srOthers');
+    if (list && window.MutationObserver) new MutationObserver(function () { scan(list); }).observe(list, { childList: true });
+})();
+</script>
 @endsection
