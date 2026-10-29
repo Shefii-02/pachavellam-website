@@ -28,7 +28,7 @@
     }
 
 
-    html, body, html[data-theme="dark"] body { background-color: var(--pv-bg); color: var(--pv-text); }
+    html, body, html[data-theme="dark"] body { background-color: var(--pv-surface); color: var(--pv-text); }
     body { transition: background-color .2s, color .2s; }
 
     /* theme switch button (header) */
