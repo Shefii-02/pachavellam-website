@@ -141,7 +141,7 @@ window.addEventListener('load', function () {
         return '<div class="lb-row' + (a.me ? ' me' : '') + '"><span class="rk">' + a.rank + '</span><span class="nm">' + esc(a.name) + (a.me ? ' (You)' : '') + '<small>' + a.right + ' right · ' + a.wrong + ' wrong</small></span><span class="mk">' + a.mark + '</span></div>';
     }
     function podium(rows) {
-        var o =  [[1, 'p1'], [0, 'p2'], [2, 'p3']].filter(function (x) { return rows[x[0]]; });
+        var o =  [[0, 'p1'], [1, 'p2'], [2, 'p3']].filter(function (x) { return rows[x[0]]; });
         pod.innerHTML = o.map(function (x) {
             var a = rows[x[0]];
             return '<div class="lb-pd ' + x[1] + (a.me ? ' me' : '') + '"><div class="av">' + (x[0] === 0 ? '<i class="bi bi-trophy-fill crown"></i>' : '') + ini(a.name) + '</div><div class="nm">' + esc(a.name) + '</div><div class="mk">' + a.mark + ' marks</div><div class="bar">' + a.rank + '</div></div>';
