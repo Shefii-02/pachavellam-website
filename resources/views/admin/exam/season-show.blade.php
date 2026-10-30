@@ -46,13 +46,15 @@
     </div>
     <div class="table-responsive">
         <table class="table align-middle mb-0 table-hover">
-            <thead><tr><th>Exam</th><th>Date</th><th>Status</th>@if ($paid)<th class="text-center">Free access</th>@endif<th class="text-end">Actions</th></tr></thead>
+            <thead><tr><th>Exam</th><th>Date</th><th>Start - End</th><th class="text-center">Attempts</th><th>Status</th>@if ($paid)<th class="text-center">Free access</th>@endif<th class="text-end">Actions</th></tr></thead>
             <tbody>
             @foreach ($courseExams as $e)
                 @php [$esL, $esC] = \App\Models\CourseExam::STATUSES[$e->status] ?? [$e->status, 'secondary']; @endphp
                 <tr>
                     <td><a href="{{ $builder }}/{{ $e->id }}" class="fw-semibold">{{ $e->title }}</a><div class="small text-muted">{{ $e->sections_count }} section(s) · {{ $e->links_count }} question(s)</div></td>
-                    <td class="small">{{ $e->start_at ? $e->start_at->format('d M Y, h:i a') : ($e->entry_date ? \Illuminate\Support\Carbon::parse($e->entry_date)->format('d M Y') : '-') }}</td>
+                    <td class="small">{{ $e->start_at ? $e->start_at->format('d M Y') : ($e->entry_date ? \Illuminate\Support\Carbon::parse($e->entry_date)->format('d M Y') : '-') }}</td>
+                    <td class="small text-nowrap">@if ($e->start_at || $e->end_at){{ $e->start_at?->format('d M, h:i a') ?? '…' }}<br>{{ $e->end_at?->format('d M, h:i a') ?? '…' }}@else - @endif</td>
+                    <td class="text-center"><b>{{ (int) ($courseAttempts[$e->id] ?? 0) }}</b></td>
                     <td><span class="badge bg-{{ $esC }}">{{ $esL }}</span></td>
                     @if ($paid)<td class="text-center"><form action="{{ $base }}/seasons/{{ $season->id }}/free/course/{{ $e->id }}" method="POST">@csrf<button class="btn btn-sm {{ $e->free_access ? 'btn-success' : 'btn-outline-secondary' }} mb-0 py-0" title="Open for everyone without buying">{{ $e->free_access ? 'Free' : 'Paid' }}</button></form></td>@endif
                     <td class="text-end text-nowrap">
@@ -67,12 +69,19 @@
             @foreach ($legacy as $d)
                 <tr>
                     <td><span class="fw-semibold">{{ $d->exam_title ?: ($d->examtitle ?: 'Exam') }}</span> <span class="badge bg-dark">old KPSC</span></td>
+                    @php $att = $legacyAttempts->get($d->id); $n = (int) ($att->c ?? 0); @endphp
                     <td class="small">{{ $d->exam_date ? \Illuminate\Support\Carbon::parse($d->exam_date)->format('d M Y') : '-' }}</td>
+                    <td class="small text-nowrap">@if ($d->started_at || $d->ended_at){{ $d->started_at ? \Illuminate\Support\Carbon::parse($d->started_at)->format('d M, h:i a') : '…' }}<br>{{ $d->ended_at ? \Illuminate\Support\Carbon::parse($d->ended_at)->format('d M, h:i a') : '…' }}@else - @endif</td>
+                    <td class="text-center"><b>{{ $n }}</b>@if ($kind !== 'omr' && $att && $att->u != $n)<div class="small text-muted">{{ (int) $att->u }} student(s)</div>@endif</td>
                     <td><span class="badge bg-{{ $d->status ? 'success' : 'secondary' }}">{{ $d->status ? 'Published' : 'Draft' }}</span></td>
                     @if ($paid)<td class="text-center"><form action="{{ $base }}/seasons/{{ $season->id }}/free/legacy/{{ $d->id }}" method="POST">@csrf<button class="btn btn-sm {{ $d->free_access ? 'btn-success' : 'btn-outline-secondary' }} mb-0 py-0">{{ $d->free_access ? 'Free' : 'Paid' }}</button></form></td>@endif
                     <td class="text-end text-nowrap">
-                        @if ($kind === 'omr')<a href="{{ url('admin/kpsc/model-exam/view') }}" class="btn btn-sm btn-light mb-0" title="Edit in the OMR exam list"><i class="bi bi-pencil"></i></a>
+                        @if ($kind === 'omr')<button type="button" class="btn btn-sm btn-light mb-0 js-omr-edit" title="Edit exam details" data-id="{{ $d->id }}" data-date="{{ $d->exam_date ? \Illuminate\Support\Carbon::parse($d->exam_date)->format('Y-m-d') : '' }}"
+                            data-started="{{ $d->started_at ? \Illuminate\Support\Carbon::parse($d->started_at)->format('Y-m-d\TH:i') : '' }}" data-ended="{{ $d->ended_at ? \Illuminate\Support\Carbon::parse($d->ended_at)->format('Y-m-d\TH:i') : '' }}"
+                            data-title="{{ $d->examtitle }}" data-category="{{ $d->category }}" data-cutoff="{{ $d->cutoff_mark }}" data-instruction="{{ $d->instruction_id }}" data-free="{{ $d->free_access ? 1 : 0 }}"
+                            data-qp="{{ $d->model_exam_details_one?->qp_file ? url(Storage::url('model-exam/' . $d->model_exam_details_one->qp_file)) : '' }}" data-ak="{{ $d->model_exam_details_one?->answer_file ? url(Storage::url('model-exam/' . $d->model_exam_details_one->answer_file)) : '' }}"><i class="bi bi-pencil"></i></button>
                         @elseif ($legacyBase)<a href="{{ url($legacyBase . '/edit/' . $d->id) }}" class="btn btn-sm btn-light mb-0" title="Edit"><i class="bi bi-pencil"></i></a>@endif
+                        <form class="d-inline" action="{{ $base }}/seasons/{{ $season->id }}/clear-leaderboard/{{ $d->id }}" method="POST" onsubmit="return confirm('Clear the leaderboard? All {{ $n }} attempt(s) of this exam are deleted. This cannot be undone.')">@csrf<button class="btn btn-sm btn-light mb-0" title="Clear leaderboard ({{ $n }} attempt(s))" @disabled($n === 0)><i class="bi bi-trophy"></i><i class="bi bi-x-lg" style="font-size:.6rem;vertical-align:top"></i></button></form>
                         <button type="button" class="btn btn-sm btn-light mb-0" title="Move / copy to another season" onclick="pvPlace('legacy',{{ $d->id }})"><i class="bi bi-arrow-left-right"></i></button>
                         <form class="d-inline" action="{{ $base }}/seasons/{{ $season->id }}/legacy-status/{{ $d->id }}" method="POST">@csrf<button class="btn btn-sm btn-light mb-0" title="{{ $d->status ? 'Unpublish' : 'Publish' }}"><i class="bi {{ $d->status ? 'bi-eye-slash' : 'bi-eye' }}"></i></button></form>
                         <form class="d-inline" action="{{ $base }}/seasons/{{ $season->id }}/detach/{{ $d->id }}" method="POST" onsubmit="return confirm('Take this exam out of the season? The exam itself is kept.')">@csrf<button class="btn btn-sm btn-light mb-0" title="Take out of the season"><i class="bi bi-box-arrow-right"></i></button></form>
@@ -81,7 +90,7 @@
                 </tr>
             @endforeach
             @if (!$courseExams->count() && !$legacy->count())
-                <tr><td colspan="5" class="text-center text-muted py-5"><i class="bi bi-journal-plus fs-1 d-block mb-2"></i>No exams in this season yet. Press <b>Add exam</b>.</td></tr>
+                <tr><td colspan="8" class="text-center text-muted py-5"><i class="bi bi-journal-plus fs-1 d-block mb-2"></i>No exams in this season yet. Press <b>Add exam</b>.</td></tr>
             @endif
             </tbody>
         </table>
@@ -96,6 +105,40 @@
         <div class="modal-footer"><button type="button" class="btn btn-light mb-0" data-bs-dismiss="modal">Cancel</button><button class="btn btn-success mb-0"><i class="bi bi-check-lg me-1"></i>Save</button></div>
     </form>
 </div></div></div>
+
+@if ($kind === 'omr')
+{{-- Edit an OMR exam here (saves and comes back to this season, no redirect to the old OMR list) --}}
+<div class="modal fade modal-drawer" id="editOmrExam" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
+    <form action="{{ url('admin/kpsc/model-exam/edit-details') }}" method="POST" enctype="multipart/form-data">@csrf
+        <input type="hidden" name="exam_id" id="oe_id"><input type="hidden" name="series_season_id" value="{{ $season->id }}"><input type="hidden" name="back" value="{{ url()->current() }}">
+        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-pencil me-1"></i>Edit exam details</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body"><div class="row g-2">
+            <div class="col-12"><label class="form-label small mb-0">Exam title <span class="text-danger">*</span></label><input class="form-control" name="examtitle" id="oe_title" required autocomplete="off"></div>
+            <div class="col-12"><label class="form-label small mb-0">Exam date <span class="text-danger">*</span></label><input type="date" class="form-control" name="exam_date" id="oe_date" required></div>
+            <div class="col-12"><label class="form-label small mb-0">Starts at <span class="text-danger">*</span></label><input type="datetime-local" class="form-control" name="exam_started" id="oe_started" required></div>
+            <div class="col-12"><label class="form-label small mb-0">Ends at <span class="text-danger">*</span></label><input type="datetime-local" class="form-control" name="exam_ended" id="oe_ended" required></div>
+            <div class="col-12"><label class="form-label small mb-0">Cutoff mark</label><input type="number" step="0.01" min="0" class="form-control" name="cutoff_mark" id="oe_cutoff" placeholder="optional"></div>
+            <div class="col-12"><label class="form-label small mb-0">Instructions</label><select class="form-select" name="instruction_id" id="oe_instruction"><option value="">Default (OMR)</option>@foreach (\App\Models\ExamInstruction::where('kind', 'omr')->orderBy('name')->get() as $ins)<option value="{{ $ins->id }}">{{ $ins->name }}</option>@endforeach</select></div>
+            <div class="col-12"><label class="form-label small mb-0">Category <span class="text-danger">*</span></label><select class="form-select" name="category" id="oe_category" required><option value=""></option>@foreach (['10th level' => '10th level', 'Plus two level' => 'Plus two level', 'Degree level' => 'Degree level', 'Programmer' => 'Programmer', 'Typest' => 'Typest'] as $cv => $cl)<option value="{{ $cv }}">{{ $cl }}</option>@endforeach</select></div>
+            <div class="col-12"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" role="switch" name="free_access" id="oe_free" value="1"><label class="form-check-label" for="oe_free">Free access - open for everyone even when the season is paid</label></div></div>
+            <div class="col-12"><label class="form-label small mb-0">Question paper (PDF)</label><input class="form-control" accept=".pdf" type="file" name="qstn_file"><a href="#" target="_blank" id="oe_qp" class="small">View current question paper</a></div>
+            <div class="col-12"><label class="form-label small mb-0">Answer key (PDF)</label><input class="form-control" accept=".pdf" type="file" name="ans_file"><a href="#" target="_blank" id="oe_ak" class="small">View current answer key</a></div>
+        </div></div>
+        <div class="modal-footer"><button type="button" class="btn btn-light mb-0" data-bs-dismiss="modal">Cancel</button><button class="btn btn-success mb-0"><i class="bi bi-check-lg me-1"></i>Save changes</button></div>
+    </form>
+</div></div></div>
+<script>
+    document.querySelectorAll('.js-omr-edit').forEach(function (b) {
+        b.addEventListener('click', function () {
+            var d = b.dataset, set = function (id, v) { document.getElementById(id).value = v || ''; };
+            set('oe_id', d.id); set('oe_title', d.title); set('oe_date', d.date); set('oe_started', d.started); set('oe_ended', d.ended); set('oe_cutoff', d.cutoff); set('oe_instruction', d.instruction); set('oe_category', d.category);
+            document.getElementById('oe_free').checked = d.free === '1';
+            [['oe_qp', d.qp], ['oe_ak', d.ak]].forEach(function (x) { var a = document.getElementById(x[0]); a.style.display = x[1] ? '' : 'none'; a.href = x[1] || '#'; });
+            new bootstrap.Modal(document.getElementById('editOmrExam')).show();
+        });
+    });
+</script>
+@endif
 
 {{-- Add exams of the "Other exams" list (no season): move or copy them into this season --}}
 @if ($attachable->count() || $otherCourse->count())

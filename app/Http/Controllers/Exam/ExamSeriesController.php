@@ -160,14 +160,25 @@ class ExamSeriesController extends Controller
         $legacy = collect();
         $attachable = collect();
         if ($exam->slug === 'kpsc' && $section && \Illuminate\Support\Facades\Schema::hasTable('kpsc_daily_exams')) {
-            $legacy = \App\Models\DailyExam::where('section', $section)->where('series_season_id', $season->id)->orderByDesc('exam_date')->orderByDesc('id')->get();
+            $legacy = \App\Models\DailyExam::with('model_exam_details_one')->where('section', $section)->where('series_season_id', $season->id)->orderByDesc('exam_date')->orderByDesc('id')->get();
             $attachable = \App\Models\DailyExam::where('section', $section)->whereNull('series_season_id')->orderByDesc('exam_date')->orderByDesc('id')->limit(150)->get();
         }
         $otherCourse = CourseExam::where('course_id', $course->id)->where('feature_id', $feature->id)->whereNull('season_id')->orderByDesc('id')->limit(150)->get();
         $otherSeasons = ExamSeason::where('exam_id', $exam->id)->where('kind', $kind)->where('id', '!=', $season->id)->orderByDesc('starts_on')->orderByDesc('id')->get();
         $legacyBase = ['daily' => 'admin/kpsc/daily-exam', 'omr' => 'admin/kpsc/model-exam', 'ca' => 'admin/kpsc/ca-daily-exam'][$kind] ?? null;
 
+        // how many attempts each exam has (the leaderboard of an exam is built from them)
+        $DB = \Illuminate\Support\Facades\DB::class;
+        $legacyIds = $legacy->pluck('id');
+        $legacyAttempts = collect();
+        if ($legacyIds->count()) {
+            $q = $kind === 'omr' ? $DB::table('kpsc_model_exam_attempt') : ($kind === 'ca' ? $DB::table('kpsc_ca_daily_exam_attempts') : $DB::table('kpsc_daily_exams_attempt')->where('status', '2'));
+            $legacyAttempts = $q->whereIn('exam_id', $legacyIds)->selectRaw('exam_id, count(*) c, count(distinct user_id) u')->groupBy('exam_id')->get()->keyBy('exam_id');
+        }
+        $courseAttempts = $courseExams->count() ? \App\Models\CourseExamAttempt::whereIn('course_exam_id', $courseExams->pluck('id'))->where('status', 'submitted')->selectRaw('course_exam_id, count(*) c')->groupBy('course_exam_id')->pluck('c', 'course_exam_id') : collect();
+
         return view('admin.exam.season-show', [
+            'legacyAttempts' => $legacyAttempts, 'courseAttempts' => $courseAttempts,
             'exam' => $exam, 'layout' => $exam->layout(), 'kind' => $kind, 'title' => self::KINDS[$kind][1], 'season' => $season, 'courseExams' => $courseExams,
             'legacy' => $legacy, 'attachable' => $attachable, 'otherCourse' => $otherCourse, 'otherSeasons' => $otherSeasons, 'legacyBase' => $legacyBase, 'builder' => $builder, 'base' => $exam->examUrl('series/' . $kind),
             'special' => $kind === 'special', 'access' => app(\App\Services\SeasonAccess::class),
@@ -241,6 +252,25 @@ class ExamSeriesController extends Controller
         }
 
         return back()->with('success', $n ? ($copy ? $n . ' exam(s) copied into this season (drafts / hidden; the originals stay).' : $n . ' exam(s) moved into this season.') : 'Nothing changed.');
+    }
+
+    /** Clear the leaderboard of an old exam of this season: every attempt of the exam is removed (the exam and its questions stay). */
+    public function clearLeaderboard(Request $request, $examSlug, $kind, $id, $examId)
+    {
+        $this->scope($request, $examSlug, $kind);
+        $d = \App\Models\DailyExam::where('series_season_id', $id)->findOrFail($examId);
+        $DB = \Illuminate\Support\Facades\DB::class;
+        if ($d->section === 'Model Exam') {
+            $n = $DB::table('kpsc_model_exam_attempt')->where('exam_id', $d->id)->delete();
+            $DB::table('omr_exam_times')->where('exam_id', $d->id)->delete();
+        } elseif ($d->section === 'CA-Daily-Exam') {
+            $n = $DB::table('kpsc_ca_daily_exam_attempts')->where('exam_id', $d->id)->delete();
+        } else {
+            $DB::table('kpsc_daily_exam_answers')->where('exam_id', $d->id)->delete();
+            $n = $DB::table('kpsc_daily_exams_attempt')->where('exam_id', $d->id)->delete();
+        }
+
+        return back()->with('success', 'Leaderboard cleared: ' . $n . ' attempt(s) removed from "' . ($d->examtitle ?: 'the exam') . '".');
     }
 
     /** Take an old exam out of the season (the exam itself is kept). */

@@ -30,6 +30,9 @@
     <div class="page-content-wrapper"><div class="container"><div class="xt-wrap">
         <h4>Exam : <span class="text-info">{{ $examdetails->examtitle }}</span></h4>
 
+        @if (!empty($notStarted))
+            @include('kpsc.partials.exam-instructions', ['exam' => $examdetails, 'instruction' => $instruction, 'meta' => array_filter(['Ends' => $examdetails->ended_at ? date('d M Y, h:i a', strtotime($examdetails->ended_at)) : null]), 'startsAt' => $startsAt])
+        @else
         <div class="xt-tabs" role="tablist">
             <button class="xt-tab" data-pane="ins">Instructions</button>
             <button class="xt-tab" data-pane="qp">Question paper</button>
@@ -96,6 +99,7 @@
             @if ($akUrl)@include('kpsc.partials.pdf-viewer', ['pdfId' => 'ak', 'pdfUrl' => $akUrl])@else<p class="text-muted">The answer key is not uploaded yet.</p>@endif
             <p class="xt-note">Check your OMR sheet, then use <b>Upload your marks</b> on the exam list to save your result.</p>
         </div>
+        @endif
 
         <div class="xt-about">
             <h5>About this OMR exam</h5>
@@ -116,6 +120,7 @@
     @include('kpsc.partials.exam-report', ['examId' => $examdetails->id])
 @endsection
 @section('scripts')
+@if (empty($notStarted))
     <script>
     (function () {
         var id = @json($examdetails->id), key = 'omr_started_' + id;
@@ -172,4 +177,5 @@
         show(@json(session('success') || $errors->any() ? 'mk' : 'ins'));
     })();
     </script>
+@endif
 @endsection

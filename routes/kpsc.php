@@ -46,6 +46,9 @@ Route::group(['prefix' => 'kpsc', 'as' => 'kpsc'], function () {
 
     Route::get("model-exam-mark-form", function (Request $request) {
         $id = $request->id;
+        if (!\App\Models\DailyExam::findOrFail($id)->hasStarted()) {
+            return '<div class="alert alert-warning mb-0">Marks can be uploaded after the exam starts.</div>';
+        }
         return view("kpsc.model-exam-mark-form", compact('id'));
     })->middleware('auth');
 

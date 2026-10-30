@@ -68,6 +68,9 @@ class ApiCollectionController extends Controller
     }
     public function DailyExamSingle(Request $request)
     {
+        if (($exam = DailyExam::find($request->exam_id)) && !$exam->hasStarted()) {
+            return response()->json(['message' => 'This exam has not started yet.', 'starts_at' => $exam->startIso(), 'status' => 403], 403);
+        }
         if ($locked = $this->seasonLock($request->exam_id)) {
             return $locked;
         }
@@ -90,6 +93,9 @@ class ApiCollectionController extends Controller
     }
     public function ModelExamSingle(Request $request)
     {
+        if (($exam = DailyExam::find($request->exam_id)) && !$exam->hasStarted()) {
+            return response()->json(['message' => 'This exam has not started yet.', 'starts_at' => $exam->startIso(), 'status' => 403], 403);
+        }
         if ($locked = $this->seasonLock($request->exam_id)) {
             return $locked;
         }

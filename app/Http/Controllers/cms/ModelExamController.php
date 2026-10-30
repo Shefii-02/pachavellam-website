@@ -175,7 +175,11 @@ class ModelExamController extends Controller
             dd($e);
         }
 
-        return redirect()->back()->with('message', 'Data Updated Successfully');
+        // sent from a season page: go back there (only inside /admin)
+        $back = (string) $request->input('back');
+        $to = $back !== '' && \Illuminate\Support\Str::startsWith($back, url('/admin/')) ? redirect($back) : redirect()->back();
+
+        return $to->with(['message' => 'Data Updated Successfully', 'success' => 'Exam saved.']);
     }
 
 
@@ -255,7 +259,8 @@ class ModelExamController extends Controller
     public function clear_leaderboard($id)
     {
 
-        $date_based = DailyExamattempt::where('exam_id', $id)->delete();
+        ModelExamAttempt::where('exam_id', $id)->delete();
+        \Illuminate\Support\Facades\DB::table('omr_exam_times')->where('exam_id', $id)->delete();
 
         return redirect()->back()->with('message', 'Data deleted Successfully');
     }

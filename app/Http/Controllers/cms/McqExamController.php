@@ -13,7 +13,10 @@ class McqExamController extends Controller
 {
     private function exam($id): DailyExam
     {
-        return DailyExam::where('section', '<>', 'Model Exam')->findOrFail($id);
+        $exam = DailyExam::where('section', '<>', 'Model Exam')->findOrFail($id);
+        abort_unless($exam->hasStarted(), 403, 'This exam has not started yet.');
+
+        return $exam;
     }
 
     private function running($id): DailyExamattempt

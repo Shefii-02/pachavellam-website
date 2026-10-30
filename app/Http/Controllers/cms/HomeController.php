@@ -699,6 +699,10 @@ class HomeController extends Controller
         
         abort_if(!$examdetails, 404);
         $instruction = \App\Models\ExamInstruction::forExam($examdetails, 'omr');
+        if (!$examdetails->hasStarted()) {   // before the start time only the instructions and the countdown: no paper, key or marks
+            return view("kpsc.model-exam-single", ['examdetails' => $examdetails, 'instruction' => $instruction, 'notStarted' => true, 'startsAt' => $examdetails->startIso(),
+                'uploaded' => false, 'timing' => ['avg' => null, 'count' => 0], 'myMark' => null, 'myTime' => null]);
+        }
         $myMark = ModelExamAttempt::where('exam_id',$id)->where('user_id',auth()->id())->first();
         $uploaded = (bool) $myMark;
         $myTime = \Illuminate\Support\Facades\DB::table('omr_exam_times')->where('exam_id',$id)->where('user_id',auth()->id())->value('seconds');
@@ -719,6 +723,9 @@ class HomeController extends Controller
                                 ->first();
         
         abort_if(!$examdetails, 404);
+        if (!$examdetails->hasStarted()) {
+            return redirect(url('kpsc/model-exam/' . $date . '/' . $id));   // the answer key opens with the exam
+        }
 
         return view("kpsc.model-exam-answerkey",compact('examdetails'));
     }
@@ -726,6 +733,9 @@ class HomeController extends Controller
     public function store_model_exam_results($id,Request $request){
         date_default_timezone_set('Asia/Kolkata');
         $user = auth()->user();
+        if (!DailyExam::findOrFail($id)->hasStarted()) {
+            return redirect()->back()->with('success', 'Marks can be uploaded after the exam starts.');
+        }
         $request->validate(['correct_answer' => 'required|integer|min:0', 'wrong_answer' => 'required|integer|min:0']);
         $new_one = ModelExamAttempt::where('exam_id',$id)->where('user_id',$user->id)->first();
         if(!$new_one){
@@ -1052,6 +1062,13 @@ class HomeController extends Controller
  
         
         // the instructions come first (once per attempt: an unfinished attempt goes straight back into the exam)
+        if (!$date_list->hasStarted()) {   // not open yet: the instructions and a countdown, no questions and no attempt row
+            return view('kpsc.exam-instructions', [
+                'exam' => $date_list, 'instruction' => \App\Models\ExamInstruction::forExam($date_list, 'mcq'),
+                'meta' => array_filter(['Total questions' => $date_based->count(), 'Duration' => $date_list->duration_min ? $date_list->duration_min . ' min' : null]),
+                'startUrl' => null, 'startsAt' => $date_list->startIso(), 'lastResult' => null,
+            ]);
+        }
         if (!request()->boolean('start') && !DailyExamattempt::where('user_id',auth()->user()->id)->where('exam_id',$date_list->id)->where('status','<>',2)->exists()) {
             return view('kpsc.exam-instructions', [
                 'exam' => $date_list, 'instruction' => \App\Models\ExamInstruction::forExam($date_list, 'mcq'),
