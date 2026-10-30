@@ -9,7 +9,7 @@
         max-width:1180px; margin:0 auto; padding:10px 0 90px; color:var(--tx); }
     .mq * { box-sizing:border-box; }
     .mq-top { position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--bd); border-radius:14px; padding:8px 12px; margin-bottom:10px; }
-    .mq-top h1 { font-size:1rem; font-weight:800; margin:0; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .mq-top h1 { color:var(--opt); font-size:1rem; font-weight:800; margin:0; flex:1; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
     .mq-chip { border-radius:20px; padding:4px 12px; font-weight:800; font-size:.85rem; background:var(--bg); border:1px solid var(--bd); white-space:nowrap; font-variant-numeric:tabular-nums; }
     .mq-chip.warn { background:#fff3d6; color:#8a5500; border-color:transparent; } .mq-chip.crit { background:#fde8e8; color:#a4242a; border-color:transparent; animation:mqp 1s infinite; } @keyframes mqp { 50% { opacity:.55; } }
     .mq-btn { border:1px solid var(--bd); background:var(--card); color:var(--tx); border-radius:10px; padding:8px 14px; font-weight:700; font-size:.88rem; cursor:pointer; }
