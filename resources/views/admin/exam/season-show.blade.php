@@ -49,15 +49,30 @@
         <div class="small text-muted"><i class="bi bi-grip-vertical"></i> Drag <b>⠿</b> to set the order of the exams (students see this order). <span id="orderNote"></span></div>
         <form action="{{ $base }}/seasons/{{ $season->id }}/exams-order/reset" method="POST" onsubmit="return confirm('Go back to the default order (newest first)?')">@csrf<button class="btn btn-sm btn-outline-secondary mb-0"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset to date order</button></form>
     </div>
+    <div class="d-none align-items-center flex-wrap gap-2 px-3 pb-2" id="bulkBar">
+        <form action="{{ $base }}/seasons/{{ $season->id }}/bulk" method="POST" class="d-flex align-items-center flex-wrap gap-2" id="bulkForm">@csrf
+            <span class="badge bg-primary"><span id="bulkN">0</span> selected</span>
+            <select name="action" class="form-select form-select-sm w-auto" id="bulkAction" required>
+                <option value="">Action…</option>
+                <option value="publish">Publish</option>
+                <option value="unpublish">Unpublish (hide)</option>
+                @if ($paid)<option value="free">Make free access</option><option value="paid">Follow season (paid)</option>@endif
+                <option value="remove">Take out of the season</option>
+            </select>
+            <button class="btn btn-sm btn-success mb-0">Apply</button>
+            <button type="button" class="btn btn-sm btn-light mb-0" id="bulkClear">Clear</button>
+        </form>
+    </div>
     <div class="table-responsive">
         <table class="table align-middle mb-0 table-hover">
-            <thead><tr><th style="width:30px"></th><th>Exam</th><th>Date</th><th>Start - End</th><th class="text-center">Attempts</th><th>Status</th>@if ($paid)<th class="text-center">Free access</th>@endif<th class="text-end">Actions</th></tr></thead>
+            <thead><tr><th style="width:30px"></th><th style="width:30px"><input type="checkbox" class="form-check-input" id="bulkAll" title="Select all"></th><th>Exam</th><th>Date</th><th>Start - End</th><th class="text-center">Attempts</th><th>Status</th>@if ($paid)<th class="text-center">Free access</th>@endif<th class="text-end">Actions</th></tr></thead>
             <tbody id="examRows">
             @foreach ($items as $it)
               @if ($it['type'] === 'course')
                 @php $e = $it['model']; [$esL, $esC] = \App\Models\CourseExam::STATUSES[$e->status] ?? [$e->status, 'secondary']; @endphp
                 <tr data-type="course" data-id="{{ $e->id }}">
                     <td class="pv-drag" title="Drag to change the order">⠿</td>
+                    <td><input type="checkbox" class="form-check-input bulk-cb" data-type="course" value="{{ $e->id }}"></td>
                     <td><a href="{{ $builder }}/{{ $e->id }}" class="fw-semibold">{{ $e->title }}</a><div class="small text-muted">{{ $e->sections_count }} section(s) · {{ $e->links_count }} question(s)@if ($e->sort_no !== null) · sort no. {{ $e->sort_no }}@endif</div></td>
                     <td class="small">{{ $e->start_at ? $e->start_at->format('d M Y') : ($e->entry_date ? \Illuminate\Support\Carbon::parse($e->entry_date)->format('d M Y') : '-') }}</td>
                     <td class="small text-nowrap">@if ($e->start_at || $e->end_at){{ $e->start_at?->format('d M, h:i a') ?? '…' }}<br>{{ $e->end_at?->format('d M, h:i a') ?? '…' }}@else - @endif</td>
@@ -77,6 +92,7 @@
                 @php $d = $it['model']; @endphp
                 <tr data-type="legacy" data-id="{{ $d->id }}">
                     <td class="pv-drag" title="Drag to change the order">⠿</td>
+                    <td><input type="checkbox" class="form-check-input bulk-cb" data-type="legacy" value="{{ $d->id }}"></td>
                     <td><span class="fw-semibold">{{ $d->exam_title ?: ($d->examtitle ?: 'Exam') }}</span> <span class="badge bg-dark">old KPSC</span>@if ($d->sort_no !== null)<div class="small text-muted">sort no. {{ $d->sort_no }}</div>@endif</td>
                     @php $att = $legacyAttempts->get($d->id); $n = (int) ($att->c ?? 0); @endphp
                     <td class="small">{{ $d->exam_date ? \Illuminate\Support\Carbon::parse($d->exam_date)->format('d M Y') : '-' }}</td>
@@ -100,7 +116,7 @@
               @endif
             @endforeach
             @if (!count($items))
-                <tr><td colspan="9" class="text-center text-muted py-5"><i class="bi bi-journal-plus fs-1 d-block mb-2"></i>No exams in this season yet. Press <b>Add exam</b>.</td></tr>
+                <tr><td colspan="10" class="text-center text-muted py-5"><i class="bi bi-journal-plus fs-1 d-block mb-2"></i>No exams in this season yet. Press <b>Add exam</b>.</td></tr>
             @endif
             </tbody>
         </table>
@@ -167,6 +183,29 @@
     .pv-drag { cursor:grab; color:#8b95a1; font-size:1.2rem; user-select:none; text-align:center; } .pv-drag:active { cursor:grabbing; }
     #examRows tr.sortable-ghost { opacity:.4; background:#e8f0fe; } #examRows tr.sortable-chosen { background:#f1f6ff; }
 </style>
+<script>
+    (function () {
+        var cbs = function () { return [].slice.call(document.querySelectorAll('.bulk-cb')); }, all = document.getElementById('bulkAll'),
+            bar = document.getElementById('bulkBar'), form = document.getElementById('bulkForm');
+        if (!all || !form) return;
+        var refresh = function () {
+            var on = cbs().filter(function (c) { return c.checked; });
+            document.getElementById('bulkN').textContent = on.length;
+            bar.classList.toggle('d-none', !on.length); bar.classList.toggle('d-flex', !!on.length);
+            all.checked = on.length > 0 && on.length === cbs().length;
+        };
+        all.addEventListener('change', function () { cbs().forEach(function (c) { c.checked = all.checked; }); refresh(); });
+        document.addEventListener('change', function (e) { if (e.target.classList && e.target.classList.contains('bulk-cb')) refresh(); });
+        document.getElementById('bulkClear').addEventListener('click', function () { cbs().forEach(function (c) { c.checked = false; }); refresh(); });
+        form.addEventListener('submit', function (e) {
+            var a = document.getElementById('bulkAction'), on = cbs().filter(function (c) { return c.checked; });
+            if (!a.value || !on.length) { e.preventDefault(); return; }
+            if (!confirm(a.options[a.selectedIndex].text + ' - ' + on.length + ' exam(s)?')) { e.preventDefault(); return; }
+            form.querySelectorAll('.bulk-id').forEach(function (n) { n.remove(); });
+            on.forEach(function (c) { var i = document.createElement('input'); i.type = 'hidden'; i.className = 'bulk-id'; i.name = c.dataset.type === 'legacy' ? 'legacy_ids[]' : 'course_ids[]'; i.value = c.value; form.appendChild(i); });
+        });
+    })();
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
 <script>
     (function () {

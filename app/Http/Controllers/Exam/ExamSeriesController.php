@@ -380,6 +380,39 @@ class ExamSeriesController extends Controller
         return back()->with('success', $row->free_access ? 'This exam is now free for everyone.' : 'This exam now follows the season.');
     }
 
+    /** One action for many ticked exams of the season: publish, unpublish, free, paid, remove (take out of the season). */
+    public function bulk(Request $request, $examSlug, $kind, $id)
+    {
+        [$exam, $course, $feature] = $this->scope($request, $examSlug, $kind);
+        $season = ExamSeason::where('exam_id', $exam->id)->where('kind', $kind)->findOrFail($id);
+        $data = $request->validate([
+            'action' => 'required|in:publish,unpublish,free,paid,remove',
+            'course_ids' => 'nullable|array|max:200', 'course_ids.*' => 'integer',
+            'legacy_ids' => 'nullable|array|max:200', 'legacy_ids.*' => 'integer',
+        ]);
+        abort_if(empty($data['course_ids']) && empty($data['legacy_ids']), 422, 'Tick at least one exam.');
+
+        $courseQ = CourseExam::where('course_id', $course->id)->where('season_id', $season->id)->whereIn('id', $data['course_ids'] ?? []);
+        $legacyQ = \App\Models\DailyExam::where('series_season_id', $season->id)->whereIn('id', $data['legacy_ids'] ?? []);
+        $map = [
+            'publish'   => [['status' => 'published'], ['status' => 1], 'published'],
+            'unpublish' => [['status' => 'draft'], ['status' => 0], 'hidden'],
+            'free'      => [['free_access' => 1], ['free_access' => 1], 'made free'],
+            'paid'      => [['free_access' => 0], ['free_access' => 0], 'set to follow the season'],
+            'remove'    => [['season_id' => null, 'season_position' => null], ['series_season_id' => null, 'season_position' => null], 'taken out of the season'],
+        ];
+        [$courseSet, $legacySet, $word] = $map[$data['action']];
+        $n = 0;
+        if (!empty($data['course_ids'])) {
+            $n += $courseQ->update($courseSet);
+        }
+        if (!empty($data['legacy_ids'])) {
+            $n += $legacyQ->update($legacySet);
+        }
+
+        return back()->with('success', $n . ' exam(s) ' . $word . '.');
+    }
+
     /** Publish / hide an old KPSC exam from the season page. */
     public function legacyStatus(Request $request, $examSlug, $kind, $id, $examId)
     {
