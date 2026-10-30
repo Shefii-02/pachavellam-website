@@ -73,17 +73,8 @@
                 <div class="doc-cont">
                     <div class="container-fluid p-0 documents-container d-flex align-items-center">
                         <div class="container m-auto position-relative">
-                            <div class="position-absolute doc-actions">
-                                <a target="_new" href="{{ url(Storage::url('model-exam/' . $examdetails->answer_file)) }}"
-                                    class="btn share btn-dark  btn-lg add-doc button-1 text-white ctm-border-radius p-1 btn-sm  ctm-btn-p">
-                                    Download </a>
-                                <a href=""
-                                    class="btn share btn-lg  btn-info add-doc button-1 text-white ctm-border-radius p-1 btn-sm  ctm-btn-p">
-                                    Refresh Page </a>
-                            </div>
-                            <iframe
-                                src="https://docs.google.com/gview?url={{ url(Storage::url('model-exam/' . $examdetails->answer_file)) }}&embedded=true"
-                                frameborder="0"></iframe>
+                            @include('kpsc.partials.pdf-viewer', ['pdfId' => 'ak', 'pdfUrl' => url(Storage::url('model-exam/' . $examdetails->answer_file))])
+<script>window.addEventListener('load', function () { window.pvStart.ak(); });</script>
                         </div>
                     </div>
                 </div>

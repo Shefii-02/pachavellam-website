@@ -17,8 +17,7 @@
         .xt-tab.on { color:#0a8f5b; border-color:#0a8f5b; } .xt-tab[disabled] { opacity:.45; }
         .xt-pane { display:none; } .xt-pane.on { display:block; }
         .xt-bar { display:flex; gap:8px; justify-content:flex-end; margin-bottom:8px; }
-        .xt-frame { width:100%; height:78vh; border:1px solid var(--pv-border,#e5e7eb); border-radius:12px; background:#d1d1d1; }
-        .xt-timer { position:sticky; top:0; z-index:5; background:var(--pv-surface,#fff); border:1px solid var(--pv-border,#e5e7eb); border-radius:12px; padding:8px 12px; margin-bottom:8px; }
+                .xt-timer { position:sticky; top:0; z-index:5; background:var(--pv-surface,#fff); border:1px solid var(--pv-border,#e5e7eb); border-radius:12px; padding:8px 12px; margin-bottom:8px; }
         .xt-timer .row1 { display:flex; align-items:center; gap:8px; flex-wrap:wrap; } .xt-clock { font-variant-numeric:tabular-nums; font-size:1.25rem; font-weight:800; min-width:92px; }
         .xt-timer button { border:0; border-radius:18px; padding:5px 14px; font-size:.8rem; font-weight:800; background:#eef0f3; } .xt-timer button.pri { background:#0a8f5b; color:#fff; } .xt-timer button.stop { background:#e53935; color:#fff; }
         .xt-info { font-size:.78rem; color:var(--pv-muted,#667); } .xt-about { margin-top:22px; line-height:1.6; font-size:.92rem; } .xt-about h5 { font-weight:800; margin:14px 0 6px; }
@@ -40,7 +39,6 @@
         </div>
 
         <div class="xt-pane" id="pane-qp">
-            <div class="xt-bar">@if ($qpUrl)<a target="_blank" class="btn btn-sm btn-dark" href="{{ $qpUrl }}">Download</a>@endif</div>
             <div class="xt-timer" id="tm">
                 <div class="row1">
                     <button type="button" id="tmOn">⏱ Timer (optional)</button>
@@ -51,13 +49,12 @@
                 </div>
                 <div class="xt-info" id="tmInfo">@if ($timing['avg']) Average time taken by {{ $timing['count'] }} students: <b>{{ floor($timing['avg'] / 60) }} min {{ $timing['avg'] % 60 }} s</b> @else Time yourself: start, pause or stop the timer while you write the paper. @endif</div>
             </div>
-            @if ($qpUrl)<iframe class="xt-frame" data-src="https://docs.google.com/gview?url={{ $qpUrl }}&embedded=true" frameborder="0"></iframe>@else<p class="text-muted">The question paper is not uploaded yet.</p>@endif
+            @if ($qpUrl)@include('kpsc.partials.pdf-viewer', ['pdfId' => 'qp', 'pdfUrl' => $qpUrl])@else<p class="text-muted">The question paper is not uploaded yet.</p>@endif
             <p class="xt-note">Write your answers on the OMR sheet. The answer key opens once the paper has been started.</p>
         </div>
 
         <div class="xt-pane" id="pane-ak">
-            <div class="xt-bar">@if ($akUrl)<a target="_blank" class="btn btn-sm btn-dark" href="{{ $akUrl }}">Download</a>@endif</div>
-            @if ($akUrl)<iframe class="xt-frame" data-src="https://docs.google.com/gview?url={{ $akUrl }}&embedded=true" frameborder="0"></iframe>@else<p class="text-muted">The answer key is not uploaded yet.</p>@endif
+            @if ($akUrl)@include('kpsc.partials.pdf-viewer', ['pdfId' => 'ak', 'pdfUrl' => $akUrl])@else<p class="text-muted">The answer key is not uploaded yet.</p>@endif
             <p class="xt-note">Check your OMR sheet, then use <b>Upload your marks</b> on the exam list to save your result.</p>
         </div>
 
@@ -85,18 +82,19 @@
         var id = @json($examdetails->id), key = 'omr_started_' + id;
         var seen = false; try { seen = localStorage.getItem(key) === '1'; } catch (e) {}
         // the key opens when the paper was started, marks were uploaded, or the exam is over
-        var keyOpen = @json($ended || $uploaded) || seen;
-        var tabs = document.querySelectorAll('.xt-tab'), akTab = document.getElementById('akTab');
+        var keyOpen = @json($ended || $uploaded) || seen;   // the paper and the key are open
+        var tabs = document.querySelectorAll('.xt-tab'), akTab = document.getElementById('akTab'), qpTab = document.querySelector('.xt-tab[data-pane=qp]');
+        // the instructions come first: the question paper and the answer key open after "Start exam" (or when the exam is over / marks are uploaded)
         function show(name) {
-            if (name === 'ak' && !keyOpen) return;
+            if (name !== 'ins' && !keyOpen) return;
             tabs.forEach(function (t) { t.classList.toggle('on', t.dataset.pane === name); });
             document.querySelectorAll('.xt-pane').forEach(function (p) { p.classList.toggle('on', p.id === 'pane-' + name); });
-            var f = document.querySelector('#pane-' + name + ' iframe[data-src]');
-            if (f) { f.src = f.dataset.src; f.removeAttribute('data-src'); }
+            if (window.pvStart && window.pvStart[name]) window.pvStart[name]();   // the PDF loads when its tab opens
         }
-        function unlock() { keyOpen = true; akTab.disabled = false; akTab.title = ''; }
-        if (!keyOpen) { akTab.disabled = true; akTab.title = 'Opens after you start the paper'; }
-        tabs.forEach(function (t) { t.addEventListener('click', function () { if (t.dataset.pane === 'qp') { try { localStorage.setItem(key, '1'); } catch (e) {} unlock(); } show(t.dataset.pane); }); });
+        function unlock() { keyOpen = true; [akTab, qpTab].forEach(function (t) { t.disabled = false; t.title = ''; }); }
+        if (!keyOpen) { [akTab, qpTab].forEach(function (t) { t.disabled = true; t.title = 'Opens after you start the exam'; }); }
+        tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.pane); }); });
+
         // the optional timer: start / pause / resume / stop; kept in the browser so a refresh does not lose it, saved on stop
         var tk = 'omr_timer_' + id, T = { e: 0, s: null, done: false, on: false };
         try { T = Object.assign(T, JSON.parse(localStorage.getItem(tk) || '{}')); } catch (e) {}
@@ -132,7 +130,7 @@
         draw();
 
         document.addEventListener('exam-start', function () { try { localStorage.setItem(key, '1'); } catch (e) {} unlock(); show('qp'); });
-        show(@json(($uploaded || $ended) ? 'qp' : 'ins'));
+        show('ins');
     })();
     </script>
 @endsection
