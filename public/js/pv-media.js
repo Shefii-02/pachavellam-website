@@ -49,6 +49,15 @@
 
 
 
+    /* Where a pop-up (dialog, "where to?" window, menu) is mounted. Bootstrap keeps the keyboard focus inside an open modal / drawer, so a pop-up
+       appended to <body> can never be typed into. It goes inside the picker drawer (or the open modal / drawer) instead; on a plain page: <body>. */
+    var drawerEl = null;
+    function overlayHost() {
+        if (drawerEl && drawerEl.classList.contains('on')) return drawerEl;
+        var open = document.querySelectorAll('.modal.show, .offcanvas.show');
+        return open.length ? open[open.length - 1] : document.body;
+    }
+
     /* ------------------------------------------------------------------ dialogs (no browser prompt / confirm / alert) */
     var ask = {
         /** o: title, message, input {label,value,placeholder}, options [{value,label,desc,danger}], confirm, danger, hideCancel. Resolves to the answer, or null when cancelled. */
@@ -73,7 +82,7 @@
                     ok.disabled = true;
                     tc.addEventListener('input', function () { ok.disabled = tc.value.trim() !== o.typeToConfirm; });
                 }
-                document.body.appendChild(box);
+                overlayHost().appendChild(box);
                 var prev = document.activeElement;
                 function close(v) { document.removeEventListener('keydown', key, true); box.remove(); if (prev && prev.focus) try { prev.focus(); } catch (e) {} resolve(v); }
                 function done() {
@@ -106,7 +115,7 @@
             overlay.querySelector('.ok').innerHTML = o.confirm;
             var nameBox = overlay.querySelector('.nm');
             if (o.nameLabel) { nameBox.hidden = false; nameBox.querySelector('span').textContent = o.nameLabel; nameBox.querySelector('input').value = o.name || ''; }
-            document.body.appendChild(overlay);
+            overlayHost().appendChild(overlay);
             var tree = [], sel = o.start == null ? null : o.start, open = {}, cur = overlay.querySelector('.cur'), err = overlay.querySelector('.err');
             function pathOf(id) { var names = [], found = false; (function walk(n, trail) { n.forEach(function (f) { if (found) return; var t = trail.concat(f.name); if (f.id === id) { names = t; found = true; } else walk(f.children, t); }); })(tree, []); return 'Media library' + (names.length ? ' / ' + names.join(' / ') : ''); }
             function blocked(id) { return (o.exclude || []).indexOf(id) >= 0; }
@@ -152,7 +161,7 @@
     function popMenu(ev, entries) {
         [].forEach.call(document.querySelectorAll('.pvm-pop'), function (x) { x.remove(); });
         var m = h('<div class="pvm-pop">' + entries.map(function (e, i) { return e === '-' ? '<hr>' : '<button type="button" data-i="' + i + '" class="' + (e.red ? 'red' : '') + '"><i class="bi ' + e.icon + '"></i>' + esc(e.label) + '</button>'; }).join('') + '</div>');
-        document.body.appendChild(m);
+        overlayHost().appendChild(m);
         var r = ev.currentTarget ? ev.currentTarget.getBoundingClientRect() : { left: ev.clientX, bottom: ev.clientY };
         m.style.left = Math.max(8, Math.min(window.innerWidth - 230, r.left - 150)) + 'px'; m.style.top = Math.min(window.innerHeight - 280, r.bottom + 4) + 'px';
         m.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; m.remove(); entries[+b.dataset.i].run(); });
@@ -432,25 +441,38 @@
     };
 
     /* ------------------------------------------------------------------ the pick window */
-    var modal, modalEl, panel, pending;
-    function ensureModal() {
-        if (modalEl) return;
-        modalEl = h('<div class="modal fade pvm-modal" tabindex="-1"><div class="modal-dialog modal-xl modal-dialog-centered"><div class="modal-content">' +
-            '<div class="modal-header py-2"><h5 class="modal-title">Choose or upload a file</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>' +
-            '<div class="modal-body p-0"><div class="pvm-host"></div></div></div></div></div>');
-        document.body.appendChild(modalEl);
-        modal = new bootstrap.Modal(modalEl);
+    var panel, pending, lastFocus;
+    function ensureDrawer() {
+        if (drawerEl) return;
+        drawerEl = h('<div class="pvm-drawer" role="dialog" aria-modal="true"><div class="pvm-dback"></div><aside class="pvm-dpanel" tabindex="-1">' +
+            '<div class="hd"><h5 class="ttl">Choose or upload a file</h5><button type="button" class="pvm-dx" aria-label="Close"><i class="bi bi-x-lg"></i></button></div>' +
+            '<div class="bd"><div class="pvm-host"></div></div></aside></div>');
+        drawerEl.querySelector('.pvm-dback').onclick = closeDrawer;
+        drawerEl.querySelector('.pvm-dx').onclick = closeDrawer;
+        document.addEventListener('keydown', function (e) {   // Esc closes the drawer, unless a dialog on top of it is open (that one takes the key)
+            if (e.key === 'Escape' && drawerEl.classList.contains('on') && !drawerEl.querySelector('.pvm-dlg, .pvm-pathwin, .pvm-pop')) closeDrawer();
+        });
+    }
+    function closeDrawer() {
+        if (!drawerEl) return;
+        drawerEl.classList.remove('on'); document.documentElement.classList.remove('pvm-noscroll');
+        if (lastFocus && lastFocus.focus) try { lastFocus.focus(); } catch (e) {}
     }
     var TYPE_MAP = { image: 'image', file: '', any: '', audio: 'audio', video: 'video' };
     function pick(o) {
-        ensureModal();
-        modalEl.querySelector('.modal-title').textContent = o.title || ({ image: 'Choose or upload a picture', audio: 'Choose or upload a voice / audio file', video: 'Choose or upload a video', file: 'Choose or upload a file' }[o.kind] || 'Choose or upload a file');
-        var host = modalEl.querySelector('.pvm-host'); host.innerHTML = '';
+        ensureDrawer();
+        lastFocus = document.activeElement;
+        // opened from inside a Bootstrap modal / drawer: sit inside it, so its focus trap lets the keyboard reach us
+        var openers = document.querySelectorAll('.modal.show, .offcanvas.show');
+        (openers.length ? openers[openers.length - 1] : document.body).appendChild(drawerEl);
+        drawerEl.querySelector('.ttl').textContent = o.title || ({ image: 'Choose or upload a picture', audio: 'Choose or upload a voice / audio file', video: 'Choose or upload a video', file: 'Choose or upload a file' }[o.kind] || 'Choose or upload a file');
+        var host = drawerEl.querySelector('.pvm-host'); host.innerHTML = '';
         var t = TYPE_MAP[o.kind || 'any'] || '';
         var accept = o.kind === 'image' ? 'image/*' : o.kind === 'audio' ? 'audio/*' : o.kind === 'video' ? 'video/*' : '';
         panel = new Panel(host, { mode: 'pick', type: t, lockType: !!t, multiple: !!o.multiple, spec: o.spec, accept: accept, needsPath: !!o.needsPath,
-            onSelect: function (res) { modal.hide(); o.onSelect && o.onSelect(res); } });
-        modal.show();
+            onSelect: function (res) { closeDrawer(); o.onSelect && o.onSelect(res); } });
+        drawerEl.classList.add('on'); document.documentElement.classList.add('pvm-noscroll');
+        setTimeout(function () { var q = drawerEl.querySelector('.pvm-q'); if (q && window.innerWidth > 760) q.focus(); }, 320);
     }
 
     /* ------------------------------------------------------------------ native library field: <div class="pvm-field"> */

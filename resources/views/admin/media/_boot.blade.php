@@ -29,7 +29,17 @@
     .pvm-empty { color:#8b95a1; text-align:center; padding:18px 6px; } .pvm-empty.big { grid-column:1/-1; padding:60px 10px; } .pvm-empty.big i { display:block; font-size:2.6rem; margin-bottom:6px; }
     .pvm-more { text-align:center; padding:12px; } .pvm-prog { margin-bottom:8px; } .pvm-up-row .bar { height:6px; background:rgba(127,127,127,.25); border-radius:4px; overflow:hidden; } .pvm-up-row .bar i { display:block; height:100%; background:#0a8f5b; transition:width .2s; } .pvm-up-row span { font-size:.78rem; color:#8b95a1; }
     .pvm-err { color:#d93036; font-size:.8rem; margin-top:4px; }
-    .pvm-modal .modal-content { min-height:70vh; } .pvm-modal .pvm-host { height:100%; }
+    /* the pick window: a drawer from the right */
+    .pvm-drawer { position:fixed; inset:0; z-index:1090; visibility:hidden; pointer-events:none; }
+    .pvm-drawer.on { visibility:visible; pointer-events:auto; }
+    .pvm-dback { position:absolute; inset:0; background:rgba(0,0,0,.5); opacity:0; transition:opacity .25s; } .pvm-drawer.on .pvm-dback { opacity:1; }
+    .pvm-dpanel { position:absolute; top:0; right:0; bottom:0; width:min(1120px, 100vw); display:flex; flex-direction:column; background:var(--bs-body-bg, #fff); color:var(--bs-body-color, #1b2a41); box-shadow:-10px 0 34px rgba(0,0,0,.28); transform:translateX(100%); transition:transform .28s ease-out; outline:0; }
+    .pvm-drawer.on .pvm-dpanel { transform:none; }
+    .pvm-dpanel .hd { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 16px; border-bottom:1px solid rgba(127,127,127,.25); } .pvm-dpanel .ttl { margin:0; font-size:1.05rem; font-weight:800; }
+    .pvm-dx { border:0; background:transparent; color:inherit; font-size:1.1rem; border-radius:8px; padding:4px 10px; } .pvm-dx:hover { background:rgba(127,127,127,.2); }
+    .pvm-dpanel .bd { flex:1; min-height:0; display:flex; } .pvm-dpanel .pvm-host { flex:1; min-width:0; min-height:0; display:flex; }
+    .pvm-dpanel .pvm { flex:1; min-height:0; } .pvm-dpanel .pvm-gridwrap, .pvm-dpanel .pvm-side { max-height:none; }
+    html.pvm-noscroll { overflow:hidden; }
     @media (max-width: 760px) { .pvm-main { flex-direction:column; } .pvm-side { width:auto; border-left:0; border-top:1px solid rgba(127,127,127,.25); max-height:none; } .pvm-gridwrap { max-height:46vh; } }
 
     /* "where to?" window and the folder menu */
@@ -71,5 +81,5 @@
     .pvm-chip { display:flex; align-items:center; gap:8px; border:1px solid rgba(127,127,127,.3); border-radius:10px; padding:4px 10px 4px 4px; font-size:.8rem; } .pvm-chip img { width:54px; height:40px; object-fit:cover; border-radius:6px; } .pvm-chip > i { font-size:1.4rem; padding:0 6px; }
 </style>
 <script>window.PVMEDIA = { admin: @json(\App\Support\StaffAccess::isAdmin(auth()->user())), base: @json(url('admin/media')), csrf: @json(csrf_token()), specs: @json(config('media.specs')) };</script>
-<script src="{{ asset('js/pv-media.js') }}?v=1"></script>
+<script src="{{ asset('js/pv-media.js') }}?v=2"></script>
 @endif
