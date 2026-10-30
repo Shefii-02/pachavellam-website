@@ -36,7 +36,7 @@ class SeasonController extends Controller
         // the seasons of this exam and series page (a handful): match the saved slug, else the slug of the title (seasons saved before slugs existed)
         $season = ExamSeason::with('exam')->where('status', 'published')
             ->whereHas('exam', fn ($q) => $q->where('slug', $examSlug))->get()
-            ->filter(fn ($s) => (self::PAGES[$s->kind] ?? 'daily-exams') === $page)
+            // ->filter(fn ($s) => (self::PAGES[$s->kind] ?? 'daily-exams') === $page)
             ->first(fn ($s) => $s->slug === $seasonSlug || \Illuminate\Support\Str::slug($s->title) === $seasonSlug);
 
         abort_if(!$season, 404);
