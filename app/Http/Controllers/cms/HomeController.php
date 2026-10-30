@@ -699,11 +699,13 @@ class HomeController extends Controller
         
         abort_if(!$examdetails, 404);
         $instruction = \App\Models\ExamInstruction::forExam($examdetails, 'omr');
-        $uploaded = ModelExamAttempt::where('exam_id',$id)->where('user_id',auth()->id())->exists();
+        $myMark = ModelExamAttempt::where('exam_id',$id)->where('user_id',auth()->id())->first();
+        $uploaded = (bool) $myMark;
+        $myTime = \Illuminate\Support\Facades\DB::table('omr_exam_times')->where('exam_id',$id)->where('user_id',auth()->id())->value('seconds');
 
         $timing = \App\Http\Controllers\cms\ExamTimeController::stats($id);
 
-        return view("kpsc.model-exam-single",compact('examdetails','instruction','uploaded','timing'));
+        return view("kpsc.model-exam-single",compact('examdetails','instruction','uploaded','timing','myMark','myTime'));
 
     }
      

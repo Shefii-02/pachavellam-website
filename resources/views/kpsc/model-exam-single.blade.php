@@ -21,6 +21,8 @@
         .xt-timer .row1 { display:flex; align-items:center; gap:8px; flex-wrap:wrap; } .xt-clock { font-variant-numeric:tabular-nums; font-size:1.25rem; font-weight:800; min-width:92px; }
         .xt-timer button { border:0; border-radius:18px; padding:5px 14px; font-size:.8rem; font-weight:800; background:#eef0f3; } .xt-timer button.pri { background:#0a8f5b; color:#fff; } .xt-timer button.stop { background:#e53935; color:#fff; }
         .xt-info { font-size:.78rem; color:var(--pv-muted,#667); } .xt-about { margin-top:22px; line-height:1.6; font-size:.92rem; } .xt-about h5 { font-weight:800; margin:14px 0 6px; }
+        .xt-mark { max-width:520px; background:var(--pv-surface,#fff); border:1px solid var(--pv-border,#e5e7eb); border-radius:14px; padding:16px; }
+        .xt-mk-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); gap:10px; } .xt-mk-grid div { background:var(--pv-chip,#eef0f3); border-radius:12px; padding:10px; text-align:center; } .xt-mk-grid b { display:block; font-size:1.25rem; } .xt-mk-grid small { color:var(--pv-muted,#667); font-weight:700; }
         .xt-note { font-size:.8rem; color:var(--pv-muted,#667); margin:6px 0 0; }
     </style>
 @endsection
@@ -32,6 +34,7 @@
             <button class="xt-tab" data-pane="ins">Instructions</button>
             <button class="xt-tab" data-pane="qp">Question paper</button>
             <button class="xt-tab" data-pane="ak" id="akTab">Answer key</button>
+            <button class="xt-tab" data-pane="mk" id="mkTab">{{ $myMark ? 'My marks' : 'Upload marks' }}</button>
         </div>
 
         <div class="xt-pane" id="pane-ins">
@@ -51,6 +54,39 @@
             </div>
             @if ($qpUrl)@include('kpsc.partials.pdf-viewer', ['pdfId' => 'qp', 'pdfUrl' => $qpUrl])@else<p class="text-muted">The question paper is not uploaded yet.</p>@endif
             <p class="xt-note">Write your answers on the OMR sheet. The answer key opens once the paper has been started.</p>
+        </div>
+
+        <div class="xt-pane" id="pane-mk">
+            @if (session('success'))<div class="alert alert-success py-2">{{ session('success') }}</div>@endif
+            @if ($errors->any())<div class="alert alert-danger py-2">{{ $errors->first() }}</div>@endif
+            @if ($myMark)
+                @php $mScore = round((float) $myMark->total_mark, 2); $cut = $examdetails->cutoff_mark !== null ? (float) $examdetails->cutoff_mark : null; @endphp
+                <div class="xt-mark">
+                    <h5 class="mb-3">Your uploaded marks</h5>
+                    <div class="xt-mk-grid">
+                        <div><b>{{ $mScore }}</b><small>Score</small></div>
+                        <div><b>{{ (int) $myMark->right_answer }}</b><small>Correct</small></div>
+                        <div><b>{{ (int) $myMark->wrong_answer }}</b><small>Wrong</small></div>
+                        @if ($myTime)<div><b>{{ floor($myTime / 60) }}m {{ $myTime % 60 }}s</b><small>Time taken</small></div>@endif
+                    </div>
+                    <p class="xt-note mt-2">Uploaded on {{ $myMark->answer_uploaded ? date('d M Y, h:i a', strtotime($myMark->answer_uploaded)) : '' }}. Marks can be uploaded once per exam.</p>
+                    @if ($cut !== null)
+                        @if ($mScore < $cut)<div class="alert alert-danger py-2 mb-0"><b>Below cutoff.</b> Your score {{ $mScore }} is {{ round($cut - $mScore, 2) }} short of the cutoff {{ $cut }}. Keep practising!</div>
+                        @else<div class="alert alert-success py-2 mb-0"><b>Above cutoff</b> ({{ $cut }}). Well done!</div>@endif
+                    @endif
+                </div>
+            @else
+                <form method="POST" action="{{ url('kpsc/model-exam/store-result/' . $examdetails->id) }}" class="xt-mark">
+                    @csrf
+                    <h5 class="mb-1">Upload your marks</h5>
+                    <p class="xt-note mb-3">Check your OMR sheet with the answer key, then enter your counts. Uploading as <b>{{ auth()->user()->name }}</b>. Marks can be uploaded once.</p>
+                    <div class="row g-3">
+                        <div class="col-6"><label class="form-label">Correct answers</label><input class="form-control" type="number" min="0" required name="correct_answer" autocomplete="off"></div>
+                        <div class="col-6"><label class="form-label">Wrong answers</label><input class="form-control" type="number" min="0" required name="wrong_answer" autocomplete="off"></div>
+                    </div>
+                    <button class="btn btn-success mt-3" type="submit">Save my marks</button>
+                </form>
+            @endif
         </div>
 
         <div class="xt-pane" id="pane-ak">
@@ -83,7 +119,7 @@
         var seen = false; try { seen = localStorage.getItem(key) === '1'; } catch (e) {}
         // the key opens when the paper was started, marks were uploaded, or the exam is over
         var keyOpen = @json($ended || $uploaded) || seen;   // the paper and the key are open
-        var tabs = document.querySelectorAll('.xt-tab'), akTab = document.getElementById('akTab'), qpTab = document.querySelector('.xt-tab[data-pane=qp]');
+        var tabs = document.querySelectorAll('.xt-tab'), akTab = document.getElementById('akTab'), qpTab = document.querySelector('.xt-tab[data-pane=qp]'), mkTab = document.getElementById('mkTab');
         // the instructions come first: the question paper and the answer key open after "Start exam" (or when the exam is over / marks are uploaded)
         function show(name) {
             if (name !== 'ins' && !keyOpen) return;
@@ -91,8 +127,8 @@
             document.querySelectorAll('.xt-pane').forEach(function (p) { p.classList.toggle('on', p.id === 'pane-' + name); });
             if (window.pvStart && window.pvStart[name]) window.pvStart[name]();   // the PDF loads when its tab opens
         }
-        function unlock() { keyOpen = true; [akTab, qpTab].forEach(function (t) { t.disabled = false; t.title = ''; }); }
-        if (!keyOpen) { [akTab, qpTab].forEach(function (t) { t.disabled = true; t.title = 'Opens after you start the exam'; }); }
+        function unlock() { keyOpen = true; [akTab, qpTab, mkTab].forEach(function (t) { t.disabled = false; t.title = ''; }); }
+        if (!keyOpen) { [akTab, qpTab, mkTab].forEach(function (t) { t.disabled = true; t.title = 'Opens after you start the exam'; }); }
         tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.pane); }); });
 
         // the optional timer: start / pause / resume / stop; kept in the browser so a refresh does not lose it, saved on stop
@@ -130,7 +166,7 @@
         draw();
 
         document.addEventListener('exam-start', function () { try { localStorage.setItem(key, '1'); } catch (e) {} unlock(); show('qp'); });
-        show('ins');
+        show(@json(session('success') || $errors->any() ? 'mk' : 'ins'));
     })();
     </script>
 @endsection
