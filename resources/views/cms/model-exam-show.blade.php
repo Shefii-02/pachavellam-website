@@ -85,6 +85,7 @@
                                                 data-session="{{ $date_list->series_season_id }}"
                                                 data-free="{{ $date_list->free_access ? 1 : 0 }}"
                                                 data-cutoff="{{ $date_list->cutoff_mark }}"
+                                                data-sort="{{ $date_list->sort_no }}"
                                                 data-instruction="{{ $date_list->instruction_id }}"
                                                 class="btn btn-info mb-2 exam_details_edit btn-sm float-left">
                                                 <i class="bi bi-pencil"></i>
@@ -164,6 +165,10 @@
                                     <label class="form-label">Exam Ended</label>
                                     <input class="form-control" required id="exam_ended_edit" type="datetime-local"
                                         name="exam_ended" placeholder="">
+                                </div>
+                                <div class="col-md-12 mt-2">
+                                    <label class="form-label">Sort number</label>
+                                    <input class="form-control" type="number" min="0" id="sort_no_edit" name="sort_no" placeholder="optional - smallest shows first">
                                 </div>
                                 <div class="col-md-12 mt-2">
                                     <label class="form-label">Cutoff mark</label>
@@ -296,6 +301,7 @@
                 $('#series_season_edit').val($(this).data('session') || '');
                 $('#free_access_edit').prop('checked', String($(this).data('free')) === '1');
                 $('#cutoff_mark_edit').val($(this).data('cutoff') || '');
+                $('#sort_no_edit').val($(this).data('sort') || '');
                 $('#instruction_edit').val($(this).data('instruction') || '');
 
 

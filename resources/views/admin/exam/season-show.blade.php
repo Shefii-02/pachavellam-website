@@ -86,7 +86,7 @@
                     <td class="text-end text-nowrap">
                         @if ($kind === 'omr')<button type="button" class="btn btn-sm btn-light mb-0 js-omr-edit" title="Edit exam details" data-id="{{ $d->id }}" data-date="{{ $d->exam_date ? \Illuminate\Support\Carbon::parse($d->exam_date)->format('Y-m-d') : '' }}"
                             data-started="{{ $d->started_at ? \Illuminate\Support\Carbon::parse($d->started_at)->format('Y-m-d\TH:i') : '' }}" data-ended="{{ $d->ended_at ? \Illuminate\Support\Carbon::parse($d->ended_at)->format('Y-m-d\TH:i') : '' }}"
-                            data-title="{{ $d->examtitle }}" data-category="{{ $d->category }}" data-cutoff="{{ $d->cutoff_mark }}" data-instruction="{{ $d->instruction_id }}" data-free="{{ $d->free_access ? 1 : 0 }}"
+                            data-title="{{ $d->examtitle }}" data-category="{{ $d->category }}" data-cutoff="{{ $d->cutoff_mark }}" data-sort="{{ $d->sort_no }}" data-instruction="{{ $d->instruction_id }}" data-free="{{ $d->free_access ? 1 : 0 }}"
                             data-qp="{{ $d->model_exam_details_one?->qp_file ? url(Storage::url('model-exam/' . $d->model_exam_details_one->qp_file)) : '' }}" data-ak="{{ $d->model_exam_details_one?->answer_file ? url(Storage::url('model-exam/' . $d->model_exam_details_one->answer_file)) : '' }}"><i class="bi bi-pencil"></i></button>
                         @elseif ($legacyBase)<a href="{{ url($legacyBase . '/edit/' . $d->id) }}" class="btn btn-sm btn-light mb-0" title="Edit"><i class="bi bi-pencil"></i></a>@endif
                         <button type="button" class="btn btn-sm btn-light mb-0 js-lb" title="Leaderboard ({{ $n }} attempt(s))" data-id="{{ $d->id }}" data-n="{{ $n }}" data-title="{{ $d->examtitle ?: ($d->exam_title ?: 'Exam') }}"><i class="bi bi-trophy"></i></button>
@@ -126,6 +126,7 @@
             <div class="col-12"><label class="form-label small mb-0">Exam date <span class="text-danger">*</span></label><input type="date" class="form-control" name="exam_date" id="oe_date" required></div>
             <div class="col-12"><label class="form-label small mb-0">Starts at <span class="text-danger">*</span></label><input type="datetime-local" class="form-control" name="exam_started" id="oe_started" required></div>
             <div class="col-12"><label class="form-label small mb-0">Ends at <span class="text-danger">*</span></label><input type="datetime-local" class="form-control" name="exam_ended" id="oe_ended" required></div>
+            <div class="col-12"><label class="form-label small mb-0">Sort number</label><input type="number" min="0" class="form-control" name="sort_no" id="oe_sort" placeholder="optional - smallest shows first on the OMR exams page"></div>
             <div class="col-12"><label class="form-label small mb-0">Cutoff mark</label><input type="number" step="0.01" min="0" class="form-control" name="cutoff_mark" id="oe_cutoff" placeholder="optional"></div>
             <div class="col-12"><label class="form-label small mb-0">Instructions</label><select class="form-select" name="instruction_id" id="oe_instruction"><option value="">Default (OMR)</option>@foreach (\App\Models\ExamInstruction::where('kind', 'omr')->orderBy('name')->get() as $ins)<option value="{{ $ins->id }}">{{ $ins->name }}</option>@endforeach</select></div>
             <div class="col-12"><label class="form-label small mb-0">Category <span class="text-danger">*</span></label><select class="form-select" name="category" id="oe_category" required><option value=""></option>@foreach (['10th level' => '10th level', 'Plus two level' => 'Plus two level', 'Degree level' => 'Degree level', 'Programmer' => 'Programmer', 'Typest' => 'Typest'] as $cv => $cl)<option value="{{ $cv }}">{{ $cl }}</option>@endforeach</select></div>
@@ -140,7 +141,7 @@
     document.querySelectorAll('.js-omr-edit').forEach(function (b) {
         b.addEventListener('click', function () {
             var d = b.dataset, set = function (id, v) { document.getElementById(id).value = v || ''; };
-            set('oe_id', d.id); set('oe_title', d.title); set('oe_date', d.date); set('oe_started', d.started); set('oe_ended', d.ended); set('oe_cutoff', d.cutoff); set('oe_instruction', d.instruction); set('oe_category', d.category);
+            set('oe_id', d.id); set('oe_title', d.title); set('oe_date', d.date); set('oe_started', d.started); set('oe_ended', d.ended); set('oe_cutoff', d.cutoff); set('oe_sort', d.sort); set('oe_instruction', d.instruction); set('oe_category', d.category);
             document.getElementById('oe_free').checked = d.free === '1';
             [['oe_qp', d.qp], ['oe_ak', d.ak]].forEach(function (x) { var a = document.getElementById(x[0]); a.style.display = x[1] ? '' : 'none'; a.href = x[1] || '#'; });
             new bootstrap.Modal(document.getElementById('editOmrExam')).show();

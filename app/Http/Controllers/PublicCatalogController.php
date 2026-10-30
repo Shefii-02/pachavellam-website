@@ -448,7 +448,7 @@ class PublicCatalogController extends Controller
         $today = today();
         foreach ($seasonMap->where('kind', $kind)->where('status', 'published')
             ->filter(fn ($se) => (!$se->starts_on || $se->starts_on->lte($today)) && (!$se->ends_on || $se->ends_on->gte($today)))
-            ->sortByDesc(fn ($se) => ($se->starts_on ? $se->starts_on->format('Y-m-d') : '') . sprintf('%08d', $se->id)) as $se) {
+            ->sort(fn ($x, $y) => [(int) $x->position, $y->id] <=> [(int) $y->position, $x->id]) as $se) {   // the season order set in admin (arrows): smallest first, same number newest first
             $activeIds[] = $se->id;
             $items = collect();
             if ($legacy && \Illuminate\Support\Facades\Schema::hasTable('kpsc_daily_exams')) {
@@ -484,6 +484,7 @@ class PublicCatalogController extends Controller
             $others = \App\Models\DailyExam::where('section', $legacy)->where('status', 1)
                 ->whereNull('series_season_id')   // an exam that sits in a season is listed inside that season only
                 ->when($caIds, fn ($q) => $q->where(fn ($w) => $w->whereNull('season_id')->orWhereNotIn('season_id', $caIds)))
+                ->when($kind === 'omr', fn ($q) => $q->orderByRaw('sort_no is null')->orderBy('sort_no'))   // OMR exams: the sort number, smallest first; no number goes last
                 ->orderByDesc('exam_date')->orderByDesc('id')->paginate(15)->withQueryString();
             $sid = fn ($e) => $e->series_season_id;
         } else {
