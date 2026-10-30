@@ -336,6 +336,22 @@
     });
 </script>
 @include('admin.media._boot')
+<script>
+    // admin links that change data (delete, clear, toggle...) are sent as POST with the CSRF token, never as a plain GET link
+    document.addEventListener('click', function (e) {
+        if (e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
+        var a = e.target.closest && e.target.closest('a[href]');
+        if (!a) return;
+        var u; try { u = new URL(a.href, location.href); } catch (x) { return; }
+        if (u.origin !== location.origin || u.pathname.indexOf('/admin/') !== 0) return;
+        if (!/\/(delete|delete-all|destroy|destroy_all|clear-leaderboard|toggle|sever-cache-clear|prune|pages-delete)(\/|$)/.test(u.pathname)) return;
+        e.preventDefault();
+        var f = document.createElement('form');
+        f.method = 'POST'; f.action = a.href; f.style.display = 'none';
+        var t = document.createElement('input'); t.type = 'hidden'; t.name = '_token'; t.value = @json(csrf_token()); f.appendChild(t);
+        document.body.appendChild(f); f.submit();
+    });
+</script>
 @yield('scripts')
 
 <!-- Google Tag Manager (noscript) -->

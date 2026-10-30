@@ -22,6 +22,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['admin.area']], function () 
             Route::get('seasons/{id}', 'Exam\ExamSeriesController@show')->whereNumber('id');
             Route::post('seasons/{id}/attach', 'Exam\ExamSeriesController@attach')->whereNumber('id');
             Route::post('seasons/{id}/bulk', 'Exam\ExamSeriesController@bulk')->whereNumber('id');
+            Route::get('seasons/{id}/bulk', fn ($exam, $kind, $id) => redirect(url('admin/exam/' . $exam . '/series/' . $kind . '/seasons/' . $id)))->whereNumber('id');   // opened as a link, nothing is changed
             Route::post('seasons/{id}/place', 'Exam\ExamSeriesController@place')->whereNumber('id');
             Route::post('seasons/{id}/detach/{examId}', 'Exam\ExamSeriesController@detach')->whereNumber(['id', 'examId']);
             Route::post('seasons/{id}/free/{type}/{examId}', 'Exam\ExamSeriesController@free')->whereNumber(['id', 'examId'])->where('type', 'course|legacy');

@@ -14,21 +14,21 @@ Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area
         Route::resource('role', RoleController::class);
 
         Route::get('logs', 'General\LogController@index')->name('logs.index');
-        Route::get('logs/destroy_all', 'General\LogController@destroy_all')->name('logs.destroy_all');
+        Route::post('logs/destroy_all', 'General\LogController@destroy_all')->name('logs.destroy_all');
         Route::get('logs/{id}', 'General\LogController@show')->name('logs.show');
-        Route::get('logs/{id}/destroy', 'General\LogController@destroy')->name('logs.delete');
+        Route::post('logs/{id}/destroy', 'General\LogController@destroy')->name('logs.delete');
 
 
 
 
         Route::get('otp-logs', 'General\SignInLogController@otpLogs');
-        Route::get('otp-logs/delete/{id}', 'General\SignInLogController@otpLogDelete');
+        Route::post('otp-logs/delete/{id}', 'General\SignInLogController@otpLogDelete');
         Route::get('google-signins', 'General\SignInLogController@googleSignIns');
         Route::get('apple-signins', 'General\SignInLogController@appleSignIns');
 
         Route::get('users', 'General\UserController@users');
         Route::post('users', 'General\UserController@users_store');
-        Route::get('users/delete/{id}', 'General\UserController@users_delete');
+        Route::post('users/delete/{id}', 'General\UserController@users_delete');
         Route::post('users/updating', 'General\UserController@users_updating');
 
 
@@ -36,7 +36,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area
 
         Route::get('feedback', 'General\AdminController@feedback');
         Route::post('feedback', 'General\AdminController@feedback_store');
-        Route::get('feedback/delete/{id}', 'General\AdminController@feedback_delete');
+        Route::post('feedback/delete/{id}', 'General\AdminController@feedback_delete');
         Route::post('feedback/updating', 'General\AdminController@feedback_updating');
 
         Route::get('feedback/view/{id}', 'General\AdminController@feedback_requests');
@@ -44,13 +44,13 @@ Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area
 
         Route::get('permission', 'General\PermissionController@permission_index');
         Route::post('permission', 'General\PermissionController@permission_store');
-        Route::get('permission/delete/{id}', 'General\PermissionController@permission_delete');
+        Route::post('permission/delete/{id}', 'General\PermissionController@permission_delete');
         Route::post('permission/updating', 'General\PermissionController@permission_updating');
 
         Route::group(['prefix' => 'dev-tools'], function () {
             Route::get('api-logs', 'General\DevToolController@apiLogs');
             Route::get('analytics', 'General\DevToolController@analytics');
-            Route::get('prune', 'General\DevToolController@prune');
+            Route::post('prune', 'General\DevToolController@prune');
         });
 
         // exam types and course features (Admin only - checked in the controllers). Coupons moved to admin/coupons.
@@ -70,14 +70,14 @@ Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area
 
 
         Route::get('contact-db', 'General\ContactDbController@index');
-        Route::get('contact-db/delete/{id}', 'General\ContactDbController@destroy');
+        Route::post('contact-db/delete/{id}', 'General\ContactDbController@destroy');
 
-        Route::get('sever-cache-clear', 'General\UserController@sever_cache_clear');
+        Route::post('sever-cache-clear', 'General\UserController@sever_cache_clear');
 
         Route::get('pages', 'General\UserController@pages');
 
         Route::post('pages', 'General\UserController@pages_store');
         Route::post('update-pages', 'General\UserController@update_pages');
-        Route::get('pages-delete/{id}', 'General\UserController@pages_delete');
+        Route::post('pages-delete/{id}', 'General\UserController@pages_delete');
     });
 });

@@ -28,6 +28,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area
         Route::get('platforms/export', 'student\PlatformController@export');
         Route::get('analytics', 'student\InsightController@analytics');
         Route::get('student-list/{id}', 'student\InsightController@profile')->whereNumber('id');
-        Route::get('student-list/{slug}/delete', 'student\HomeController@student_delete');
+        Route::post('student-list/{slug}/delete', 'student\HomeController@student_delete');
     });
 });

@@ -351,7 +351,7 @@
 
                 $.ajax({
                     url: "{{ kpsc_cms('daily-exam/question-delete') }}",
-                    type: "GET", // Use POST instead of GET
+                    type: "POST",
                     data: {
                         id: id,
                         _token: "{{ csrf_token() }}" // Include CSRF token for Laravel
