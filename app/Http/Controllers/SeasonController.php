@@ -37,7 +37,8 @@ class SeasonController extends Controller
         $season = ExamSeason::with('exam')->where('status', 'published')
             ->whereHas('exam', fn ($q) => $q->where('slug', $examSlug))->get()
             // ->filter(fn ($s) => (self::PAGES[$s->kind] ?? 'daily-exams') === $page)
-            ->first(fn ($s) => $s->slug === $seasonSlug || \Illuminate\Support\Str::slug($s->title) === $seasonSlug);
+            ->first(fn ($s) => $s->slug === $seasonSlug);
+            //  || \Illuminate\Support\Str::slug($s->title) === $seasonSlug);
                  dd($season, $examSlug, $page, $seasonSlug);
         abort_if(!$season, 404);
         if ($season->slug && $season->slug !== $seasonSlug) {
