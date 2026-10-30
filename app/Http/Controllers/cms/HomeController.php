@@ -732,10 +732,10 @@ class HomeController extends Controller
             $new_one->total_mark    = $new_one->right_answer - ($new_one->wrong_answer / 3);
             $new_one->answer_uploaded = Carbon::now()->format('Y-m-d H:i:s');
             $new_one->save();
-               return redirect('/kpsc/model-exam')->with('success', 'Mark uploaded successfully!' );
+               return redirect()->back()->with(['success' => 'Mark uploaded successfully!', 'season_ok' => 'Mark uploaded successfully!']);
         }
         
-      return redirect('/kpsc/model-exam')->with('success', 'Your Mark already uploaded!' );
+      return redirect()->back()->with(['success' => 'Your Mark already uploaded!', 'season_ok' => 'Your Mark already uploaded!']);
          
     }
      

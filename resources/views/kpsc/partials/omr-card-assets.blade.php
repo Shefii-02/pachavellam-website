@@ -1,3 +1,25 @@
+{{-- "Upload marks" drawer for the OMR exam cards: the mark form (kpsc/model-exam-mark-form) loads into it --}}
+<div class="offcanvas offcanvas-end" tabindex="-1" id="markDrawer" aria-labelledby="markTitle">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="markTitle">Upload your marks</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body" id="markBody"></div>
+</div>
+<script>
+window.addEventListener('load', function () {
+    var el = document.getElementById('markDrawer'); if (!el || !window.bootstrap) return;
+    var oc = new bootstrap.Offcanvas(el), body = document.getElementById('markBody');
+    document.addEventListener('click', function (e) {
+        var b = e.target.closest('[data-mark]'); if (!b) return;
+        document.getElementById('markTitle').textContent = b.dataset.title ? 'Upload marks: ' + b.dataset.title : 'Upload your marks';
+        body.innerHTML = '<div class="text-muted small">Loading…</div>'; oc.show();
+        fetch(@json(url('kpsc/model-exam-mark-form')) + '?id=' + encodeURIComponent(b.dataset.mark), { credentials: 'same-origin' })
+            .then(function (r) { return r.text(); }).then(function (h) { body.innerHTML = h; })
+            .catch(function () { body.innerHTML = '<div class="text-danger small">Could not load the form.</div>'; });
+    });
+});
+</script>
 {{-- leaderboard drawer + "My attempts" loader for the OMR exam cards (series-card partial) --}}
 <div class="offcanvas offcanvas-end" tabindex="-1" id="lbDrawer" aria-labelledby="lbTitle">
     <div class="lb-head">
