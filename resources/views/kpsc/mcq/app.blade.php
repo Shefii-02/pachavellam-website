@@ -33,7 +33,7 @@
     .mq-fil { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; } .mq-fil button, .mq-tabs button { border:1px solid var(--bd); background:var(--card); color:var(--tx); border-radius:16px; padding:4px 12px; font-size:.76rem; font-weight:700; cursor:pointer; } .mq-fil button.on, .mq-tabs button.on { background:var(--pri); border-color:var(--pri); color:#fff; }
     .mq-tabs { display:flex; gap:8px; margin:12px 0; overflow-x:auto; } .mq-tabs button { padding:8px 20px; font-size:.9rem; }
     .mq-ov { position:fixed; inset:0; z-index:1070; background:rgba(0,0,0,.55); display:none; align-items:center; justify-content:center; padding:16px; } .mq-ov.on { display:flex; }
-    .mq-modal { background:var(--card); color:var(--tx); border-radius:16px; width:100%; max-width:460px; padding:20px; } .mq-modal h5 { font-weight:800; margin-bottom:10px; }
+    .mq-modal { background:var(--card); color:var(--tx); border-radius:16px; width:100%; max-width:460px; padding:20px; } .mq-modal h5 { font-weight:800; margin-bottom:10px; color: var(--tx); }
     .mq-tbl { width:100%; border-collapse:collapse; margin:10px 0; font-size:.9rem; } .mq-tbl td { border:1px solid var(--bd); padding:7px 10px; } .mq-tbl td:last-child { text-align:center; font-weight:800; }
     .mq-pbtn { display:none; }
     .mq-pclose, .mq-pbd { display:none; }
