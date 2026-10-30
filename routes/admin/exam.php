@@ -24,6 +24,9 @@ Route::group(['prefix' => 'admin', 'middleware' => ['admin.area']], function () 
             Route::post('seasons/{id}/place', 'Exam\ExamSeriesController@place')->whereNumber('id');
             Route::post('seasons/{id}/detach/{examId}', 'Exam\ExamSeriesController@detach')->whereNumber(['id', 'examId']);
             Route::post('seasons/{id}/free/{type}/{examId}', 'Exam\ExamSeriesController@free')->whereNumber(['id', 'examId'])->where('type', 'course|legacy');
+            Route::post('seasons/{id}/exams-order', 'Exam\ExamSeriesController@orderExams')->whereNumber('id');
+            Route::post('seasons/{id}/exams-order/reset', 'Exam\ExamSeriesController@resetOrder')->whereNumber('id');
+            Route::get('seasons/{id}/leaderboard/{examId}', 'Exam\ExamSeriesController@leaderboard')->whereNumber(['id', 'examId']);
             Route::post('seasons/{id}/clear-leaderboard/{examId}', 'Exam\ExamSeriesController@clearLeaderboard')->whereNumber(['id', 'examId']);
             Route::post('seasons/{id}/legacy-status/{examId}', 'Exam\ExamSeriesController@legacyStatus')->whereNumber(['id', 'examId']);
             Route::post('seasons/{id}/move/{dir}', 'Exam\ExamSeriesController@move')->whereNumber('id')->where('dir', 'up|down');

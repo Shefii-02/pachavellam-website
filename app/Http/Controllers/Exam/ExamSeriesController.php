@@ -177,8 +177,18 @@ class ExamSeriesController extends Controller
         }
         $courseAttempts = $courseExams->count() ? \App\Models\CourseExamAttempt::whereIn('course_exam_id', $courseExams->pluck('id'))->where('status', 'submitted')->selectRaw('course_exam_id, count(*) c')->groupBy('course_exam_id')->pluck('c', 'course_exam_id') : collect();
 
+        // one list for both kinds of exam, in the order the admin dragged them; an exam not placed yet (a new one) comes first; with nothing placed the old order stays
+        $items = [];
+        foreach ($courseExams as $e) {
+            $items[] = ['type' => 'course', 'model' => $e, 'pos' => $e->season_position, 'i' => count($items)];
+        }
+        foreach ($legacy as $d) {
+            $items[] = ['type' => 'legacy', 'model' => $d, 'pos' => $d->season_position, 'i' => count($items)];
+        }
+        usort($items, fn ($a, $b) => [$a['pos'] === null ? 0 : 1, (int) $a['pos'], $a['i']] <=> [$b['pos'] === null ? 0 : 1, (int) $b['pos'], $b['i']]);
+
         return view('admin.exam.season-show', [
-            'legacyAttempts' => $legacyAttempts, 'courseAttempts' => $courseAttempts,
+            'items' => $items, 'legacyAttempts' => $legacyAttempts, 'courseAttempts' => $courseAttempts,
             'exam' => $exam, 'layout' => $exam->layout(), 'kind' => $kind, 'title' => self::KINDS[$kind][1], 'season' => $season, 'courseExams' => $courseExams,
             'legacy' => $legacy, 'attachable' => $attachable, 'otherCourse' => $otherCourse, 'otherSeasons' => $otherSeasons, 'legacyBase' => $legacyBase, 'builder' => $builder, 'base' => $exam->examUrl('series/' . $kind),
             'special' => $kind === 'special', 'access' => app(\App\Services\SeasonAccess::class),
@@ -252,6 +262,62 @@ class ExamSeriesController extends Controller
         }
 
         return back()->with('success', $n ? ($copy ? $n . ' exam(s) copied into this season (drafts / hidden; the originals stay).' : $n . ' exam(s) moved into this season.') : 'Nothing changed.');
+    }
+
+    /** Save the order the admin dragged the exams into (both kinds of exam in one list): positions 1..n. */
+    public function orderExams(Request $request, $examSlug, $kind, $id)
+    {
+        [$exam] = $this->scope($request, $examSlug, $kind);
+        $season = ExamSeason::where('exam_id', $exam->id)->where('kind', $kind)->findOrFail($id);
+        $data = $request->validate(['items' => 'required|array|max:500', 'items.*.type' => 'required|in:course,legacy', 'items.*.id' => 'required|integer']);
+        $course = CourseExam::where('season_id', $season->id)->pluck('id')->flip();
+        $legacy = \App\Models\DailyExam::where('series_season_id', $season->id)->pluck('id')->flip();
+        foreach ($data['items'] as $i => $it) {   // only exams that really belong to this season
+            if ($it['type'] === 'course' && $course->has($it['id'])) {
+                CourseExam::whereKey($it['id'])->update(['season_position' => $i + 1]);
+            } elseif ($it['type'] === 'legacy' && $legacy->has($it['id'])) {
+                \App\Models\DailyExam::whereKey($it['id'])->update(['season_position' => $i + 1]);
+            }
+        }
+
+        return response()->json(['ok' => true]);
+    }
+
+    /** Back to the default order (newest first): every manual place of this season is cleared. */
+    public function resetOrder(Request $request, $examSlug, $kind, $id)
+    {
+        [$exam] = $this->scope($request, $examSlug, $kind);
+        $season = ExamSeason::where('exam_id', $exam->id)->where('kind', $kind)->findOrFail($id);
+        CourseExam::where('season_id', $season->id)->update(['season_position' => null]);
+        \App\Models\DailyExam::where('series_season_id', $season->id)->update(['season_position' => null]);
+
+        return back()->with('success', 'The exams are back in the default order (newest first).');
+    }
+
+    /** The leaderboard of an old exam of this season, as the admin drawer shows it (top 200: rank, student, marks, time). */
+    public function leaderboard(Request $request, $examSlug, $kind, $id, $examId)
+    {
+        $this->scope($request, $examSlug, $kind);
+        $d = \App\Models\DailyExam::where('series_season_id', $id)->findOrFail($examId);
+        $DB = \Illuminate\Support\Facades\DB::class;
+        $neg = \App\Services\McqExam::NEGATIVE;
+        if ($d->section === 'Model Exam') {
+            $q = $DB::table('kpsc_model_exam_attempt as a')->leftJoin('users as u', 'u.id', '=', 'a.user_id')->where('a.exam_id', $d->id)
+                ->selectRaw('coalesce(a.full_name, u.name) as name, coalesce(a.mobile_no, u.mobile) as mobile, a.total_mark as mark, a.right_answer as ok, a.wrong_answer as bad, null as secs, a.answer_uploaded as at')->orderByDesc('a.total_mark')->orderBy('a.created_at');
+        } elseif ($d->section === 'CA-Daily-Exam') {
+            $q = $DB::table('kpsc_ca_daily_exam_attempts as a')->leftJoin('users as u', 'u.id', '=', 'a.user_id')->where('a.exam_id', $d->id)
+                ->selectRaw('u.name as name, u.mobile as mobile, (a.`right` - a.wrong * ' . $neg . ') as mark, a.`right` as ok, a.wrong as bad, null as secs, a.attend_ended_at as at')->orderByDesc('mark')->orderBy('a.attend_ended_at');
+        } else {   // MCQ: the first attempt of each student is the one the leaderboard counts
+            $q = $DB::table('kpsc_daily_exams_attempt as a')->leftJoin('users as u', 'u.id', '=', 'a.user_id')->where('a.exam_id', $d->id)->where('a.status', '2')->where('a.attempt_no', 1)
+                ->selectRaw('u.name as name, u.mobile as mobile, a.total_mark as mark, a.`right` as ok, a.wrong as bad, a.attempt_time as secs, a.attend_ended_at as at')->orderByDesc('a.total_mark')->orderBy('a.attempt_time');
+        }
+        $total = (clone $q)->reorder()->count();   // no ordering for the count: the CA branch orders by a computed column
+        $rows = $q->limit(200)->get()->values()->map(fn ($r, $i) => [
+            'rank' => $i + 1, 'name' => $r->name ?: 'Student', 'mobile' => $r->mobile, 'mark' => round((float) $r->mark, 2), 'ok' => $r->ok, 'bad' => $r->bad,
+            'secs' => $r->secs !== null ? (int) $r->secs : null, 'at' => $r->at ? \Illuminate\Support\Carbon::parse($r->at)->format('d M, h:i a') : '',
+        ]);
+
+        return response()->json(['title' => $d->examtitle ?: ($d->exam_title ?: 'Exam'), 'total' => $total, 'rows' => $rows, 'cutoff' => $d->cutoff_mark !== null ? (float) $d->cutoff_mark : null]);
     }
 
     /** Clear the leaderboard of an old exam of this season: every attempt of the exam is removed (the exam and its questions stay). */

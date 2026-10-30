@@ -94,7 +94,7 @@ class SeasonController extends Controller
             $state = $access->state($user, $season, 'legacy', $d->id);
             $base = $d->section === 'Model Exam' ? 'kpsc/model-exam' : 'kpsc/daily-exam';
             $rows[] = (object) ($span($d->started_at, $d->ended_at) + ['title' => $d->exam_title ?: ($d->examtitle ?: 'Exam'), 'date' => $d->exam_date ? Carbon::parse($d->exam_date)->format('d M Y') . ($d->started_at ? ', ' . Carbon::parse($d->started_at)->format('h:i a') : '') : ($d->started_at ? Carbon::parse($d->started_at)->format('d M Y, h:i a') : ''), 'tag' => $t, 'tagc' => $c, 'state' => $state, 'done' => $attended, 'paid' => false,
-                'attended' => $attended, 'bucket' => $bucket($c, $attended),
+                'attended' => $attended, 'bucket' => $bucket($c, $attended), 'pos' => $d->season_position,
                 'omr' => $d->section === 'Model Exam', 'omrId' => $d->id,
                 'answerKey' => $d->section === 'Model Exam' && $state !== 'locked' && $c !== 'up' ? url('kpsc/model-exam/' . $d->exam_date . '/' . $d->id . '/answerkey') : null,
                 'url' => $state === 'locked' ? null : url($base . '/' . $d->exam_date . '/' . $d->id), 'sort' => $sortKey($d->exam_date ?: $d->started_at, $d->started_at, $d->id)]);
@@ -104,10 +104,14 @@ class SeasonController extends Controller
             $attended = $attCourse->has($e->id);
             $state = $access->state($user, $season, 'course', $e->id);
             $rows[] = (object) ($span($e->start_at, $e->end_at) + ['title' => $e->title, 'date' => $e->start_at ? $e->start_at->format('d M Y, h:i a') : '', 'tag' => $t, 'tagc' => $c, 'state' => $state, 'done' => $attended, 'paid' => false,
-                'attended' => $attended, 'bucket' => $bucket($c, $attended),
+                'attended' => $attended, 'bucket' => $bucket($c, $attended), 'pos' => $e->season_position,
                 'url' => $state === 'locked' ? null : url('courses/' . ($e->course->slug ?? $e->course_id)), 'sort' => $sortKey($e->start_at, $e->start_at, $e->id)]);
         }
-        usort($rows, fn ($a, $b) => strcmp($b->sort, $a->sort));   // newest date and time first
+        // the order the admin set by dragging (exams not placed yet first); with none set: newest date and time first
+        $manual = collect($rows)->contains(fn ($r) => $r->pos !== null);
+        usort($rows, fn ($a, $b) => $manual
+            ? ([$a->pos === null ? 0 : 1, (int) $a->pos] <=> [$b->pos === null ? 0 : 1, (int) $b->pos]) ?: strcmp($b->sort, $a->sort)
+            : strcmp($b->sort, $a->sort));
 
         \App\Support\Seo::set(['key' => 'season:' . $season->id, 'title' => $season->title . ' - ' . ($season->exam->short_name ?? '') . ' | Pachavellam', 'description' => $season->tagline ?: strip_tags((string) $season->description) ?: 'Exam season on Pachavellam.',
             'image' => $season->cover_image ? \Illuminate\Support\Facades\Storage::url($season->cover_image) : null]);

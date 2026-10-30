@@ -45,13 +45,19 @@
             @if ($attachable->count() || $otherCourse->count())<button type="button" class="btn btn-sm btn-outline-secondary mb-0" data-bs-toggle="modal" data-bs-target="#attachExams"><i class="bi bi-link-45deg me-1"></i>Add from Other exams</button>@endif
         </div>
     </div>
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 px-3 pb-2">
+        <div class="small text-muted"><i class="bi bi-grip-vertical"></i> Drag <b>⠿</b> to set the order of the exams (students see this order). <span id="orderNote"></span></div>
+        <form action="{{ $base }}/seasons/{{ $season->id }}/exams-order/reset" method="POST" onsubmit="return confirm('Go back to the default order (newest first)?')">@csrf<button class="btn btn-sm btn-outline-secondary mb-0"><i class="bi bi-arrow-counterclockwise me-1"></i>Reset to date order</button></form>
+    </div>
     <div class="table-responsive">
         <table class="table align-middle mb-0 table-hover">
-            <thead><tr><th>Exam</th><th>Date</th><th>Start - End</th><th class="text-center">Attempts</th><th>Status</th>@if ($paid)<th class="text-center">Free access</th>@endif<th class="text-end">Actions</th></tr></thead>
-            <tbody>
-            @foreach ($courseExams as $e)
-                @php [$esL, $esC] = \App\Models\CourseExam::STATUSES[$e->status] ?? [$e->status, 'secondary']; @endphp
-                <tr>
+            <thead><tr><th style="width:30px"></th><th>Exam</th><th>Date</th><th>Start - End</th><th class="text-center">Attempts</th><th>Status</th>@if ($paid)<th class="text-center">Free access</th>@endif<th class="text-end">Actions</th></tr></thead>
+            <tbody id="examRows">
+            @foreach ($items as $it)
+              @if ($it['type'] === 'course')
+                @php $e = $it['model']; [$esL, $esC] = \App\Models\CourseExam::STATUSES[$e->status] ?? [$e->status, 'secondary']; @endphp
+                <tr data-type="course" data-id="{{ $e->id }}">
+                    <td class="pv-drag" title="Drag to change the order">⠿</td>
                     <td><a href="{{ $builder }}/{{ $e->id }}" class="fw-semibold">{{ $e->title }}</a><div class="small text-muted">{{ $e->sections_count }} section(s) · {{ $e->links_count }} question(s)</div></td>
                     <td class="small">{{ $e->start_at ? $e->start_at->format('d M Y') : ($e->entry_date ? \Illuminate\Support\Carbon::parse($e->entry_date)->format('d M Y') : '-') }}</td>
                     <td class="small text-nowrap">@if ($e->start_at || $e->end_at){{ $e->start_at?->format('d M, h:i a') ?? '…' }}<br>{{ $e->end_at?->format('d M, h:i a') ?? '…' }}@else - @endif</td>
@@ -66,9 +72,10 @@
                         <form class="d-inline" action="{{ $builder }}/{{ $e->id }}" method="POST" onsubmit="return confirm('Move this exam to the Trash?')">@csrf @method('DELETE')<input type="hidden" name="back" value="{{ urldecode($back) }}"><button class="btn btn-sm btn-outline-danger mb-0" title="Delete"><i class="bi bi-trash"></i></button></form>
                     </td>
                 </tr>
-            @endforeach
-            @foreach ($legacy as $d)
-                <tr>
+              @else
+                @php $d = $it['model']; @endphp
+                <tr data-type="legacy" data-id="{{ $d->id }}">
+                    <td class="pv-drag" title="Drag to change the order">⠿</td>
                     <td><span class="fw-semibold">{{ $d->exam_title ?: ($d->examtitle ?: 'Exam') }}</span> <span class="badge bg-dark">old KPSC</span></td>
                     @php $att = $legacyAttempts->get($d->id); $n = (int) ($att->c ?? 0); @endphp
                     <td class="small">{{ $d->exam_date ? \Illuminate\Support\Carbon::parse($d->exam_date)->format('d M Y') : '-' }}</td>
@@ -82,16 +89,17 @@
                             data-title="{{ $d->examtitle }}" data-category="{{ $d->category }}" data-cutoff="{{ $d->cutoff_mark }}" data-instruction="{{ $d->instruction_id }}" data-free="{{ $d->free_access ? 1 : 0 }}"
                             data-qp="{{ $d->model_exam_details_one?->qp_file ? url(Storage::url('model-exam/' . $d->model_exam_details_one->qp_file)) : '' }}" data-ak="{{ $d->model_exam_details_one?->answer_file ? url(Storage::url('model-exam/' . $d->model_exam_details_one->answer_file)) : '' }}"><i class="bi bi-pencil"></i></button>
                         @elseif ($legacyBase)<a href="{{ url($legacyBase . '/edit/' . $d->id) }}" class="btn btn-sm btn-light mb-0" title="Edit"><i class="bi bi-pencil"></i></a>@endif
-                        <form class="d-inline" action="{{ $base }}/seasons/{{ $season->id }}/clear-leaderboard/{{ $d->id }}" method="POST" onsubmit="return confirm('Clear the leaderboard? All {{ $n }} attempt(s) of this exam are deleted. This cannot be undone.')">@csrf<button class="btn btn-sm btn-light mb-0" title="Clear leaderboard ({{ $n }} attempt(s))" @disabled($n === 0)><i class="bi bi-trophy"></i><i class="bi bi-x-lg" style="font-size:.6rem;vertical-align:top"></i></button></form>
+                        <button type="button" class="btn btn-sm btn-light mb-0 js-lb" title="Leaderboard ({{ $n }} attempt(s))" data-id="{{ $d->id }}" data-n="{{ $n }}" data-title="{{ $d->examtitle ?: ($d->exam_title ?: 'Exam') }}"><i class="bi bi-trophy"></i></button>
                         <button type="button" class="btn btn-sm btn-light mb-0" title="Move / copy to another season" onclick="pvPlace('legacy',{{ $d->id }})"><i class="bi bi-arrow-left-right"></i></button>
                         <form class="d-inline" action="{{ $base }}/seasons/{{ $season->id }}/legacy-status/{{ $d->id }}" method="POST">@csrf<button class="btn btn-sm btn-light mb-0" title="{{ $d->status ? 'Unpublish' : 'Publish' }}"><i class="bi {{ $d->status ? 'bi-eye-slash' : 'bi-eye' }}"></i></button></form>
                         <form class="d-inline" action="{{ $base }}/seasons/{{ $season->id }}/detach/{{ $d->id }}" method="POST" onsubmit="return confirm('Take this exam out of the season? The exam itself is kept.')">@csrf<button class="btn btn-sm btn-light mb-0" title="Take out of the season"><i class="bi bi-box-arrow-right"></i></button></form>
                         @if ($legacyBase)<a href="{{ url($legacyBase . '/delete/' . $d->id) }}" class="btn btn-sm btn-outline-danger mb-0" title="Delete the exam" onclick="return confirm('Delete this exam and its questions?')"><i class="bi bi-trash"></i></a>@endif
                     </td>
                 </tr>
+              @endif
             @endforeach
-            @if (!$courseExams->count() && !$legacy->count())
-                <tr><td colspan="8" class="text-center text-muted py-5"><i class="bi bi-journal-plus fs-1 d-block mb-2"></i>No exams in this season yet. Press <b>Add exam</b>.</td></tr>
+            @if (!count($items))
+                <tr><td colspan="9" class="text-center text-muted py-5"><i class="bi bi-journal-plus fs-1 d-block mb-2"></i>No exams in this season yet. Press <b>Add exam</b>.</td></tr>
             @endif
             </tbody>
         </table>
@@ -140,6 +148,65 @@
     });
 </script>
 @endif
+
+{{-- Leaderboard of an old exam, with the clear action inside --}}
+<div class="modal fade modal-drawer modal-drawer-wide" id="lbDrawer" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title"><i class="bi bi-trophy me-1"></i><span id="lbTitle">Leaderboard</span></h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+    <div class="modal-body">
+        <div class="small text-muted mb-2" id="lbSub"></div>
+        <div class="table-responsive"><table class="table table-sm align-middle mb-0"><thead><tr><th>#</th><th>Student</th><th class="text-end">Marks</th><th class="text-center">✓ / ✗</th><th>Time</th><th>Submitted</th></tr></thead><tbody id="lbRows"></tbody></table></div>
+    </div>
+    <div class="modal-footer justify-content-between">
+        <form id="lbClear" method="POST" onsubmit="return confirm('Clear this leaderboard? Every attempt of this exam is deleted. This cannot be undone.')" style="display:none">@csrf<button class="btn btn-danger mb-0"><i class="bi bi-trash me-1"></i>Clear leaderboard</button></form>
+        <button type="button" class="btn btn-light mb-0" data-bs-dismiss="modal">Close</button>
+    </div>
+</div></div></div>
+<style>
+    .pv-drag { cursor:grab; color:#8b95a1; font-size:1.2rem; user-select:none; text-align:center; } .pv-drag:active { cursor:grabbing; }
+    #examRows tr.sortable-ghost { opacity:.4; background:#e8f0fe; } #examRows tr.sortable-chosen { background:#f1f6ff; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<script>
+    (function () {
+        var tb = document.getElementById('examRows'), note = document.getElementById('orderNote');
+        if (!tb || !window.Sortable) return;
+        var say = function (t, ok) { if (!note) return; note.textContent = t; note.className = 'small ' + (ok ? 'text-success' : 'text-danger'); if (ok) setTimeout(function () { note.textContent = ''; }, 2500); };
+        Sortable.create(tb, {
+            handle: '.pv-drag', animation: 150, draggable: 'tr[data-id]',
+            onEnd: function () {
+                var items = [].map.call(tb.querySelectorAll('tr[data-id]'), function (r) { return { type: r.dataset.type, id: +r.dataset.id }; });
+                say('Saving the order…', true);
+                fetch(@json($base . '/seasons/' . $season->id . '/exams-order'), { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': @json(csrf_token()) }, body: JSON.stringify({ items: items }) })
+                    .then(function (r) { if (!r.ok) throw 0; say('Order saved.', true); })
+                    .catch(function () { say('Could not save the order. Refresh and try again.', false); });
+            }
+        });
+    })();
+</script>
+<script>
+    (function () {
+        var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+        var clock = function (s) { s = Math.max(0, s | 0); return Math.floor(s / 60) + 'm ' + (s % 60) + 's'; };
+        var el = document.getElementById('lbDrawer'), rows = document.getElementById('lbRows'), form = document.getElementById('lbClear'), modal = null;
+        document.querySelectorAll('.js-lb').forEach(function (b) {
+            b.addEventListener('click', function () {
+                document.getElementById('lbTitle').textContent = b.dataset.title; document.getElementById('lbSub').textContent = 'Loading…'; rows.innerHTML = ''; form.style.display = 'none';
+                form.action = @json($base . '/seasons/' . $season->id . '/clear-leaderboard/') + b.dataset.id;
+                modal = modal || new bootstrap.Modal(el); modal.show();
+                fetch(@json($base . '/seasons/' . $season->id . '/leaderboard/') + b.dataset.id, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+                    .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+                    .then(function (d) {
+                        document.getElementById('lbSub').textContent = d.total + ' attempt(s)' + (d.total > d.rows.length ? ' · showing the top ' + d.rows.length : '') + (d.cutoff != null ? ' · cutoff ' + d.cutoff : '');
+                        rows.innerHTML = d.rows.length ? d.rows.map(function (r) {
+                            return '<tr' + (d.cutoff != null && r.mark < d.cutoff ? ' class="table-danger"' : '') + '><td>' + r.rank + '</td><td><b>' + esc(r.name) + '</b>' + (r.mobile ? '<div class="small text-muted">' + esc(r.mobile) + '</div>' : '') + '</td><td class="text-end"><b>' + r.mark + '</b></td><td class="text-center small">' + (r.ok == null ? '-' : r.ok + ' / ' + r.bad) + '</td><td class="small">' + (r.secs != null ? clock(r.secs) : '-') + '</td><td class="small text-nowrap">' + esc(r.at) + '</td></tr>';
+                        }).join('') : '<tr><td colspan="6" class="text-center text-muted py-4">No attempts yet.</td></tr>';
+                        form.style.display = d.total ? '' : 'none';
+                    })
+                    .catch(function () { document.getElementById('lbSub').textContent = 'Could not load the leaderboard.'; });
+            });
+        });
+    })();
+</script>
 
 {{-- Add exams of the "Other exams" list (no season): move or copy them into this season --}}
 @if ($attachable->count() || $otherCourse->count())
