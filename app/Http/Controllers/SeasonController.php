@@ -30,7 +30,7 @@ class SeasonController extends Controller
     }
 
     /** /{exam}/{series page}/{season slug}, e.g. /kpsc/omr-exams/typist-omr-2026 */
-    public function showBySlug(Request $request, $examSlug, $page, $seasonSlug, SeasonAccess $access)
+    public function showBySlug(Request $request, $examSlug, $seasonSlug, $page, SeasonAccess $access)
     {
 
         // the seasons of this exam and series page (a handful): match the saved slug, else the slug of the title (seasons saved before slugs existed)
@@ -38,7 +38,7 @@ class SeasonController extends Controller
             ->whereHas('exam', fn ($q) => $q->where('slug', $examSlug))->get();
             // ->filter(fn ($s) => (self::PAGES[$s->kind] ?? 'daily-exams') === $page)
             // ->first(fn ($s) => $s->slug === $seasonSlug || \Illuminate\Support\Str::slug($s->title) === $seasonSlug);
-dd($season,$request->all(),$examSlug,$page,$seasonSlug,$access);
+dd($season,$request->all(),$examSlug,$page,$seasonSlug);
         abort_if(!$season, 404);
         if ($season->slug && $season->slug !== $seasonSlug) {
             return redirect($season->publicUrl(), 301);
