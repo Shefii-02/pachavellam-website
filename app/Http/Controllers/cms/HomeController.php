@@ -1066,7 +1066,7 @@ class HomeController extends Controller
             return view('kpsc.exam-instructions', [
                 'exam' => $date_list, 'instruction' => \App\Models\ExamInstruction::forExam($date_list, 'mcq'),
                 'meta' => array_filter(['Total questions' => $date_based->count(), 'Duration' => $date_list->duration_min ? $date_list->duration_min . ' min' : null]),
-                'startUrl' => null, 'startsAt' => $date_list->startIso(), 'lastResult' => null,
+                'closeUrl' => url('kpsc/daily-exams'), 'startUrl' => null, 'startsAt' => $date_list->startIso(), 'lastResult' => null,
             ]);
         }
         if (!request()->boolean('start') && !DailyExamattempt::where('user_id',auth()->user()->id)->where('exam_id',$date_list->id)->where('status','<>',2)->exists()) {
@@ -1075,7 +1075,7 @@ class HomeController extends Controller
                 'meta' => array_filter(['Total questions' => $date_based->count(), 'Duration' => $date_list->duration_min ? $date_list->duration_min . ' min' : null, 'Marking' => '+1 correct, -1/3 wrong']),
                 'lastResult' => DailyExamattempt::where('user_id',auth()->user()->id)->where('exam_id',$date_list->id)->where('status','2')->exists() ? url('kpsc/mcq/' . $date_list->id . '/result') : null,
                 'summary' => app(\App\Services\McqExam::class)->summary($date_list, auth()->user()),   // my attempts, marks and the question summary
-                'startUrl' => url()->current() . '?start=1',
+                'startUrl' => url()->current() . '?start=1', 'closeUrl' => url('kpsc/daily-exams'),
             ]);
         }
 

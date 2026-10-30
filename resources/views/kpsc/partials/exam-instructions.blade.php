@@ -7,6 +7,7 @@
     .xi-agree { display:flex; gap:10px; align-items:flex-start; margin:14px 0; font-size:.85rem; }
     .xi-go { display:inline-block; border:0; border-radius:24px; padding:10px 30px; font-weight:800; background:#0a8f5b; color:#fff !important; text-decoration:none !important; }
     .xi-cd { border-radius:12px; padding:10px 14px; margin-bottom:12px; background:#fff1d6; color:#8a5500; font-size:.9rem; } .xi-cd .xi-left { font-variant-numeric:tabular-nums; }
+    .xi-close { display:inline-block; margin-left:10px; padding:10px 22px; border-radius:24px; font-weight:700; border:1px solid var(--pv-border,#e5e7eb); color:var(--pv-text,#111) !important; text-decoration:none !important; }
     .xi-go[disabled], .xi-go.off { opacity:.45; pointer-events:none; }
 </style>
 <div class="xi-card" data-exam="{{ $exam->id }}">
@@ -15,6 +16,9 @@
     @if (!empty($startsAt))
         <div class="xi-cd" data-start="{{ $startsAt }}"><i class="bi bi-hourglass-split"></i> This exam opens on <b>{{ \Illuminate\Support\Carbon::parse($startsAt)->format('d M Y, h:i a') }}</b>@if ($exam->ended_at) and closes on <b>{{ \Illuminate\Support\Carbon::parse($exam->ended_at)->format('d M Y, h:i a') }}</b>@endif.<br>Starts in <b class="xi-left">--</b>. The question paper, answer key and marks open when it starts.</div>
     @endif
+    @if (empty($startsAt) && $exam->ended_at && \Illuminate\Support\Carbon::parse($exam->ended_at)->isFuture())
+        <div class="xi-cd" data-end="{{ \Illuminate\Support\Carbon::parse($exam->ended_at)->toIso8601String() }}"><i class="bi bi-alarm"></i> Exam closes in <b class="xi-endleft"></b>@if ($exam->duration_min) · your {{ $exam->duration_min }} min timer starts when you press Start @endif</div>
+    @endif
     <div class="xi-body">{!! $instruction?->body ?: '<p>Read the questions carefully. Good luck!</p>' !!}</div>
     <label class="xi-agree"><input type="checkbox" id="xiAgree"> <span>I have read and understood the instructions.</span></label>
     @if (!empty($startUrl))
@@ -22,10 +26,17 @@
     @else
         <button type="button" class="xi-go" id="xiStart" disabled>Start exam</button>
     @endif
+    @if (!empty($closeUrl))<a class="xi-close" href="{{ $closeUrl }}">✕ Close</a>@endif
 </div>
 <script>
 (function () {
-    var cb = document.getElementById('xiAgree'), go = document.getElementById('xiStart'), cd = document.querySelector('.xi-cd');
+    var ce = document.querySelector('.xi-cd[data-end]');
+    if (ce) {   // exam window still open: how long is left to start and finish
+        var endAt = new Date(ce.dataset.end).getTime(), el = ce.querySelector('.xi-endleft'), q = function (n) { return (n < 10 ? '0' : '') + n; };
+        (function t() { var ms = endAt - Date.now(); if (ms <= 0) { el.textContent = '00h 00m 00s'; return; } var s = Math.floor(ms / 1000), d = Math.floor(s / 86400);
+            el.textContent = (d ? d + 'd ' : '') + q(Math.floor(s / 3600) % 24) + 'h ' + q(Math.floor(s / 60) % 60) + 'm ' + q(s % 60) + 's'; setTimeout(t, 1000); })();
+    }
+    var cb = document.getElementById('xiAgree'), go = document.getElementById('xiStart'), cd = document.querySelector('.xi-cd[data-start]');
     if (cd) {   // not started: the countdown, and the page reloads itself when the time comes
         var at = new Date(cd.dataset.start).getTime(), left = cd.querySelector('.xi-left');
         var p = function (n) { return (n < 10 ? '0' : '') + n; };

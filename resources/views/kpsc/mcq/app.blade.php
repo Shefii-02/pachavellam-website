@@ -5,7 +5,7 @@
 @if ($mode === 'play')@section('no_ads', '1')@endif   {{-- the exam screen has no publisher content: no ads --}}
 @section('styles')
 <style>
-    .mq { --fs:16px; --bg:var(--pv-bg,#f4f6fa); --card:var(--pv-surface,#fff); --bd:var(--pv-border,#e3e7ee); --tx:var(--pv-text,#16202e); --mu:var(--pv-muted,#6b7585); --pri:#1a63e0; --ok:#0a8f5b; --bad:#e0314b; --warn:#d98a00; --mark:#7c4dff;
+    .mq { --opt:#eceef2; --fs:16px; --bg:var(--pv-bg,#f4f6fa); --card:var(--pv-surface,#fff); --bd:var(--pv-border,#e3e7ee); --tx:var(--pv-text,#16202e); --mu:var(--pv-muted,#6b7585); --pri:#1a63e0; --ok:#0a8f5b; --bad:#e0314b; --warn:#d98a00; --mark:#7c4dff;
         max-width:1180px; margin:0 auto; padding:10px 0 90px; color:var(--tx); }
     .mq * { box-sizing:border-box; }
     .mq-top { position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--bd); border-radius:14px; padding:8px 12px; margin-bottom:10px; }
@@ -17,9 +17,9 @@
     .mq-grid { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:12px; align-items:start; }
     .mq-card { background:var(--card); border:1px solid var(--bd); border-radius:16px; padding:16px; }
     .mq-qh { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px; } .mq-qh b { font-size:1rem; } .mq-qh .sp { flex:1; }
-    .mq-q { font-size:calc(var(--fs) * 1.08); line-height:1.6; margin-bottom:14px; overflow-wrap:anywhere; } .mq-q img, .mq-opt img, .mq-sol img { max-width:100%; height:auto; }
+    .mq-q { font-size:calc(var(--fs) * 1.08); line-height:1.6; margin-bottom:14px; overflow-wrap:anywhere; background:var(--opt); border-radius:12px; padding:12px 14px; } .mq-q img, .mq-opt img, .mq-sol img { max-width:100%; height:auto; }
     .mq-opts { display:grid; gap:8px; }
-    .mq-opt { display:flex; gap:12px; align-items:flex-start; width:100%; text-align:left; background:var(--card); color:var(--tx); border:2px solid var(--bd); border-radius:12px; padding:12px 14px; font-size:var(--fs); cursor:pointer; line-height:1.45; }
+    .mq-opt { display:flex; gap:12px; align-items:flex-start; width:100%; text-align:left; background:var(--opt); color:var(--tx); border:2px solid var(--bd); border-radius:12px; padding:12px 14px; font-size:var(--fs); cursor:pointer; line-height:1.45; }
     .mq-opt .l { flex:none; width:28px; height:28px; border-radius:50%; border:2px solid var(--bd); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:.82rem; }
     .mq-opt:hover { border-color:#9db9ee; } .mq-opt.on { border-color:var(--pri); background:rgba(26,99,224,.08); } .mq-opt.on .l { background:var(--pri); border-color:var(--pri); color:#fff; }
     .mq-opt.right { border-color:var(--ok); background:rgba(10,143,91,.09); } .mq-opt.right .l { background:var(--ok); border-color:var(--ok); color:#fff; } .mq-opt.wrong { border-color:var(--bad); background:rgba(224,49,75,.08); } .mq-opt.wrong .l { background:var(--bad); border-color:var(--bad); color:#fff; }
@@ -54,7 +54,8 @@
     .mq-sol { margin-top:12px; border-radius:12px; background:#eaf3ff; color:#12315c; padding:12px 14px; font-size:calc(var(--fs) * .95); line-height:1.6; } .mq-sol h6 { font-weight:800; font-size:.85rem; margin-bottom:6px; }
     .mq-row { display:flex; align-items:center; gap:12px; padding:9px 12px; border-radius:10px; border:1px solid var(--bd); margin-bottom:6px; } .mq-row.me { background:#e8f0fe; border-color:#9db9ee; } .mq-row .rk { width:28px; text-align:center; font-weight:800; color:var(--mu); } .mq-row .nm { flex:1; min-width:0; font-weight:700; } .mq-row .mk { font-weight:800; }
     @media (max-width:640px) { .mq-stats { grid-template-columns:1fr 1fr; } .mq-top h1 { font-size:.9rem; } }
-    @media (prefers-color-scheme:dark) { .mq { --bg:#0f141c; --card:#171e29; --bd:#2a3342; --tx:#e8edf5; --mu:#93a0b4; } .mq-n { background:#222c3b; color:#a8b4c8; } .mq-n.na { background:#3a1f26; color:#ff9aa9; } .mq-sol { background:#16273f; color:#cfe0ff; } .mq-note.info { background:#14284a; color:#a8c4ff; } .mq-chip.warn { background:#3a2c0a; color:#ffd27a; } }
+    [data-theme="dark"] .mq { --opt:var(--pv-surface-2,#1d3022); }
+    @media (prefers-color-scheme:dark) { .mq { --opt:#1f2937; --bg:#0f141c; --card:#171e29; --bd:#2a3342; --tx:#e8edf5; --mu:#93a0b4; } .mq-n { background:#222c3b; color:#a8b4c8; } .mq-n.na { background:#3a1f26; color:#ff9aa9; } .mq-sol { background:#16273f; color:#cfe0ff; } .mq-note.info { background:#14284a; color:#a8c4ff; } .mq-chip.warn { background:#3a2c0a; color:#ffd27a; } }
 </style>
 @endsection
 @php
@@ -200,7 +201,7 @@ window.MCQ.csrf = @json(csrf_token());
         function head() {
             var att = C.attempts.length > 1 ? '<select id="attSel" class="mq-btn">' + C.attempts.map(function (a) { return '<option value="' + a.no + '"' + (a.no === R.attemptNo ? ' selected' : '') + '>Attempt ' + a.no + ' (' + a.mark + ')' + (a.no === 1 ? ' · leaderboard' : '') + '</option>'; }).join('') + '</select>' : '';
             return '<div class="mq-card" style="margin-bottom:10px"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:220px"><h1 style="font-size:1.15rem;font-weight:800;margin:0">' + esc(R.title) + '</h1><small style="color:var(--mu)">Attempt ' + R.attemptNo + ' · ' + esc(R.at) + ' · ' + R.total + ' questions</small></div>'
-                + att + '<a class="mq-btn" href="' + esc(C.back) + '">All exams</a><a class="mq-btn bad" href="' + esc(C.retake) + '">Re-attempt</a></div></div>'
+                + att + '<a class="mq-btn" href="' + esc(C.back) + '">✕ Close</a><a class="mq-btn bad" href="' + esc(C.retake) + '">Re-attempt</a></div></div>'
                 + (!R.isFirst ? '<div class="mq-note info">This is attempt ' + R.attemptNo + '. Rank and leaderboard use your <b>first attempt</b>.</div>' : '')
                 + (R.cutoff != null ? (R.belowCutoff ? '<div class="mq-note bad"><b>Below cutoff.</b> Your score ' + R.score + ' is ' + (Math.round((R.cutoff - R.score) * 100) / 100) + ' short of the cutoff ' + R.cutoff + '. Keep practising!</div>' : '<div class="mq-note ok"><b>Above cutoff</b> (' + R.cutoff + '). Well done!</div>') : '')
                 + '<div class="mq-tabs"><button data-t="ov" class="' + (tab === 'ov' ? 'on' : '') + '">Performance</button><button data-t="sol" class="' + (tab === 'sol' ? 'on' : '') + '">Solutions</button><button data-t="lb" class="' + (tab === 'lb' ? 'on' : '') + '">Leaderboard</button></div>';
@@ -242,7 +243,7 @@ window.MCQ.csrf = @json(csrf_token());
                 + (!me && R.rank ? '<div class="mq-row me"><span class="rk">#' + R.rank + '</span><span class="nm">You</span><span class="mk">' + R.score + '</span></div>' : '') + '</div>';
         }
         function draw() {
-            root.innerHTML = head() + (tab === 'ov' ? overview() : tab === 'sol' ? solutions() : board());
+            root.innerHTML = head() + (tab === 'ov' ? overview() : tab === 'sol' ? solutions() : board()) + '<div style="text-align:center;margin:16px 0"><a class="mq-btn pri" href="' + esc(C.back) + '">✕ Close</a></div>';
             root.querySelectorAll('[data-t]').forEach(function (b) { b.onclick = function () { tab = b.dataset.t; draw(); }; });
             root.querySelectorAll('[data-f]').forEach(function (b) { b.onclick = function () { filter = b.dataset.f; draw(); }; });
             root.querySelectorAll('[data-rep]').forEach(function (b) { b.onclick = function () { open(b.dataset.rep); }; });

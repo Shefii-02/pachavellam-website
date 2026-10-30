@@ -70,6 +70,11 @@ class McqExam
         if ($exam->duration_min) {
             $remaining = max(0, $exam->duration_min * 60 - (time() - strtotime($attempt->attend_started_at)));
         }
+        // an attempt started inside the exam window must also end when the window closes (a practice attempt after the end has no such limit)
+        if ($exam->ended_at && strtotime($attempt->attend_started_at) < strtotime($exam->ended_at)) {
+            $left = max(0, strtotime($exam->ended_at) - time());
+            $remaining = $remaining === null ? $left : min($remaining, $left);
+        }
 
         return [
             'questions' => $this->questions($exam)->map(fn ($q) => ['id' => $q->id, 'q' => self::html($q->question), 'o' => $this->options($q)])->values(),
