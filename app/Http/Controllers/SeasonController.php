@@ -32,6 +32,7 @@ class SeasonController extends Controller
     /** /{exam}/{series page}/{season slug}, e.g. /kpsc/omr-exams/typist-omr-2026 */
     public function showBySlug(Request $request, $examSlug, $page, $seasonSlug, SeasonAccess $access)
     {
+        dd($examSlug, $page, $seasonSlug);
         // the seasons of this exam and series page (a handful): match the saved slug, else the slug of the title (seasons saved before slugs existed)
         $season = ExamSeason::with('exam')->where('status', 'published')
             ->whereHas('exam', fn ($q) => $q->where('slug', $examSlug))->get()
