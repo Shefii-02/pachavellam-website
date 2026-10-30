@@ -212,7 +212,7 @@ window.MCQ.csrf = @json(csrf_token());
         var open = function (n) { var b = $('xrOpen'); if (b) { $('xrQ').value = n; b.click(); } };
         function head() {
             var att = C.attempts.length > 1 ? '<select id="attSel" class="mq-btn">' + C.attempts.map(function (a) { return '<option value="' + a.no + '"' + (a.no === R.attemptNo ? ' selected' : '') + '>Attempt ' + a.no + ' (' + a.mark + ')' + (a.no === 1 ? ' · leaderboard' : '') + '</option>'; }).join('') + '</select>' : '';
-            return '<div class="mq-card" style="margin-bottom:10px"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:220px"><h1 style="font-size:1.15rem;font-weight:800;margin:0">' + esc(R.title) + '</h1><small style="color:var(--mu)">Attempt ' + R.attemptNo + ' · ' + esc(R.at) + ' · ' + R.total + ' questions</small></div>'
+            return '<div class="mq-card" style="margin-bottom:10px"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:220px"><h1 style="font-size:1.15rem;font-weight:800;margin:0;color:#fff">' + esc(R.title) + '</h1><small style="color:var(--mu)">Attempt ' + R.attemptNo + ' · ' + esc(R.at) + ' · ' + R.total + ' questions</small></div>'
                 + att + '<a class="mq-btn" href="' + esc(C.back) + '">✕ Close</a><a class="mq-btn bad" href="' + esc(C.retake) + '">Re-attempt</a></div></div>'
                 + (!R.isFirst ? '<div class="mq-note info">This is attempt ' + R.attemptNo + '. Rank and leaderboard use your <b>first attempt</b>.</div>' : '')
                 + (R.cutoff != null ? (R.belowCutoff ? '<div class="mq-note bad"><b>Below cutoff.</b> Your score ' + R.score + ' is ' + (Math.round((R.cutoff - R.score) * 100) / 100) + ' short of the cutoff ' + R.cutoff + '. Keep practising!</div>' : '<div class="mq-note ok"><b>Above cutoff</b> (' + R.cutoff + '). Well done!</div>') : '')
@@ -229,10 +229,10 @@ window.MCQ.csrf = @json(csrf_token());
                 + '<div class="mq-stat"><b>' + R.accuracy + '%</b><small>Accuracy</small></div>'
                 + '<div class="mq-stat"><b>' + tm(R.sec) + '</b><small>Time' + (R.duration ? ' of ' + tm(R.duration) : '') + '</small></div></div></div>'
                 + (!R.ended ? '<p style="font-size:.78rem;color:var(--mu);margin:10px 0 0">Rank is provisional until the exam ends.</p>' : '') + '</div>'
-                + '<div class="mq-card" style="margin-bottom:10px"><h6 style="font-weight:800">Question distribution</h6><div class="mq-dist"><i style="width:' + R.right * 100 / tot + '%;background:var(--ok)"></i><i style="width:' + R.wrong * 100 / tot + '%;background:var(--bad)"></i></div>'
+                + '<div class="mq-card" style="margin-bottom:10px"><h6 style="font-weight:800;color:#fff">Question distribution</h6><div class="mq-dist"><i style="width:' + R.right * 100 / tot + '%;background:var(--ok)"></i><i style="width:' + R.wrong * 100 / tot + '%;background:var(--bad)"></i></div>'
                 + '<div class="mq-lg"><span style="--c:var(--ok)">Correct ' + R.right + '</span><span style="--c:var(--bad)">Wrong ' + R.wrong + ' (−' + R.negative + ' each)</span><span style="--c:#c3cad6">Unattempted ' + R.skipped + '</span></div></div>'
-                + '<div class="mq-card" style="margin-bottom:10px"><h6 style="font-weight:800">How you compare</h6><div class="mq-cmp">' + bar('You', R.score, 'var(--pri)') + bar('Average', R.average, '#f5a524') + bar('Topper', R.topper, 'var(--ok)') + '</div></div>'
-                + '<div class="mq-card"><h6 style="font-weight:800">Speed</h6><p style="margin:0 0 8px;font-size:.9rem">You spent about <b>' + tm(avgQ) + '</b> on each question you answered.</p>'
+                + '<div class="mq-card" style="margin-bottom:10px"><h6 style="font-weight:800;color:#fff">How you compare</h6><div class="mq-cmp">' + bar('You', R.score, 'var(--pri)') + bar('Average', R.average, '#f5a524') + bar('Topper', R.topper, 'var(--ok)') + '</div></div>'
+                + '<div class="mq-card"><h6 style="font-weight:800;color:#fff">Speed</h6><p style="margin:0 0 8px;font-size:.9rem">You spent about <b>' + tm(avgQ) + '</b> on each question you answered.</p>'
                 + (slow.length ? '<div style="font-size:.85rem;color:var(--mu)">Most time spent on: ' + slow.map(function (q) { return '<a href="#" data-q="' + q.n + '">Q' + q.n + ' (' + tm(q.sec) + ')</a>'; }).join(', ') + '</div>' : '') + '</div>';
         }
         function solutions() {
