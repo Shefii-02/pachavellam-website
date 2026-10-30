@@ -96,7 +96,7 @@ class SeasonController extends Controller
             $rows[] = (object) ($span($d->started_at, $d->ended_at) + ['title' => $d->exam_title ?: ($d->examtitle ?: 'Exam'), 'date' => $d->exam_date ? Carbon::parse($d->exam_date)->format('d M Y') . ($d->started_at ? ', ' . Carbon::parse($d->started_at)->format('h:i a') : '') : ($d->started_at ? Carbon::parse($d->started_at)->format('d M Y, h:i a') : ''), 'tag' => $t, 'tagc' => $c, 'state' => $state, 'done' => $attended, 'paid' => false,
                 'attended' => $attended, 'bucket' => $bucket($c, $attended),
                 'omr' => $d->section === 'Model Exam', 'omrId' => $d->id,
-                'answerKey' => $d->section === 'Model Exam' && $state !== 'locked' ? url('kpsc/model-exam/' . $d->exam_date . '/' . $d->id . '/answerkey') : null,
+                'answerKey' => $d->section === 'Model Exam' && $state !== 'locked' && $c !== 'up' ? url('kpsc/model-exam/' . $d->exam_date . '/' . $d->id . '/answerkey') : null,
                 'url' => $state === 'locked' ? null : url($base . '/' . $d->exam_date . '/' . $d->id), 'sort' => $sortKey($d->exam_date ?: $d->started_at, $d->started_at, $d->id)]);
         }
         foreach (CourseExam::with('course:id,slug')->where('season_id', $season->id)->where('status', 'published')->orderByRaw('start_at is null')->orderBy('start_at')->orderBy('id')->get() as $e) {

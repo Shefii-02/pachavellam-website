@@ -4,7 +4,7 @@
     $omrHref = $omrLocked ? ($lockUrl ?? (auth()->check() ? $r->url : url('sign-in'))) : $r->url;
     if ($omrLocked && !auth()->check()) { $omrHref = url('sign-in'); }
 @endphp
-<div class="col-12 col-md-6"><div class="sr-card sr-xc" data-omr="{{ $r->omrId }}">
+<div class="col-12 col-md-6"><div class="sr-card sr-xc" @if ($r->tagc !== 'up') data-omr="{{ $r->omrId }}" @endif>   {{-- an upcoming exam has no attempts or leaderboard to load --}}
     <div class="bd">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="small text-muted">{{ $r->date }}</span><span class="sr-chip {{ $r->tagc }}">{{ $r->tag }}</span>
@@ -12,7 +12,10 @@
         <div class="fw-bold" style="line-height:1.3;min-height:2.6em">{{ \Illuminate\Support\Str::limit($r->title, 70) }}</div>
         @include('kpsc.partials.series-card-dates', ['r' => $r])
         <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
-            <a class="sr-go {{ $omrLocked ? 'off' : '' }}" href="{{ $omrHref }}">{{ $omrLocked ? 'Unlock' : ($r->tagc === 'end' ? 'Practice' : ($r->tagc === 'up' ? 'Opens soon' : 'Attempt')) }}</a>
+            @if ($r->tagc === 'up')
+                <span class="sr-go off">Opens soon</span>
+            @else
+            <a class="sr-go {{ $omrLocked ? 'off' : '' }}" href="{{ $omrHref }}">{{ $omrLocked ? 'Unlock' : ($r->tagc === 'end' ? 'Practice' : 'Attempt') }}</a>
             @if ($r->answerKey)<a class="sr-go off" href="{{ $r->answerKey }}"><i class="bi bi-key"></i> Answer key</a>@endif
             @if (!$omrLocked)
                 @auth
@@ -22,9 +25,12 @@
                 @endauth
             @endif
             <span class="small text-muted ms-auto omr-last"></span>
+            @endif
         </div>
+        @if ($r->tagc !== 'up')
         <details class="omr-dr mt-2" data-w="mine"><summary><i class="bi bi-clock-history"></i> My attempts</summary><div class="omr-body small">Loading…</div></details>
         <button type="button" class="omr-lb-btn mt-2" data-lb="{{ $r->omrId }}" data-title="{{ $r->title }}"><i class="bi bi-trophy-fill"></i> Leaderboard <i class="bi bi-chevron-right ms-auto"></i></button>
+        @endif
     </div>
 </div></div>
 @else

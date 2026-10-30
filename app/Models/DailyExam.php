@@ -17,6 +17,17 @@ class DailyExam extends Model
     /** What admin code may mass-assign (the season, access, cutoff, duration and instruction settings); everything else is set field by field. */
     protected $fillable = ['series_season_id', 'free_access', 'status', 'cutoff_mark', 'duration_min', 'instruction_id'];
 
+    /** False until the exam's start time: the question paper, answer key, questions and marks stay closed. No start time = always open. */
+    public function hasStarted(): bool
+    {
+        return !$this->started_at || !\Illuminate\Support\Carbon::parse($this->started_at)->isFuture();
+    }
+
+    public function startIso(): ?string
+    {
+        return $this->started_at ? \Illuminate\Support\Carbon::parse($this->started_at)->toIso8601String() : null;
+    }
+
     public function season()
     {
         return $this->belongsTo(CaSeason::class, 'season_id');
