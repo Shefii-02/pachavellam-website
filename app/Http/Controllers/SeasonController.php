@@ -83,20 +83,21 @@ class SeasonController extends Controller
 
             return ['startAt' => $s?->toIso8601String(), 'endAt' => $e?->toIso8601String(), 'startLbl' => $s?->format('d M Y, h:i a'), 'endLbl' => $e?->format('d M Y, h:i a')];
         };
+        // the order of every tab: the exam's date first (newest first), then its start time of day, then the id; an exam with no date goes last
+        $sortKey = fn ($date, $start, $id) => ($date ? Carbon::parse($date)->format('Y-m-d') : '0000-00-00') . ' ' . ($start ? Carbon::parse($start)->format('H:i:s') : '00:00:00') . sprintf('%08d', $id);
         $bucket = fn ($tagc, $attended) => $tagc === 'end' ? ($attended ? 'done' : 'missed') : 'live';
 
         foreach (DailyExam::where('series_season_id', $season->id)->where('status', 1)->orderBy('exam_date')->orderBy('id')->get() as $d) {
             [$t, $c] = $tag($d->started_at, $d->ended_at);
             $isOmr = $d->section === 'Model Exam';
             $attended = $isOmr ? $attOmr->has($d->id) : $attMcq->has($d->id);
-            $when = $d->started_at ?: $d->exam_date;
             $state = $access->state($user, $season, 'legacy', $d->id);
             $base = $d->section === 'Model Exam' ? 'kpsc/model-exam' : 'kpsc/daily-exam';
-            $rows[] = (object) ($span($d->started_at, $d->ended_at) + ['title' => $d->exam_title ?: ($d->examtitle ?: 'Exam'), 'date' => $when ? Carbon::parse($when)->format($d->started_at ? 'd M Y, h:i a' : 'd M Y') : '', 'tag' => $t, 'tagc' => $c, 'state' => $state, 'done' => $attended, 'paid' => false,
+            $rows[] = (object) ($span($d->started_at, $d->ended_at) + ['title' => $d->exam_title ?: ($d->examtitle ?: 'Exam'), 'date' => $d->exam_date ? Carbon::parse($d->exam_date)->format('d M Y') . ($d->started_at ? ', ' . Carbon::parse($d->started_at)->format('h:i a') : '') : ($d->started_at ? Carbon::parse($d->started_at)->format('d M Y, h:i a') : ''), 'tag' => $t, 'tagc' => $c, 'state' => $state, 'done' => $attended, 'paid' => false,
                 'attended' => $attended, 'bucket' => $bucket($c, $attended),
                 'omr' => $d->section === 'Model Exam', 'omrId' => $d->id,
                 'answerKey' => $d->section === 'Model Exam' && $state !== 'locked' ? url('kpsc/model-exam/' . $d->exam_date . '/' . $d->id . '/answerkey') : null,
-                'url' => $state === 'locked' ? null : url($base . '/' . $d->exam_date . '/' . $d->id), 'sort' => ($when ? Carbon::parse($when)->format('Y-m-d H:i:s') : '0000-00-00 00:00:00') . sprintf('%08d', $d->id)]);
+                'url' => $state === 'locked' ? null : url($base . '/' . $d->exam_date . '/' . $d->id), 'sort' => $sortKey($d->exam_date ?: $d->started_at, $d->started_at, $d->id)]);
         }
         foreach (CourseExam::with('course:id,slug')->where('season_id', $season->id)->where('status', 'published')->orderByRaw('start_at is null')->orderBy('start_at')->orderBy('id')->get() as $e) {
             [$t, $c] = $tag($e->start_at, $e->end_at);
@@ -104,7 +105,7 @@ class SeasonController extends Controller
             $state = $access->state($user, $season, 'course', $e->id);
             $rows[] = (object) ($span($e->start_at, $e->end_at) + ['title' => $e->title, 'date' => $e->start_at ? $e->start_at->format('d M Y, h:i a') : '', 'tag' => $t, 'tagc' => $c, 'state' => $state, 'done' => $attended, 'paid' => false,
                 'attended' => $attended, 'bucket' => $bucket($c, $attended),
-                'url' => $state === 'locked' ? null : url('courses/' . ($e->course->slug ?? $e->course_id)), 'sort' => ($e->start_at ? $e->start_at->format('Y-m-d H:i:s') : '9999-12-31 00:00:00') . sprintf('%08d', $e->id)]);
+                'url' => $state === 'locked' ? null : url('courses/' . ($e->course->slug ?? $e->course_id)), 'sort' => $sortKey($e->start_at, $e->start_at, $e->id)]);
         }
         usort($rows, fn ($a, $b) => strcmp($b->sort, $a->sort));   // newest date and time first
 
