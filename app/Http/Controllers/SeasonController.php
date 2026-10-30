@@ -39,7 +39,7 @@ class SeasonController extends Controller
             ->whereHas('exam', fn ($q) => $q->where('slug', $examSlug))->get()
             ->filter(fn ($s) => (self::PAGES[$s->kind] ?? 'daily-exams') === $page)
             ->first(fn ($s) => $s->slug === $seasonSlug || \Illuminate\Support\Str::slug($s->title) === $seasonSlug);
-dd($season,$request->all(),$examSlug,$page,$seasonSlug);
+
         abort_if(!$season, 404);
         if ($season->slug && $season->slug !== $seasonSlug) {
             return redirect($season->publicUrl(), 301);
