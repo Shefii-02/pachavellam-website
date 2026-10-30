@@ -21,6 +21,9 @@
         .ss-row.lock { opacity:.85; background:var(--pv-surface-2); cursor:pointer; }
         .ss-st { font-size:.68rem; font-weight:800; border-radius:10px; padding:2px 10px; flex:none; } .ss-st.free { background:#e7f6ef; color:#0a6b46; } .ss-st.unlocked { background:#dbeafe; color:#1d4ed8; } .ss-st.locked { background:#fde8e8; color:#a4242a; }
         .ss-go { flex:none; border-radius:20px; padding:5px 14px; font-size:.78rem; font-weight:800; background:var(--pv-green); color:var(--pv-on-brand) !important; } .ss-go.lk { background:transparent; border:1px solid var(--pv-border); color:var(--pv-muted) !important; }
+        .ss-tabs { display:flex; gap:8px; overflow-x:auto; margin:4px 0 12px; padding-bottom:2px; } .ss-tab { flex:none; border:1px solid var(--pv-border); background:var(--pv-surface); color:var(--pv-text); border-radius:22px; padding:8px 16px; font-weight:800; font-size:.84rem; cursor:pointer; white-space:nowrap; }
+        .ss-tab span { display:inline-block; min-width:20px; margin-left:6px; border-radius:10px; padding:0 6px; font-size:.72rem; background:var(--pv-chip); text-align:center; } .ss-tab.on { background:var(--pv-green); border-color:var(--pv-green); color:var(--pv-on-brand); } .ss-tab.on span { background:rgba(255,255,255,.25); }
+        .ss-pane { display:none; } .ss-pane.on { display:block; }
         .sr-card { display:block; height:100%; background:var(--pv-surface); border:1px solid var(--pv-border); border-radius:16px; overflow:hidden; box-shadow:0 2px 10px rgba(0,0,0,.06); color:var(--pv-text) !important; text-decoration:none !important; } .sr-card .bd { padding:12px; }
         .sr-chip { font-size:.66rem; font-weight:800; border-radius:10px; padding:2px 9px; background:#eef0f3; color:#4b5563; } .sr-chip.live { background:#e53935; color:#fff; } .sr-chip.up { background:#fff1d6; color:#9a5b00; } .sr-chip.lk { background:#fde8e8; color:#a4242a; } .sr-chip.unl { background:#dbeafe; color:#1d4ed8; } .sr-chip.fr { background:#e7f6ef; color:#0a6b46; }
         .sr-go { display:inline-block; border-radius:20px; padding:5px 14px; font-size:.78rem; font-weight:800; background:var(--pv-green); color:var(--pv-on-brand) !important; }
@@ -63,14 +66,44 @@
         </div>
     </div>
 
+    @php
+        // the three tabs; every list is newest date and time first
+        $groups = collect($rows)->groupBy('bucket');
+        $tabs = [
+            'live' => ['Ongoing & upcoming', $groups->get('live', collect())->values(), 'No ongoing or upcoming exams right now.'],
+            'done' => ['Completed · attended', $groups->get('done', collect())->values(), auth()->check() ? 'You have not attended a completed exam yet.' : 'Sign in to see the exams you attended.'],
+            'missed' => ['Completed · not attended', $groups->get('missed', collect())->values(), 'No completed exam left unattended.'],
+        ];
+        $firstTab = collect($tabs)->filter(fn ($t) => $t[1]->count())->keys()->first() ?? 'live';
+    @endphp
     <div class="hb-sec"><h2 style="font-size:1.05rem;font-weight:800;color:var(--pv-text)">Exams in this season</h2></div>
-    <div class="row g-3">
-        @forelse ($rows as $i => $r)
-            @include('kpsc.partials.series-card', ['r' => $r, 'n' => $i + 1, 'lockUrl' => auth()->check() ? url('seasons/' . $season->id . '/buy') : url('sign-in')])
-        @empty
-            <div class="hb-empty"><i class="bi bi-hourglass-split"></i>No exams in this season yet.</div>
-        @endforelse
-    </div>
+    @if (count($rows))
+        <div class="ss-tabs" role="tablist">
+            @foreach ($tabs as $key => $t)
+                <button type="button" class="ss-tab {{ $key === $firstTab ? 'on' : '' }}" data-tab="{{ $key }}" role="tab">{{ $t[0] }} <span>{{ $t[1]->count() }}</span></button>
+            @endforeach
+        </div>
+        @foreach ($tabs as $key => $t)
+            <div class="ss-pane {{ $key === $firstTab ? 'on' : '' }}" id="ss-pane-{{ $key }}" role="tabpanel">
+                <div class="row g-3">
+                    @forelse ($t[1] as $i => $r)
+                        @include('kpsc.partials.series-card', ['r' => $r, 'n' => $i + 1, 'lockUrl' => auth()->check() ? url('seasons/' . $season->id . '/buy') : url('sign-in')])
+                    @empty
+                        <div class="hb-empty"><i class="bi bi-hourglass-split"></i>{{ $t[2] }}</div>
+                    @endforelse
+                </div>
+            </div>
+        @endforeach
+    @else
+        <div class="row g-3"><div class="hb-empty"><i class="bi bi-hourglass-split"></i>No exams in this season yet.</div></div>
+    @endif
 </div></div></div>
 @include('kpsc.partials.omr-card-assets')
+<script>
+(function () {
+    var tabs = document.querySelectorAll('.ss-tab'); if (!tabs.length) return;
+    function show(k) { tabs.forEach(function (t) { t.classList.toggle('on', t.dataset.tab === k); }); document.querySelectorAll('.ss-pane').forEach(function (p) { p.classList.toggle('on', p.id === 'ss-pane-' + k); }); }
+    tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.tab); }); });
+})();
+</script>
 @endsection

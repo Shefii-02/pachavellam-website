@@ -50,7 +50,7 @@ class PublicCatalogController extends Controller
         if (\Illuminate\Support\Facades\Schema::hasTable('exam_seasons')) {
             $seasons = \App\Models\ExamSeason::where('exam_id', $exam->id)->where('kind', $kind)->where('status', 'published')
                 ->where(fn ($w) => $w->whereNull('starts_on')->orWhere('starts_on', '<=', $today))->where(fn ($w) => $w->whereNull('ends_on')->orWhere('ends_on', '>=', $today))
-                ->orderByDesc('starts_on')->orderByDesc('id')->limit($seasonLimit)->get();
+                ->orderBy('position')->orderByDesc('id')->limit($seasonLimit)->get();   // the show order the admin set
             $now = now();
             foreach ($seasons as $se) {
                 $items = collect();

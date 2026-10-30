@@ -26,7 +26,7 @@
                 <a href="{{ $base }}/seasons/{{ $s->id }}" style="display:block;height:110px;background:#10243e center/cover {{ $s->cover_image ? "url('" . Storage::url($s->cover_image) . "')" : '' }}"></a>
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start gap-2">
-                        <h5 class="mb-1"><a href="{{ $base }}/seasons/{{ $s->id }}" class="text-reset">{{ $s->title }}</a></h5>
+                        <h5 class="mb-1"><span class="badge bg-dark me-1" title="Show order">#{{ $loop->iteration }}</span><a href="{{ $base }}/seasons/{{ $s->id }}" class="text-reset">{{ $s->title }}</a></h5>
                         <span class="badge bg-{{ $stC }}">{{ $stL }}</span>
                     </div>
                     @if ($s->tagline)<div class="small text-muted">{{ $s->tagline }}</div>@endif
@@ -42,6 +42,8 @@
                     <div class="mt-2"><b>{{ (int) ($c->c ?? 0) + $legacyN }}</b> exam(s) · {{ (int) ($c->p ?? 0) }} published</div>
                 </div>
                 <div class="card-footer bg-transparent d-flex gap-2">
+                    <form action="{{ $base }}/seasons/{{ $s->id }}/move/up" method="POST">@csrf<button class="btn btn-sm btn-outline-secondary mb-0" title="Show earlier" @disabled($loop->first)><i class="bi bi-arrow-left"></i></button></form>
+                    <form action="{{ $base }}/seasons/{{ $s->id }}/move/down" method="POST">@csrf<button class="btn btn-sm btn-outline-secondary mb-0" title="Show later" @disabled($loop->last)><i class="bi bi-arrow-right"></i></button></form>
                     <a href="{{ $base }}/seasons/{{ $s->id }}" class="btn btn-sm btn-primary mb-0 flex-fill"><i class="bi bi-list-check me-1"></i>Manage exams</a>
                     <form action="{{ $base }}/seasons/{{ $s->id }}" method="POST" onsubmit="return confirm('Delete this season? Its exams are kept without a season.')">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger mb-0" title="Delete season"><i class="bi bi-trash"></i></button></form>
                 </div>

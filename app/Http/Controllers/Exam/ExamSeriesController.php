@@ -50,7 +50,7 @@ class ExamSeriesController extends Controller
     public function open(Request $request, $examSlug, $kind)
     {
         [$exam, $course, $feature] = $this->scope($request, $examSlug, $kind);
-        $seasons = ExamSeason::where('exam_id', $exam->id)->where('kind', $kind)->orderByDesc('starts_on')->orderByDesc('id')->get();
+        $seasons = ExamSeason::where('exam_id', $exam->id)->where('kind', $kind)->orderBy('position')->orderByDesc('id')->get();
         $counts = CourseExam::where('course_id', $course->id)->where('feature_id', $feature->id)->selectRaw('season_id, count(*) c, sum(status = "published") p')->groupBy('season_id')->get()->keyBy('season_id');
 
         // old KPSC exams placed in a season
@@ -68,12 +68,33 @@ class ExamSeriesController extends Controller
     {
         [$exam] = $this->scope($request, $examSlug, $kind);
         $data = $this->validated($request, $kind);
-        $season = ExamSeason::create($data + ['exam_id' => $exam->id, 'kind' => $kind, 'created_by' => $request->user()->id]);
-        $season->update(['position' => $season->id]);
+        ExamSeason::where('exam_id', $exam->id)->where('kind', $kind)->increment('position');   // a new season shows first; the admin can move it
+        $season = ExamSeason::create($data + ['exam_id' => $exam->id, 'kind' => $kind, 'created_by' => $request->user()->id, 'position' => 1]);
         $this->cover($request, $season);
         app(\App\Services\SeasonAccess::class)->syncCourse($season->fresh(), $request->user()->id);
 
         return redirect($exam->examUrl('series/' . $kind . '/seasons/' . $season->id))->with('success', 'Season created. Now add its exams below.');
+    }
+
+    /** Show a season one place earlier (up) or later (down) in the listing: the positions of the series are renumbered 1..n. */
+    public function move(Request $request, $examSlug, $kind, $id, $dir)
+    {
+        [$exam] = $this->scope($request, $examSlug, $kind);
+        $list = ExamSeason::where('exam_id', $exam->id)->where('kind', $kind)->orderBy('position')->orderByDesc('id')->get()->all();
+        $i = collect($list)->search(fn ($s) => $s->id == $id);
+        abort_if($i === false, 404);
+        $j = $dir === 'up' ? $i - 1 : $i + 1;
+        if (isset($list[$j])) {
+            [$list[$i], $list[$j]] = [$list[$j], $list[$i]];
+        }
+        foreach (array_values($list) as $n => $s) {
+            if ((int) $s->position !== $n + 1) {
+                $s->position = $n + 1;
+                $s->save();
+            }
+        }
+
+        return back()->with('success', 'Order updated.');
     }
 
     public function update(Request $request, $examSlug, $kind, $id)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\CourseExam;
 use App\Models\DailyExam;
+use App\Models\DailyExamattempt;
 use App\Models\ExamCourse;
 use App\Models\ExamSeason;
 use App\Models\PaymentLink;
@@ -55,7 +56,7 @@ class SeasonController extends Controller
         $paid = $access->isPaid($season);
         $owns = $access->owns($user, $season);
 
-        // the exams of the season, oldest first (that is also the order the "first N free" is counted in)
+        // the exams of the season, newest first (the "first N free" is worked out per exam by SeasonAccess, not by this order)
         $rows = [];
         $tag = function ($start, $end) {
             $start = $start ? Carbon::parse($start) : null;
@@ -69,22 +70,43 @@ class SeasonController extends Controller
 
             return [$start || $end ? 'Live now' : 'Open', 'live'];
         };
+        // what this student has attended (guests: nothing)
+        $legacyIds = DailyExam::where('series_season_id', $season->id)->pluck('id');
+        $attOmr = $user ? \App\Models\ModelExamAttempt::where('user_id', $user->id)->whereIn('exam_id', $legacyIds)->pluck('exam_id')->flip() : collect();
+        $attMcq = $user ? DailyExamattempt::where('user_id', $user->id)->where('status', '2')->whereIn('exam_id', $legacyIds)->pluck('exam_id')->flip() : collect();
+        $attCourse = $user ? \App\Models\CourseExamAttempt::where('user_id', $user->id)->where('status', 'submitted')->pluck('course_exam_id')->flip() : collect();
+        // the tab of a row: ongoing / upcoming, or completed and attended, or completed and not attended
+        // start / end of an exam: a label to show and an ISO time (with the zone) for the countdown
+        $span = function ($start, $end) {
+            $s = $start ? Carbon::parse($start) : null;
+            $e = $end ? Carbon::parse($end) : null;
+
+            return ['startAt' => $s?->toIso8601String(), 'endAt' => $e?->toIso8601String(), 'startLbl' => $s?->format('d M Y, h:i a'), 'endLbl' => $e?->format('d M Y, h:i a')];
+        };
+        $bucket = fn ($tagc, $attended) => $tagc === 'end' ? ($attended ? 'done' : 'missed') : 'live';
+
         foreach (DailyExam::where('series_season_id', $season->id)->where('status', 1)->orderBy('exam_date')->orderBy('id')->get() as $d) {
             [$t, $c] = $tag($d->started_at, $d->ended_at);
+            $isOmr = $d->section === 'Model Exam';
+            $attended = $isOmr ? $attOmr->has($d->id) : $attMcq->has($d->id);
+            $when = $d->started_at ?: $d->exam_date;
             $state = $access->state($user, $season, 'legacy', $d->id);
             $base = $d->section === 'Model Exam' ? 'kpsc/model-exam' : 'kpsc/daily-exam';
-            $rows[] = (object) ['title' => $d->exam_title ?: ($d->examtitle ?: 'Exam'), 'date' => $d->exam_date ? Carbon::parse($d->exam_date)->format('d M Y') : '', 'tag' => $t, 'tagc' => $c, 'state' => $state, 'done' => false, 'paid' => false,
+            $rows[] = (object) ($span($d->started_at, $d->ended_at) + ['title' => $d->exam_title ?: ($d->examtitle ?: 'Exam'), 'date' => $when ? Carbon::parse($when)->format($d->started_at ? 'd M Y, h:i a' : 'd M Y') : '', 'tag' => $t, 'tagc' => $c, 'state' => $state, 'done' => $attended, 'paid' => false,
+                'attended' => $attended, 'bucket' => $bucket($c, $attended),
                 'omr' => $d->section === 'Model Exam', 'omrId' => $d->id,
                 'answerKey' => $d->section === 'Model Exam' && $state !== 'locked' ? url('kpsc/model-exam/' . $d->exam_date . '/' . $d->id . '/answerkey') : null,
-                'url' => $state === 'locked' ? null : url($base . '/' . $d->exam_date . '/' . $d->id), 'sort' => $d->exam_date . sprintf('%08d', $d->id)];
+                'url' => $state === 'locked' ? null : url($base . '/' . $d->exam_date . '/' . $d->id), 'sort' => ($when ? Carbon::parse($when)->format('Y-m-d H:i:s') : '0000-00-00 00:00:00') . sprintf('%08d', $d->id)]);
         }
         foreach (CourseExam::with('course:id,slug')->where('season_id', $season->id)->where('status', 'published')->orderByRaw('start_at is null')->orderBy('start_at')->orderBy('id')->get() as $e) {
             [$t, $c] = $tag($e->start_at, $e->end_at);
+            $attended = $attCourse->has($e->id);
             $state = $access->state($user, $season, 'course', $e->id);
-            $rows[] = (object) ['title' => $e->title, 'date' => $e->start_at ? $e->start_at->format('d M Y, h:i a') : '', 'tag' => $t, 'tagc' => $c, 'state' => $state, 'done' => false, 'paid' => false,
-                'url' => $state === 'locked' ? null : url('courses/' . ($e->course->slug ?? $e->course_id)), 'sort' => ($e->start_at ? $e->start_at->format('Y-m-d') : '9999') . sprintf('%08d', $e->id)];
+            $rows[] = (object) ($span($e->start_at, $e->end_at) + ['title' => $e->title, 'date' => $e->start_at ? $e->start_at->format('d M Y, h:i a') : '', 'tag' => $t, 'tagc' => $c, 'state' => $state, 'done' => $attended, 'paid' => false,
+                'attended' => $attended, 'bucket' => $bucket($c, $attended),
+                'url' => $state === 'locked' ? null : url('courses/' . ($e->course->slug ?? $e->course_id)), 'sort' => ($e->start_at ? $e->start_at->format('Y-m-d H:i:s') : '9999-12-31 00:00:00') . sprintf('%08d', $e->id)]);
         }
-        usort($rows, fn ($a, $b) => strcmp($a->sort, $b->sort));
+        usort($rows, fn ($a, $b) => strcmp($b->sort, $a->sort));   // newest date and time first
 
         \App\Support\Seo::set(['key' => 'season:' . $season->id, 'title' => $season->title . ' - ' . ($season->exam->short_name ?? '') . ' | Pachavellam', 'description' => $season->tagline ?: strip_tags((string) $season->description) ?: 'Exam season on Pachavellam.',
             'image' => $season->cover_image ? \Illuminate\Support\Facades\Storage::url($season->cover_image) : null]);

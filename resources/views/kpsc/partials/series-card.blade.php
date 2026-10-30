@@ -10,6 +10,7 @@
             <span class="small text-muted">{{ $r->date }}</span><span class="sr-chip {{ $r->tagc }}">{{ $r->tag }}</span>
         </div>
         <div class="fw-bold" style="line-height:1.3;min-height:2.6em">{{ \Illuminate\Support\Str::limit($r->title, 70) }}</div>
+        @include('kpsc.partials.series-card-dates', ['r' => $r])
         <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
             <a class="sr-go {{ $omrLocked ? 'off' : '' }}" href="{{ $omrHref }}">{{ $omrLocked ? 'Unlock' : ($r->tagc === 'end' ? 'Practice' : ($r->tagc === 'up' ? 'Opens soon' : 'Attempt')) }}</a>
             @if ($r->answerKey)<a class="sr-go off" href="{{ $r->answerKey }}"><i class="bi bi-key"></i> Answer key</a>@endif
@@ -43,6 +44,7 @@
             @else<span class="sr-chip {{ $r->tagc }}">{{ $r->tag }}</span>@endif
         </div>
         <div class="fw-bold" style="line-height:1.3;min-height:2.6em">{{ \Illuminate\Support\Str::limit($r->title, 70) }}@if ($r->paid)<span class="sr-paid">PAID</span>@endif</div>
+        @include('kpsc.partials.series-card-dates', ['r' => $r])
         <div class="mt-2 text-end">
             @if ($locked)<span class="sr-go off">Unlock</span>
             @elseif ($r->done)<span class="sr-go done"><i class="bi bi-check2"></i> Attempted</span>
