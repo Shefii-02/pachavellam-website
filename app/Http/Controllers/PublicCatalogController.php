@@ -436,6 +436,7 @@ class PublicCatalogController extends Controller
                 'tag' => $t, 'tagc' => $c, 'state' => $state, 'inPaid' => $se && $access->isPaid($se), 'paid' => false, 'done' => $legacyRow && in_array($e->id, $done),
                 'url' => $state === 'locked' && $se ? $access->buyUrl($se) : $examUrl,
                 'sort' => ($legacyRow ? (string) $e->exam_date : ($e->start_at ? $e->start_at->format('Y-m-d') : '0000-00-00')) . sprintf('%08d', $e->id),
+                'pos' => $e->season_position,
             ];
         };
         $money = fn ($v) => rtrim(rtrim(number_format($v, 2), '0'), '.');
@@ -454,6 +455,7 @@ class PublicCatalogController extends Controller
                 $items = $items->concat(\App\Models\DailyExam::where('series_season_id', $se->id)->where('section', $legacy)->where('status', 1)->get()->map(fn ($d) => $row($d, $se)));
             }
             $items = $items->concat(\App\Models\CourseExam::with('course:id,slug')->where('season_id', $se->id)->where('status', 'published')->get()->map(fn ($c) => $row($c, $se)));
+            $manual = $items->contains(fn ($i) => $i->pos !== null);   // the admin dragged the exams into an order: exams not placed yet first; otherwise newest first
             $paid = $access->isPaid($se);
             $eff = $access->effectivePrice($se);
             $active[] = (object) [
@@ -461,7 +463,9 @@ class PublicCatalogController extends Controller
                 'basis' => $se->basis ? (\App\Models\ExamSeason::BASES[$se->basis] ?? '') . ($se->basis_name ? ': ' . $se->basis_name : '') : null,
                 'paid' => $paid, 'price' => $paid ? $money($eff) : null, 'oldPrice' => $paid && $eff < $se->price ? $money($se->price) : null, 'validity' => $paid ? $access->validityLabel($se) : null,
                 'freeN' => $paid ? $items->where('state', 'free')->count() : 0, 'owns' => $paid && $access->owns($user, $se), 'url' => $se->publicUrl(),
-                'total' => $items->count(), 'items' => $items->sortByDesc('sort')->values()->take(30)->all(),
+                'total' => $items->count(), 'items' => $items->sort(fn ($x, $y) => $manual
+                    ? ([$x->pos === null ? 0 : 1, (int) $x->pos] <=> [$y->pos === null ? 0 : 1, (int) $y->pos]) ?: strcmp($y->sort, $x->sort)
+                    : strcmp($y->sort, $x->sort))->values()->take(30)->all(),
             ];
         }
         // the old CA seasons of KPSC (free)
