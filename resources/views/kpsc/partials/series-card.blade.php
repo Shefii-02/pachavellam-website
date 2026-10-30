@@ -13,7 +13,13 @@
         <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
             <a class="sr-go {{ $omrLocked ? 'off' : '' }}" href="{{ $omrHref }}">{{ $omrLocked ? 'Unlock' : ($r->tagc === 'end' ? 'Practice' : ($r->tagc === 'up' ? 'Opens soon' : 'Attempt')) }}</a>
             @if ($r->answerKey)<a class="sr-go off" href="{{ $r->answerKey }}"><i class="bi bi-key"></i> Answer key</a>@endif
-            @if (!$omrLocked)<button type="button" class="sr-go off" data-mark="{{ $r->omrId }}" data-title="{{ $r->title }}"><i class="bi bi-upload"></i> Upload marks</button>@endif
+            @if (!$omrLocked)
+                @auth
+                    <button type="button" class="sr-go off" data-mark="{{ $r->omrId }}" data-title="{{ $r->title }}"><i class="bi bi-upload"></i> Upload marks</button>
+                @else
+                    <a class="sr-go off" href="{{ url('sign-in') }}"><i class="bi bi-upload"></i> Upload marks</a>
+                @endauth
+            @endif
             <span class="small text-muted ms-auto omr-last"></span>
         </div>
         <details class="omr-dr mt-2" data-w="mine"><summary><i class="bi bi-clock-history"></i> My attempts</summary><div class="omr-body small">Loading…</div></details>

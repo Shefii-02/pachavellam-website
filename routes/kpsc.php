@@ -29,7 +29,7 @@ Route::group(['prefix' => 'kpsc', 'as' => 'kpsc'], function () {
 
     Route::get('model-exam', fn () => redirect(url('kpsc/omr-exams'), 301));   // renamed: /kpsc/omr-exams
     Route::get('model-exam/{date}/{id}', 'cms\HomeController@get_model_date_based_questions')->middleware('season.access');
-    Route::post('model-exam/store-result/{id}', 'cms\HomeController@store_model_exam_results')->middleware('season.access');
+    Route::post('model-exam/store-result/{id}', 'cms\HomeController@store_model_exam_results')->middleware(['auth', 'season.access']);
     Route::get('model-exam/{date}/{id}/leaderboard', 'cms\HomeController@model_exam_leaderboard');
     Route::get('model-exam-summary/{id}', 'PublicCatalogController@omrSummary')->whereNumber('id');   // drawers on the OMR listing: my attempts + leaderboard
     Route::get('model-exam-leaderboard-data/{id}', 'PublicCatalogController@omrLeaderboard')->whereNumber('id');
@@ -37,17 +37,17 @@ Route::group(['prefix' => 'kpsc', 'as' => 'kpsc'], function () {
 
 
 
-    Route::get('mcq/{id}/questions', 'cms\McqExamController@questions')->whereNumber('id')->middleware('season.access');
-    Route::post('mcq/{id}/progress', 'cms\McqExamController@progress')->whereNumber('id')->middleware('season.access');
-    Route::post('mcq/{id}/submit', 'cms\McqExamController@submit')->whereNumber('id')->middleware('season.access');
-    Route::get('mcq/{id}/result', 'cms\McqExamController@result')->whereNumber('id')->middleware('season.access');
-    Route::post('model-exam/{id}/time', 'cms\ExamTimeController@store')->whereNumber('id')->middleware('throttle:20,1');
-    Route::post('exam-report', 'cms\ExamReportController@store')->middleware('throttle:10,1');
+    Route::get('mcq/{id}/questions', 'cms\McqExamController@questions')->whereNumber('id')->middleware(['auth', 'season.access']);
+    Route::post('mcq/{id}/progress', 'cms\McqExamController@progress')->whereNumber('id')->middleware(['auth', 'season.access']);
+    Route::post('mcq/{id}/submit', 'cms\McqExamController@submit')->whereNumber('id')->middleware(['auth', 'season.access']);
+    Route::get('mcq/{id}/result', 'cms\McqExamController@result')->whereNumber('id')->middleware(['auth', 'season.access']);
+    Route::post('model-exam/{id}/time', 'cms\ExamTimeController@store')->whereNumber('id')->middleware(['auth', 'throttle:20,1']);
+    Route::post('exam-report', 'cms\ExamReportController@store')->middleware(['auth', 'throttle:10,1']);
 
     Route::get("model-exam-mark-form", function (Request $request) {
         $id = $request->id;
         return view("kpsc.model-exam-mark-form", compact('id'));
-    });
+    })->middleware('auth');
 
 
     Route::get('home-new', 'cms\HomeController@homepage_new');

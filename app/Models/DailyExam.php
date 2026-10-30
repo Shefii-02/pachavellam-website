@@ -14,6 +14,9 @@ class DailyExam extends Model
 
     protected $table = 'kpsc_daily_exams';
 
+    /** What admin code may mass-assign (the season, access, cutoff, duration and instruction settings); everything else is set field by field. */
+    protected $fillable = ['series_season_id', 'free_access', 'status', 'cutoff_mark', 'duration_min', 'instruction_id'];
+
     public function season()
     {
         return $this->belongsTo(CaSeason::class, 'season_id');

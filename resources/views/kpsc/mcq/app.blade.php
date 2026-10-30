@@ -1,5 +1,6 @@
 @extends('layouts.without-bottom')
 @extends('kpsc.section_header')
+@php $title = ($exam->examtitle ?: 'Exam') . ($mode === 'result' ? ' - Result' : ''); @endphp
 @section('title', ($exam->examtitle ?: 'Exam') . ($mode === 'result' ? ' - Result' : ''))
 @if ($mode === 'play')@section('no_ads', '1')@endif   {{-- the exam screen has no publisher content: no ads --}}
 @section('styles')

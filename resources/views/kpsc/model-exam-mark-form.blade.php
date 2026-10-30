@@ -2,7 +2,7 @@
     method="POST">
 
     @csrf
-    <p class="small text-muted mb-0">Uploading as <b>{{ auth()->user()->name }}</b></p>
+    <p class="small text-muted mb-0">Uploading as <b>{{ auth()->user()?->name }}</b></p>
     <div class="form-group border-bottom mb-2 p-3 bg-light">
         <div class="row">
             <div class="col-md-12 mt-2">

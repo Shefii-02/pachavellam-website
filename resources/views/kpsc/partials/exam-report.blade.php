@@ -7,7 +7,11 @@
     .xr-msg { font-size:.78rem; color:#a4242a; min-height:1.1em; } .xr-row { display:flex; justify-content:flex-end; gap:10px; margin-top:10px; }
     .xr-row button { border:0; border-radius:20px; padding:8px 22px; font-weight:800; } .xr-c { background:#eef0f3; } .xr-s { background:#0a8f5b; color:#fff; }
 </style>
+@auth
 <button type="button" class="xr-fab" id="xrOpen"><i class="bi bi-flag-fill"></i> Report an error</button>
+@else
+<a class="xr-fab" href="{{ url('sign-in') }}" style="text-decoration:none"><i class="bi bi-flag-fill"></i> Report an error</a>
+@endauth
 <div class="xr-ov" id="xrOv"><div class="xr-box">
     <h5>Report an Error with this Quiz</h5>
     @foreach (\App\Models\ExamReport::TYPES as $i => $t)
@@ -22,7 +26,8 @@
 (function () {
     var ov = document.getElementById('xrOv'), msg = document.getElementById('xrMsg'), err = document.getElementById('xrErr');
     var close = function () { ov.classList.remove('on'); };
-    document.getElementById('xrOpen').onclick = function () { ov.classList.add('on'); };
+    var xo = document.getElementById('xrOpen'); if (!xo) return;
+    xo.onclick = function () { ov.classList.add('on'); };
     document.getElementById('xrCancel').onclick = close;
     ov.addEventListener('click', function (e) { if (e.target === ov) close(); });
     document.getElementById('xrSend').onclick = function () {

@@ -191,7 +191,8 @@ class ExamSeriesController extends Controller
                     });
                     $n++;
                 } elseif ($d->series_season_id !== $season->id) {
-                    $d->update(['series_season_id' => $season->id]);
+                    $d->series_season_id = $season->id;   // not update([...]): the model has no $fillable
+                    $d->save();
                     $n++;
                 }
             }

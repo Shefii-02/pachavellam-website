@@ -75,6 +75,8 @@
                         @else<div class="alert alert-success py-2 mb-0"><b>Above cutoff</b> ({{ $cut }}). Well done!</div>@endif
                     @endif
                 </div>
+            @guest
+                <div class="xt-mark"><h5 class="mb-1">Upload your marks</h5><p class="xt-note mb-3">Sign in to upload your marks and see them here.</p><a class="btn btn-success" href="{{ url('sign-in') }}">Sign in</a></div>
             @else
                 <form method="POST" action="{{ url('kpsc/model-exam/store-result/' . $examdetails->id) }}" class="xt-mark">
                     @csrf
@@ -86,6 +88,7 @@
                     </div>
                     <button class="btn btn-success mt-3" type="submit">Save my marks</button>
                 </form>
+            @endguest
             @endif
         </div>
 
