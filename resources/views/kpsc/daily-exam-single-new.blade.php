@@ -473,6 +473,7 @@
         <!--/heroBody-->
 
     </section>
+    @include('kpsc.partials.exam-report', ['examId' => $exam_id])
 @endsection
 
 

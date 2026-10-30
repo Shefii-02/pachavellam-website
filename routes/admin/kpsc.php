@@ -219,6 +219,12 @@ Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area
 
 
 
+        Route::get('exam-instructions', 'cms\ExamInstructionController@index');
+        Route::post('exam-instructions/save', 'cms\ExamInstructionController@save');
+        Route::get('exam-instructions/delete/{id}', 'cms\ExamInstructionController@delete');
+        Route::get('exam-reports', 'cms\ExamReportController@index');
+        Route::get('exam-reports/toggle/{id}', 'cms\ExamReportController@resolve');
+
         Route::get('model-exam', 'cms\ModelExamController@model_exams');
         Route::get('model-exam/view', 'cms\ModelExamController@model_exams_show');
         Route::get('model-exam/date_based', 'cms\ModelExamController@model_exams_date_based');

@@ -344,11 +344,12 @@ class PublicCatalogController extends Controller
     {
         $exam = \App\Models\DailyExam::where('section', 'Model Exam')->where('status', 1)->findOrFail($id);
         $user = auth()->user();
-        $fmt = fn ($a) => ['name' => $a->full_name, 'right' => (int) $a->right_answer, 'wrong' => (int) $a->wrong_answer, 'mark' => round((float) $a->total_mark, 2),
+        $cutoff = $exam->cutoff_mark !== null ? (float) $exam->cutoff_mark : null;
+        $fmt = fn ($a) => ['name' => $a->full_name, 'right' => (int) $a->right_answer, 'wrong' => (int) $a->wrong_answer, 'mark' => round((float) $a->total_mark, 2), 'below' => $cutoff !== null && (float) $a->total_mark < $cutoff,
             'at' => $a->answer_uploaded ? \Illuminate\Support\Carbon::parse($a->answer_uploaded)->format('d M Y, h:i a') : ''];
         $mine = $user ? \App\Models\ModelExamAttempt::where('exam_id', $exam->id)->where('user_id', $user->id)->orderByDesc('id')->limit(20)->get()->map($fmt)->values() : collect();
         $ended = $exam->ended_at && \Illuminate\Support\Carbon::parse($exam->ended_at)->isPast();
-        return response()->json(['loggedIn' => (bool) $user, 'ended' => $ended, 'mine' => $mine, 'title' => $exam->exam_title ?: ($exam->examtitle ?: 'Exam')]);
+        return response()->json(['loggedIn' => (bool) $user, 'ended' => $ended, 'cutoff' => $cutoff, 'mine' => $mine, 'title' => $exam->exam_title ?: ($exam->examtitle ?: 'Exam')]);
     }
 
     /** The leaderboard drawer of an OMR exam: 25 students per page (ranked), plus the signed-in student's own best rank. Opens once the exam has ended. */
@@ -374,11 +375,12 @@ class PublicCatalogController extends Controller
             if ($best) {
                 $rank = $base()->where(fn ($q) => $q->where('total_mark', '>', $best->total_mark)
                     ->orWhere(fn ($w) => $w->where('total_mark', $best->total_mark)->where(fn ($x) => $x->where('created_at', '<', $best->created_at)->orWhere(fn ($y) => $y->where('created_at', $best->created_at)->where('id', '<', $best->id)))))->count() + 1;
-                $me = ['rank' => $rank, 'name' => $best->full_name ?: 'You', 'mark' => round((float) $best->total_mark, 2), 'right' => (int) $best->right_answer, 'wrong' => (int) $best->wrong_answer];
+                $me = ['rank' => $rank, 'name' => $best->full_name ?: 'You', 'mark' => round((float) $best->total_mark, 2), 'right' => (int) $best->right_answer, 'wrong' => (int) $best->wrong_answer,
+                    'below' => $exam->cutoff_mark !== null && (float) $best->total_mark < (float) $exam->cutoff_mark];
             }
         }
 
-        return response()->json(['ended' => true, 'rows' => $out, 'total' => $total, 'more' => $page * $per < $total, 'me' => $me, 'loggedIn' => (bool) $user]);
+        return response()->json(['ended' => true, 'cutoff' => $exam->cutoff_mark !== null ? (float) $exam->cutoff_mark : null, 'rows' => $out, 'total' => $total, 'more' => $page * $per < $total, 'me' => $me, 'loggedIn' => (bool) $user]);
     }
 
     /** Everything a series page shows: active seasons and the other exams (also read by the app API). */

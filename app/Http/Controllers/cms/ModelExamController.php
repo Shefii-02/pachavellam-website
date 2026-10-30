@@ -65,6 +65,8 @@ class ModelExamController extends Controller
         $new_one->exam_date  =  date('Y-m-d', strtotime($request->exam_date));
         $new_one->started_at =  date('Y-m-d H:i:s', strtotime($request->exam_started));
         $new_one->ended_at   =  date('Y-m-d H:i:s', strtotime($request->exam_ended));
+        $new_one->cutoff_mark = $request->filled('cutoff_mark') ? (float) $request->cutoff_mark : null;
+        $new_one->instruction_id = $request->filled('instruction_id') ? (int) $request->instruction_id : null;
         $new_one->subject    = $request->subject ?? null;
         $new_one->examtitle  = $request->examtitle;
         $new_one->category   = $request->category;
@@ -117,6 +119,8 @@ class ModelExamController extends Controller
         $new_one->exam_date  = date('Y-m-d', strtotime($exam_date));
         $new_one->started_at = date('Y-m-d H:i:s', strtotime($request->exam_started));
         $new_one->ended_at   = date('Y-m-d H:i:s', strtotime($request->exam_ended));
+        $new_one->cutoff_mark = $request->filled('cutoff_mark') ? (float) $request->cutoff_mark : null;
+        $new_one->instruction_id = $request->filled('instruction_id') ? (int) $request->instruction_id : null;
         $new_one->examtitle  = $examtitle;
         $new_one->category   = $request->category;
         $new_one->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;

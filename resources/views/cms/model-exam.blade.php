@@ -51,6 +51,20 @@
                                         placeholder="">
                                 </div>
 
+                                <div class="col-md-3 mt-2">
+                                    <label class="form-label">Cutoff mark</label>
+                                    <input class="form-control" type="number" step="0.01" min="0" name="cutoff_mark"  placeholder="optional">
+                                </div>
+
+                                <div class="col-md-3 mt-2">
+                                    <label class="form-label">Instructions</label>
+                                    <select class="form-select" name="instruction_id" >
+                                        <option value="">Default (OMR)</option>
+                                        @foreach (\App\Models\ExamInstruction::where('kind', 'omr')->orderBy('name')->get() as $ins)
+                                            <option value="{{ $ins->id }}" >{{ $ins->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                                 <div class="col-md-6 mt-2">
                                     <label class="form-label">Exam Title</label>
                                     <input type="input" name="examtitle" class="form-control" required autocomplete="off">

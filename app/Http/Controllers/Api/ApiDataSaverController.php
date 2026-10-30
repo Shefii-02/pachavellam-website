@@ -97,29 +97,24 @@ class ApiDataSaverController extends Controller
 
 
         date_default_timezone_set('Asia/Kolkata');
-        $new_one = DailyExamattempt::where('user_id', $request->user_id)
-            ->where('exam_id', $request->exam_id)
-            ->first();
+        // every attempt is stored; attempt 1 is the one the leaderboard ranks
+        $attempts = DailyExamattempt::where('user_id', $request->user_id)->where('exam_id', $request->exam_id)->count();
         try {
+            $new_one                  = new DailyExamattempt();
+            $new_one->user_id         = $request->user_id;
+            $new_one->exam_id         = $request->exam_id;
+            $new_one->attempt_no      = $attempts + 1;
+            $new_one->right           = $request->correct;
+            $new_one->wrong           = $request->incorrect;
+            $new_one->skipped         = $request->unanswered;
+            $new_one->attend_ended_at = date('Y-m-d H:i:s');
+            $new_one->attempt_time    =    null;
+            $new_one->total_mark      = ($request->correct - ($request->incorrect * 0.333));
+            $new_one->summary         = $request->summary;
+            $new_one->status          = "2";
+            $new_one->save();
 
-            if (!$new_one) {
-                $new_one                  = new DailyExamattempt();
-                $new_one->user_id         = $request->user_id;
-                $new_one->exam_id         = $request->exam_id;
-                $new_one->right           = $request->correct;
-                $new_one->wrong           = $request->incorrect;
-                $new_one->skipped         = $request->unanswered;
-                $new_one->attend_ended_at = date('Y-m-d H:i:s');
-                $new_one->attempt_time    =    null;
-                $new_one->total_mark      = ($request->correct - ($request->incorrect * 0.333));
-                $new_one->summary         = $request->summary;
-                $new_one->status          = "2";
-                $new_one->save();
-
-                return response()->json(['message' => 'Your Mark Added Successfuly', 'data' => $new_one], 200);
-            } else {
-                return response()->json(['message' => 'Your Mark Already Added', 'data' => $new_one], 400);
-            }
+            return response()->json(['message' => 'Your Mark Added Successfuly', 'data' => $new_one], 200);
         } catch (Exception $e) {
             $result['leaderboard_show'] = "Report this issue to Pachavellam Admin";
 

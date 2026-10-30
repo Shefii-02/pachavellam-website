@@ -78,7 +78,7 @@ class ApiCollectionController extends Controller
     }
     public function DailyExamLeaderboard(Request $request)
     {
-        $exam_attended = DailyExamattempt::with('user')->where('exam_id', $request->exam_id)->get();
+        $exam_attended = DailyExamattempt::with('user')->where('exam_id', $request->exam_id)->where('attempt_no', 1)->get();
         return response()->json(['data' => DailyExamLeaderboardResources::collection($exam_attended), 'status' => 200]);
     }
 
@@ -104,7 +104,7 @@ class ApiCollectionController extends Controller
 
             if ($exm_details->section == 'Daily Exam') {
                 // ->where('attend_ended_at','<=',$exm_details->ended_at)
-                $exam_attended = DailyExamattempt::with('user')->where('exam_id', $request->exam_id)->orderBy('total_mark', 'DESC')->orderBy('attend_ended_at', 'ASC')->get();
+                $exam_attended = DailyExamattempt::with('user')->where('exam_id', $request->exam_id)->where('attempt_no', 1)->orderBy('total_mark', 'DESC')->orderBy('attend_ended_at', 'ASC')->get();
             } else {
                 // ->where('answer_uploaded','<=',$exm_details->ended_at)
                 $exam_attended = ModelExamAttempt::with('user')->where('exam_id', $request->exam_id)->orderBy('total_mark', 'DESC')->orderBy('answer_uploaded', 'ASC')->get();

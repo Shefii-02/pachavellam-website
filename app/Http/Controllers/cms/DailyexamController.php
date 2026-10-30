@@ -53,6 +53,9 @@ class DailyexamController extends Controller
         $new_one->exam_date = date('Y-m-d', strtotime($request->exam_date));
         $new_one->started_at = date('Y-m-d H:i:s', strtotime($request->exam_started));
         $new_one->ended_at = date('Y-m-d H:i:s', strtotime($request->exam_ended));
+        $new_one->cutoff_mark = $request->filled('cutoff_mark') ? (float) $request->cutoff_mark : null;
+        $new_one->duration_min = $request->filled('duration_min') ? (int) $request->duration_min : null;
+        $new_one->instruction_id = $request->filled('instruction_id') ? (int) $request->instruction_id : null;
         $new_one->subject = $request->subject;
         $new_one->examtitle = $request->examtitle;
         $new_one->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;
@@ -75,6 +78,9 @@ class DailyexamController extends Controller
                 $new_one->exam_date = date('Y-m-d', strtotime($request->exam_date));
                 $new_one->started_at = date('Y-m-d H:i:s', strtotime($request->exam_started));
                 $new_one->ended_at = date('Y-m-d H:i:s', strtotime($request->exam_ended));
+                $new_one->cutoff_mark = $request->filled('cutoff_mark') ? (float) $request->cutoff_mark : null;
+                $new_one->duration_min = $request->filled('duration_min') ? (int) $request->duration_min : null;
+                $new_one->instruction_id = $request->filled('instruction_id') ? (int) $request->instruction_id : null;
                 $new_one->subject = $request->subject;
                 $new_one->examtitle = $request->examtitle;
         $new_one->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;
@@ -134,6 +140,9 @@ class DailyexamController extends Controller
         $new_one->exam_date     = date('Y-m-d', strtotime($exam_date));
         $new_one->started_at    = date('Y-m-d H:i:s', strtotime($request->exam_started));
         $new_one->ended_at      = date('Y-m-d H:i:s', strtotime($request->exam_ended));
+        $new_one->cutoff_mark = $request->filled('cutoff_mark') ? (float) $request->cutoff_mark : null;
+        $new_one->duration_min = $request->filled('duration_min') ? (int) $request->duration_min : null;
+        $new_one->instruction_id = $request->filled('instruction_id') ? (int) $request->instruction_id : null;
         $new_one->subject       = $subject;
         $new_one->examtitle     = $examtitle;
         $new_one->explanation   = $request->explanation ?? null;
@@ -246,6 +255,9 @@ class DailyexamController extends Controller
         $new_two->exam_date = date('Y-m-d', strtotime($request->exam_date));
         $new_two->started_at = date('Y-m-d H:i:s', strtotime($request->exam_started));
         $new_two->ended_at = date('Y-m-d H:i:s', strtotime($request->exam_ended));
+        $new_two->cutoff_mark = $request->filled('cutoff_mark') ? (float) $request->cutoff_mark : null;
+        $new_two->duration_min = $request->filled('duration_min') ? (int) $request->duration_min : null;
+        $new_two->instruction_id = $request->filled('instruction_id') ? (int) $request->instruction_id : null;
         $new_two->subject = $request->subject;
         $new_two->examtitle = $request->examtitle;
         $new_two->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;

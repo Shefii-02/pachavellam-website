@@ -37,6 +37,13 @@ Route::group(['prefix' => 'kpsc', 'as' => 'kpsc'], function () {
 
 
 
+    Route::get('mcq/{id}/questions', 'cms\McqExamController@questions')->whereNumber('id')->middleware('season.access');
+    Route::post('mcq/{id}/progress', 'cms\McqExamController@progress')->whereNumber('id')->middleware('season.access');
+    Route::post('mcq/{id}/submit', 'cms\McqExamController@submit')->whereNumber('id')->middleware('season.access');
+    Route::get('mcq/{id}/result', 'cms\McqExamController@result')->whereNumber('id')->middleware('season.access');
+    Route::post('model-exam/{id}/time', 'cms\ExamTimeController@store')->whereNumber('id')->middleware('throttle:20,1');
+    Route::post('exam-report', 'cms\ExamReportController@store')->middleware('throttle:10,1');
+
     Route::get("model-exam-mark-form", function (Request $request) {
         $id = $request->id;
         return view("kpsc.model-exam-mark-form", compact('id'));

@@ -27,7 +27,7 @@ window.addEventListener('load', function () {
         <div class="lb-podium" id="lbPodium"></div>
     </div>
     <div id="lbList"></div>
-    <div id="lbMe"><div class="tag">Your rank</div><div class="lb-row" id="lbMeRow"></div></div>
+    <div id="lbMe"><div class="tag">Your rank</div><div class="lb-row" id="lbMeRow"></div><div id="lbCut" class="small px-3 pb-2"></div></div>
 </div>
 <script>
 window.addEventListener('load', function () {
@@ -54,11 +54,15 @@ window.addEventListener('load', function () {
             if (!d.ended) { list.innerHTML = '<div class="lb-msg"><i class="bi bi-hourglass-split d-block fs-3"></i>The leaderboard opens when the exam ends.</div>'; return; }
             if (sentinel) sentinel.remove();
             if (page === 1) {
-                document.getElementById('lbSub').textContent = d.total + ' student' + (d.total == 1 ? '' : 's');
+                document.getElementById('lbSub').textContent = d.total + ' student' + (d.total == 1 ? '' : 's') + (d.cutoff != null ? ' · Cutoff ' + d.cutoff : '');
                 podium(d.rows.slice(0, 3)); list.innerHTML = '';
                 if (!d.rows.length) list.innerHTML = '<div class="lb-msg">No marks uploaded yet.</div>';
                 if (d.me) {
                     document.getElementById('lbMeRow').innerHTML = '<span class="rk">#' + d.me.rank + '</span><span class="nm">' + esc(d.me.name) + '<small>' + d.me.right + ' right · ' + d.me.wrong + ' wrong</small></span><span class="mk">' + d.me.mark + '</span>';
+                    var cut = document.getElementById('lbCut');
+                    cut.innerHTML = d.cutoff == null ? '' : (d.me.below
+                        ? '<b style="color:#a4242a"><i class="bi bi-exclamation-triangle-fill"></i> Below cutoff.</b> Your mark ' + d.me.mark + ' is ' + (Math.round((d.cutoff - d.me.mark) * 100) / 100) + ' short of the cutoff ' + d.cutoff + '. Keep practising!'
+                        : '<b style="color:#0a6b46"><i class="bi bi-check-circle-fill"></i> Above cutoff</b> (' + d.cutoff + '). Well done!');
                     document.getElementById('lbMe').style.display = 'block';
                 }
             }
@@ -89,7 +93,9 @@ window.addEventListener('load', function () {
         var mine = card.querySelector('[data-w=mine] .omr-body');
         mine.innerHTML = !d.loggedIn ? 'Sign in to see your attempts.' : (d.mine.length ? d.mine.map(function (a, i) {
             return '<div class="ol"><span>#' + (d.mine.length - i) + ' · ' + esc(a.at) + '</span><b>' + a.mark + '</b><span>' + a.right + '✓ ' + a.wrong + '✗</span></div>';
-        }).join('') : 'No attempt yet.');
+        }).join('') + (d.cutoff != null ? '<div class="mt-1" style="color:' + (d.mine[0].below ? '#a4242a' : '#0a6b46') + '">' + (d.mine[0].below
+            ? '<b>Below cutoff</b> (' + d.cutoff + '): your latest mark ' + d.mine[0].mark + ' is short by ' + (Math.round((d.cutoff - d.mine[0].mark) * 100) / 100) + '.'
+            : '<b>Above cutoff</b> (' + d.cutoff + ')') + '</div>' : '') : 'No attempt yet.');
     }
     var io = 'IntersectionObserver' in window ? new IntersectionObserver(function (es) {
         es.forEach(function (e) {

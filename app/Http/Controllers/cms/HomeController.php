@@ -698,8 +698,12 @@ class HomeController extends Controller
                                 ->first();
         
         abort_if(!$examdetails, 404);
+        $instruction = \App\Models\ExamInstruction::forExam($examdetails, 'omr');
+        $uploaded = ModelExamAttempt::where('exam_id',$id)->where('user_id',auth()->id())->exists();
 
-        return view("kpsc.model-exam-single",compact('examdetails'));
+        $timing = \App\Http\Controllers\cms\ExamTimeController::stats($id);
+
+        return view("kpsc.model-exam-single",compact('examdetails','instruction','uploaded','timing'));
 
     }
      
@@ -719,13 +723,16 @@ class HomeController extends Controller
     
     public function store_model_exam_results($id,Request $request){
         date_default_timezone_set('Asia/Kolkata');
-        $new_one = ModelExamAttempt::where('exam_id',$id)->where('ip_address',$request->ip())->first();
+        $user = auth()->user();
+        $request->validate(['correct_answer' => 'required|integer|min:0', 'wrong_answer' => 'required|integer|min:0']);
+        $new_one = ModelExamAttempt::where('exam_id',$id)->where('user_id',$user->id)->first();
         if(!$new_one){
             $new_one = new ModelExamAttempt();
             $new_one->exam_id      = $id;
              
-            $new_one->full_name     = $request->fullname;
-            $new_one->mobile_no     = $request->mobile_no;
+            $new_one->user_id       = $user->id;
+            $new_one->full_name     = $user->name;
+            $new_one->mobile_no     = $user->mobile;
             $new_one->ip_address    = $request->ip();
             $new_one->right_answer  = $request->correct_answer ?? 0;
             $new_one->wrong_answer  = $request->wrong_answer ?? 0;
@@ -873,14 +880,17 @@ class HomeController extends Controller
         
  
         
+        // a finished attempt is kept; opening the exam again starts the next attempt (the leaderboard ranks attempt 1 only)
         $new_one = DailyExamattempt::where('user_id',auth()->user()->id)
                     ->where('exam_id',$date_list->id)
+                    ->where('status','<>',2)
                     ->first();
-                    
+
         if(!$new_one){
             $new_one = new DailyExamattempt();
             $new_one->user_id = auth()->user()->id;
             $new_one->exam_id = $date_list->id;
+            $new_one->attempt_no = DailyExamattempt::where('user_id',auth()->user()->id)->where('exam_id',$date_list->id)->count() + 1;
             $new_one->attend_started_at = date('Y-m-d H:i:s');
             $new_one->save();
         }
@@ -981,6 +991,7 @@ class HomeController extends Controller
                         ->where('exam_id',$examlist->id)
                         ->where('kpsc_daily_exams_attempt.attend_ended_at','<=',$examlist->ended_at)
                         ->where('kpsc_daily_exams_attempt.status','2')
+                        ->where('kpsc_daily_exams_attempt.attempt_no',1)
                         ->select('kpsc_daily_exams_attempt.user_id','kpsc_daily_exams_attempt.exam_id','kpsc_daily_exams_attempt.attempt_time','kpsc_daily_exams_attempt.total_mark','kpsc_daily_exams_attempt.updated_at','users.name','users.image')
                         ->orderBy('kpsc_daily_exams_attempt.total_mark','DESC')
                         ->orderBy('kpsc_daily_exams_attempt.attempt_time','ASC')
@@ -991,6 +1002,7 @@ class HomeController extends Controller
               
                     $list_attempt = DailyExamattempt::leftJoin('users','users.id','kpsc_daily_exams_attempt.user_id')
                                                     ->where('exam_id',$examlist->id)
+                                                    ->where('kpsc_daily_exams_attempt.attempt_no',1)
                                                     ->select('kpsc_daily_exams_attempt.user_id','kpsc_daily_exams_attempt.exam_id','kpsc_daily_exams_attempt.attempt_time','kpsc_daily_exams_attempt.total_mark','kpsc_daily_exams_attempt.updated_at','users.name','users.image')
                                                     ->orderBy('kpsc_daily_exams_attempt.total_mark','DESC')
                                                     ->orderBy('kpsc_daily_exams_attempt.attempt_time','ASC')
@@ -1037,14 +1049,27 @@ class HomeController extends Controller
         
  
         
+        // the instructions come first (once per attempt: an unfinished attempt goes straight back into the exam)
+        if (!request()->boolean('start') && !DailyExamattempt::where('user_id',auth()->user()->id)->where('exam_id',$date_list->id)->where('status','<>',2)->exists()) {
+            return view('kpsc.exam-instructions', [
+                'exam' => $date_list, 'instruction' => \App\Models\ExamInstruction::forExam($date_list, 'mcq'),
+                'meta' => array_filter(['Total questions' => $date_based->count(), 'Duration' => $date_list->duration_min ? $date_list->duration_min . ' min' : null, 'Marking' => '+1 correct, -1/3 wrong']),
+                'lastResult' => DailyExamattempt::where('user_id',auth()->user()->id)->where('exam_id',$date_list->id)->where('status','2')->exists() ? url('kpsc/mcq/' . $date_list->id . '/result') : null,
+                'startUrl' => url()->current() . '?start=1',
+            ]);
+        }
+
+        // a finished attempt is kept; opening the exam again starts the next attempt (the leaderboard ranks attempt 1 only)
         $new_one = DailyExamattempt::where('user_id',auth()->user()->id)
                     ->where('exam_id',$date_list->id)
+                    ->where('status','<>',2)
                     ->first();
-                    
+
         if(!$new_one){
             $new_one = new DailyExamattempt();
             $new_one->user_id = auth()->user()->id;
             $new_one->exam_id = $date_list->id;
+            $new_one->attempt_no = DailyExamattempt::where('user_id',auth()->user()->id)->where('exam_id',$date_list->id)->count() + 1;
             $new_one->attend_started_at = date('Y-m-d H:i:s');
             $new_one->save();
         }
@@ -1052,47 +1077,8 @@ class HomeController extends Controller
       
         
       
-        $jo = 0;
-        $questions=array();
-        
-      
-
-        foreach($date_based as $list){
-
-               $questions[$jo]['text'] = $list->question;
-
-                $questions[$jo]['responses'][0]['text']= $list->option_1;
-                if($list->option_1 == $list->currect_ans){
-                     $questions[$jo]['responses'][0]['correct']="true";
-                }
-                $questions[$jo]['responses'][1]['text']= $list->option_2;
-                if($list->option_2 == $list->currect_ans){
-                     $questions[$jo]['responses'][1]['correct']="true";
-                }
-                $questions[$jo]['responses'][2]['text']= $list->option_3;
-                if($list->option_3 == $list->currect_ans){
-                     $questions[$jo]['responses'][2]['correct']="true";
-                }
-                $questions[$jo]['responses'][3]['text']= $list->option_4;
-                if($list->option_4 == $list->currect_ans){
-                     $questions[$jo]['responses'][3]['correct']="true";
-                }
-               
-        
-                $questions[$jo]['optional']= $list->currect_ans;
-               
-                $jo = $jo +1;
-        }
-        
-     
-        
-        $QStn = array("user"=>"me","questions"=>$questions);
- 
-        $attempt_id = $new_one->id;
-        $exam_date = $date_list->exam_date;
-        $exam_id = $id;
-        
-        return view("kpsc.daily-exam-single-new",compact('QStn','exam_date','attempt_id','exam_id'));
+        return view('kpsc.mcq.app', ['mode' => 'play', 'exam' => $date_list, 'total' => $date_based->count(), 'attempt' => $new_one,
+            'back' => url('kpsc/daily-exams'), 'urls' => ['questions' => url('kpsc/mcq/' . $date_list->id . '/questions'), 'progress' => url('kpsc/mcq/' . $date_list->id . '/progress'), 'submit' => url('kpsc/mcq/' . $date_list->id . '/submit')]]);
         
     }
 

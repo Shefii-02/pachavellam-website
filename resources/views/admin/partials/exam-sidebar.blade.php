@@ -39,6 +39,8 @@
     {!! $heading('Exams') !!}
     {!! $link(url('admin/exam/kpsc/series/daily'), 'bi-list-task', 'Daily Exam Series', (request()->is('admin/exam/kpsc/series/daily*') || request()->is('admin/kpsc/daily-exam*')) ? 'active' : '') !!}
     {!! $link(url('admin/exam/kpsc/series/omr'), 'bi-pencil-square', 'OMR Exam Series', (request()->is('admin/exam/kpsc/series/omr*') || request()->is('admin/kpsc/model-exam*')) ? 'active' : '') !!}
+    {!! $link(url('admin/kpsc/exam-instructions'), 'bi-card-text', 'Exam instructions', request()->is('admin/kpsc/exam-instructions*') ? 'active' : '') !!}
+    {!! $link(url('admin/kpsc/exam-reports'), 'bi-flag', 'Reported errors', request()->is('admin/kpsc/exam-reports*') ? 'active' : '') !!}
     {!! $link(url('admin/exam/kpsc/series/ca'), 'bi-calendar2-check', 'CA Exam Series', (request()->is('admin/exam/kpsc/series/ca*') || request()->is('admin/kpsc/ca-daily-exam*')) ? 'active' : '') !!}
     @if (\App\Support\StaffAccess::can($me, 'Exam courses manage'))
         @php $kpscSeries = $examModel ? \App\Http\Controllers\Exam\ExamSeriesController::seriesCourseId($examModel) : null; @endphp

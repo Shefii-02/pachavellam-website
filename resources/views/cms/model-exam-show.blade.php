@@ -84,6 +84,8 @@
                                                 data-category = "{{ $date_list->category }}"
                                                 data-session="{{ $date_list->series_season_id }}"
                                                 data-free="{{ $date_list->free_access ? 1 : 0 }}"
+                                                data-cutoff="{{ $date_list->cutoff_mark }}"
+                                                data-instruction="{{ $date_list->instruction_id }}"
                                                 class="btn btn-info mb-2 exam_details_edit btn-sm float-left">
                                                 <i class="bi bi-pencil"></i>
                                                 Edit Exam Details
@@ -162,6 +164,19 @@
                                     <label class="form-label">Exam Ended</label>
                                     <input class="form-control" required id="exam_ended_edit" type="datetime-local"
                                         name="exam_ended" placeholder="">
+                                </div>
+                                <div class="col-md-12 mt-2">
+                                    <label class="form-label">Cutoff mark</label>
+                                    <input class="form-control" type="number" step="0.01" min="0" id="cutoff_mark_edit" name="cutoff_mark" placeholder="optional">
+                                </div>
+                                <div class="col-md-12 mt-2">
+                                    <label class="form-label">Instructions</label>
+                                    <select class="form-select" name="instruction_id" id="instruction_edit">
+                                        <option value="">Default (OMR)</option>
+                                        @foreach (\App\Models\ExamInstruction::where('kind', 'omr')->orderBy('name')->get() as $ins)
+                                            <option value="{{ $ins->id }}">{{ $ins->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                                 <div class="col-md-12 mt-2">
                                     <label class="form-label">Exam Title</label>
@@ -280,6 +295,8 @@
                 $('#category_edit').val(category);
                 $('#series_season_edit').val($(this).data('session') || '');
                 $('#free_access_edit').prop('checked', String($(this).data('free')) === '1');
+                $('#cutoff_mark_edit').val($(this).data('cutoff') || '');
+                $('#instruction_edit').val($(this).data('instruction') || '');
 
 
                 $('#exam_details').modal('show')
