@@ -49,7 +49,6 @@
                     <form action="{{ $base }}/seasons/{{ $s->id }}/move/up" method="POST">@csrf<button class="btn btn-sm btn-outline-secondary mb-0" title="Show earlier" @disabled($loop->first)><i class="bi bi-arrow-left"></i></button></form>
                     <form action="{{ $base }}/seasons/{{ $s->id }}/move/down" method="POST">@csrf<button class="btn btn-sm btn-outline-secondary mb-0" title="Show later" @disabled($loop->last)><i class="bi bi-arrow-right"></i></button></form>
                     <a href="{{ $base }}/seasons/{{ $s->id }}" class="btn btn-sm btn-primary mb-0 flex-fill"><i class="bi bi-list-check me-1"></i>Manage exams</a>
-                    <form action="{{ $base }}/seasons/{{ $s->id }}" method="POST" onsubmit="return confirm('Delete this season? Its exams are kept without a season.')">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger mb-0" title="Delete season"><i class="bi bi-trash"></i></button></form>
                 </div>
             </div>
         </div>

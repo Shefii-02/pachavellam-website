@@ -29,6 +29,7 @@
         <button type="button" class="btn btn-sm btn-outline-success mb-0 js-share" @disabled($season->status !== 'published') data-url="{{ $season->publicUrl() }}" data-title="{{ $season->title }}"
             data-text="{{ $season->title . ($season->tagline ? ' - ' . $season->tagline : '') . "\n" . ($season->is_paid ? 'Practise on Pachavellam:' : 'Practise free on Pachavellam:') }}"><i class="bi bi-share me-1"></i>Share</button>
         <button type="button" class="btn btn-sm btn-outline-primary mb-0" data-bs-toggle="modal" data-bs-target="#editSession"><i class="bi bi-pencil me-1"></i>Edit season</button>
+        <form action="{{ $base }}/seasons/{{ $season->id }}" method="POST" class="d-inline" onsubmit="return confirm('Delete the season &quot;{{ addslashes($season->title) }}&quot;? Its {{ $courseExams->count() + $legacy->count() }} exam(s) are kept without a season.')">@csrf @method('DELETE')<button class="btn btn-sm btn-outline-danger mb-0"><i class="bi bi-trash me-1"></i>Delete season</button></form>
     </div>
 </div>
 @if (session('success'))<div class="alert alert-success py-2">{{ session('success') }}</div>@endif
