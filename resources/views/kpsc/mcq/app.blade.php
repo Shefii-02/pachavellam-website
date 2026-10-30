@@ -5,7 +5,7 @@
 @if ($mode === 'play')@section('no_ads', '1')@endif   {{-- the exam screen has no publisher content: no ads --}}
 @section('styles')
 <style>
-    .mq { --opt:#eceef2; --fs:16px; --bg:var(--pv-bg,#f4f6fa); --card:var(--pv-surface,#fff); --bd:var(--pv-border,#e3e7ee); --tx:var(--pv-text,#16202e); --mu:var(--pv-muted,#6b7585); --pri:#1a63e0; --ok:#0a8f5b; --bad:#e0314b; --warn:#d98a00; --mark:#7c4dff;
+    .mq, .mq-ov { --opt:#eceef2; --fs:16px; --bg:var(--pv-bg,#f4f6fa); --card:var(--pv-surface,#fff); --bd:var(--pv-border,#e3e7ee); --tx:var(--pv-text,#16202e); --mu:var(--pv-muted,#6b7585); --pri:#1a63e0; --ok:#0a8f5b; --bad:#e0314b; --warn:#d98a00; --mark:#7c4dff;
         max-width:1180px; margin:0 auto; padding:10px 0 90px; color:var(--tx); }
     .mq * { box-sizing:border-box; }
     .mq-top { position:sticky; top:0; z-index:20; display:flex; align-items:center; gap:10px; background:var(--card); border:1px solid var(--bd); border-radius:14px; padding:8px 12px; margin-bottom:10px; }
@@ -25,7 +25,7 @@
     .mq-opt.right { border-color:var(--ok); background:rgba(10,143,91,.09); } .mq-opt.right .l { background:var(--ok); border-color:var(--ok); color:#fff; } .mq-opt.wrong { border-color:var(--bad); background:rgba(224,49,75,.08); } .mq-opt.wrong .l { background:var(--bad); border-color:var(--bad); color:#fff; }
     .mq-opt .tag { margin-left:auto; flex:none; font-size:.7rem; font-weight:800; border-radius:10px; padding:2px 9px; background:var(--bg); }
     .mq-bar { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; padding-top:12px; border-top:1px solid var(--bd); position:sticky; bottom:0; background:var(--card); } .mq-bar .sp { flex:1; }
-    .mq-pal h6 { font-size:.82rem; font-weight:800; margin:0 0 8px; } .mq-nums { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; max-height:48vh; overflow:auto; padding:2px; }
+    .mq-pal h6 { color: var(--tx); font-size:.82rem; font-weight:800; margin:0 0 8px; } .mq-nums { display:grid; grid-template-columns:repeat(5,1fr); gap:7px; max-height:48vh; overflow:auto; padding:2px; }
     .mq-n { position:relative; height:38px; border-radius:9px; border:2px solid transparent; font-weight:800; font-size:.85rem; cursor:pointer; background:#e9edf3; color:#52607a; }
     .mq-n.na { background:#fde8e8; color:#a4242a; } .mq-n.an { background:var(--ok); color:#fff; } .mq-n.mk { background:var(--mark); color:#fff; } .mq-n.am { background:var(--mark); color:#fff; } .mq-n.am::after { content:''; position:absolute; right:3px; bottom:3px; width:9px; height:9px; border-radius:50%; background:#3ddc97; border:1.5px solid #fff; }
     .mq-n.cur { border-color:var(--pri); box-shadow:0 0 0 2px rgba(26,99,224,.25); } .mq-n.dim { opacity:.25; }
@@ -54,8 +54,8 @@
     .mq-sol { margin-top:12px; border-radius:12px; background:#eaf3ff; color:#12315c; padding:12px 14px; font-size:calc(var(--fs) * .95); line-height:1.6; } .mq-sol h6 { font-weight:800; font-size:.85rem; margin-bottom:6px; }
     .mq-row { display:flex; align-items:center; gap:12px; padding:9px 12px; border-radius:10px; border:1px solid var(--bd); margin-bottom:6px; } .mq-row.me { background:#e8f0fe; border-color:#9db9ee; } .mq-row .rk { width:28px; text-align:center; font-weight:800; color:var(--mu); } .mq-row .nm { flex:1; min-width:0; font-weight:700; } .mq-row .mk { font-weight:800; }
     @media (max-width:640px) { .mq-stats { grid-template-columns:1fr 1fr; } .mq-top h1 { font-size:.9rem; } }
-    [data-theme="dark"] .mq { --opt:var(--pv-surface-2,#1d3022); }
-    @media (prefers-color-scheme:dark) { .mq { --opt:#1f2937; --bg:#0f141c; --card:#171e29; --bd:#2a3342; --tx:#e8edf5; --mu:#93a0b4; } .mq-n { background:#222c3b; color:#a8b4c8; } .mq-n.na { background:#3a1f26; color:#ff9aa9; } .mq-sol { background:#16273f; color:#cfe0ff; } .mq-note.info { background:#14284a; color:#a8c4ff; } .mq-chip.warn { background:#3a2c0a; color:#ffd27a; } }
+    [data-theme="dark"] .mq, [data-theme="dark"] .mq-ov { --opt:var(--pv-surface-2,#1d3022); }
+    @media (prefers-color-scheme:dark) { .mq, .mq-ov { --opt:#1f2937; --bg:#0f141c; --card:#171e29; --bd:#2a3342; --tx:#e8edf5; --mu:#93a0b4; } .mq-n { background:#222c3b; color:#a8b4c8; } .mq-n.na { background:#3a1f26; color:#ff9aa9; } .mq-sol { background:#16273f; color:#cfe0ff; } .mq-note.info { background:#14284a; color:#a8c4ff; } .mq-chip.warn { background:#3a2c0a; color:#ffd27a; } }
 </style>
 @endsection
 @php
