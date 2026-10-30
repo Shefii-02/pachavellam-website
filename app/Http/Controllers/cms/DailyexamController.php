@@ -60,6 +60,7 @@ class DailyexamController extends Controller
         $new_one->examtitle = $request->examtitle;
         $new_one->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;
         $new_one->free_access = $request->boolean('free_access');
+        if ($request->has('sort_no')) { $new_one->sort_no = $request->filled('sort_no') ? max(0, (int) $request->sort_no) : null; }
         $new_one->status = 0;
 
         try {
@@ -85,6 +86,7 @@ class DailyexamController extends Controller
                 $new_one->examtitle = $request->examtitle;
         $new_one->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;
         $new_one->free_access = $request->boolean('free_access');
+        if ($request->has('sort_no')) { $new_one->sort_no = $request->filled('sort_no') ? max(0, (int) $request->sort_no) : null; }
 
                 try {
                     $new_one->save();
@@ -262,6 +264,7 @@ class DailyexamController extends Controller
         $new_two->examtitle = $request->examtitle;
         $new_two->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;
         $new_two->free_access = $request->boolean('free_access');
+        if ($request->has('sort_no')) { $new_two->sort_no = $request->filled('sort_no') ? max(0, (int) $request->sort_no) : null; }
         $new_two->status    = $request->has('status') ? 1 : 0;
         $new_two->save();
 

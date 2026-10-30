@@ -298,6 +298,19 @@ class ExamSeriesController extends Controller
     public function leaderboard(Request $request, $examSlug, $kind, $id, $examId)
     {
         $this->scope($request, $examSlug, $kind);
+        if ($request->query('type') === 'course') {   // a builder exam (special / GK / ...): the first attempt of each student, best mark first
+            $ce = CourseExam::where('season_id', $id)->findOrFail($examId);
+            $q = \App\Models\CourseExamAttempt::where('course_exam_attempts.course_exam_id', $ce->id)->where('course_exam_attempts.status', 'submitted')->where('course_exam_attempts.attempt_no', 1);
+            $total = (clone $q)->count();
+            $rows = $q->leftJoin('users as u', 'u.id', '=', 'course_exam_attempts.user_id')->orderByDesc('course_exam_attempts.score')->orderBy('course_exam_attempts.time_used')->limit(200)
+                ->get(['u.name', 'u.mobile', 'course_exam_attempts.score', 'course_exam_attempts.correct', 'course_exam_attempts.wrong', 'course_exam_attempts.time_used', 'course_exam_attempts.submitted_at'])
+                ->values()->map(fn ($r, $i) => [
+                    'rank' => $i + 1, 'name' => $r->name ?: 'Student', 'mobile' => $r->mobile, 'mark' => round((float) $r->score, 2), 'ok' => $r->correct, 'bad' => $r->wrong,
+                    'secs' => (int) $r->time_used, 'at' => $r->submitted_at ? \Illuminate\Support\Carbon::parse($r->submitted_at)->format('d M, h:i a') : '',
+                ]);
+
+            return response()->json(['title' => $ce->title, 'total' => $total, 'rows' => $rows, 'cutoff' => null]);
+        }
         $d = \App\Models\DailyExam::where('series_season_id', $id)->findOrFail($examId);
         $DB = \Illuminate\Support\Facades\DB::class;
         $neg = \App\Services\McqExam::NEGATIVE;
@@ -324,6 +337,12 @@ class ExamSeriesController extends Controller
     public function clearLeaderboard(Request $request, $examSlug, $kind, $id, $examId)
     {
         $this->scope($request, $examSlug, $kind);
+        if ($request->query('type') === 'course') {
+            $ce = CourseExam::where('season_id', $id)->findOrFail($examId);
+            $n = \App\Models\CourseExamAttempt::where('course_exam_id', $ce->id)->delete();
+
+            return back()->with('success', 'Leaderboard cleared: ' . $n . ' attempt(s) removed from "' . $ce->title . '".');
+        }
         $d = \App\Models\DailyExam::where('series_season_id', $id)->findOrFail($examId);
         $DB = \Illuminate\Support\Facades\DB::class;
         if ($d->section === 'Model Exam') {

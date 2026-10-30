@@ -100,6 +100,11 @@
                     </select>
                 </div>
                 <div class="col-md-3">
+                    <label class="form-label">Sort number</label>
+                    <input type="number" min="0" class="form-control" name="sort_no" value="{{ old('sort_no', $editing ? $item->sort_no : '') }}" placeholder="optional">
+                    <div class="form-text">Smallest shows first on the exams page.</div>
+                </div>
+                <div class="col-md-3">
                     <label class="form-label">Free access</label>
                     <div class="form-check form-switch mt-2">
                         <input class="form-check-input" type="checkbox" role="switch" name="free_access" id="free_access" value="1" @checked(old('free_access', $editing ? $item->free_access : false))>

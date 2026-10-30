@@ -19,7 +19,7 @@
         .xt-bar { display:flex; gap:8px; justify-content:flex-end; margin-bottom:8px; }
                 .xt-timer { position:sticky; top:0; z-index:5; background:var(--pv-surface,#fff); border:1px solid var(--pv-border,#e5e7eb); border-radius:12px; padding:8px 12px; margin-bottom:8px; }
         .xt-timer .row1 { display:flex; align-items:center; gap:8px; flex-wrap:wrap; } .xt-clock { font-variant-numeric:tabular-nums; font-size:1.25rem; font-weight:800; min-width:92px; }
-        .xt-timer button { border:0; border-radius:18px; padding:5px 14px; font-size:.8rem; font-weight:800; background:#eef0f3; } .xt-timer button.pri { background:#0a8f5b; color:#fff; } .xt-timer button.stop { background:#e53935; color:#fff; }
+        .xt-timer button { border:0; border-radius:18px; padding:5px 14px; font-size:.8rem; font-weight:800; background:var(--pv-chip,#eef0f3); color:var(--pv-text,#111); } .xt-timer button.pri { background:#0a8f5b; color:#fff; } .xt-timer button.stop { background:#e53935; color:#fff; }
         .xt-info { font-size:.78rem; color:var(--pv-muted,#667); } .xt-about { margin-top:22px; line-height:1.6; font-size:.92rem; } .xt-about h5 { font-weight:800; margin:14px 0 6px; }
         .xt-mark { max-width:520px; background:var(--pv-surface,#fff); border:1px solid var(--pv-border,#e5e7eb); border-radius:14px; padding:16px; }
         .xt-mk-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); gap:10px; } .xt-mk-grid div { background:var(--pv-chip,#eef0f3); border-radius:12px; padding:10px; text-align:center; } .xt-mk-grid b { display:block; font-size:1.25rem; } .xt-mk-grid small { color:var(--pv-muted,#667); font-weight:700; }
@@ -47,8 +47,8 @@
         <div class="xt-pane" id="pane-qp">
             <div class="xt-timer" id="tm">
                 <div class="row1">
-                    <button type="button" id="tmOn">⏱ Timer (optional)</button>
-                    <span id="tmBody" class="row1" style="display:none">
+                    <span id="tmOn" style="font-weight:800;font-size:.85rem">⏱ Timer (optional)</span>
+                    <span id="tmBody" class="row1">
                         <span class="xt-clock" id="tmClock">00:00:00</span>
                         <button type="button" class="pri" id="tmStart">Start</button><button type="button" id="tmPause" style="display:none">Pause</button><button type="button" class="pri" id="tmResume" style="display:none">Resume</button><button type="button" class="stop" id="tmStop" style="display:none">Stop</button><button type="button" id="tmReset" style="display:none">Reset</button>
                     </span>
@@ -148,15 +148,13 @@
         var fmt = function (ms) { var s = Math.floor(ms / 1000), p = function (n) { return (n < 10 ? '0' : '') + n; }; return p(Math.floor(s / 3600)) + ':' + p(Math.floor(s / 60) % 60) + ':' + p(s % 60); };
         var mins = function (s) { return Math.floor(s / 60) + ' min ' + (s % 60) + ' s'; };
         function draw() {
-            $('tmBody').style.display = T.on ? '' : 'none'; $('tmOn').style.display = T.on ? 'none' : '';
-            var run = !!T.s, idle = !run && !T.e && !T.done, paused = !run && T.e && !T.done;
+                        var run = !!T.s, idle = !run && !T.e && !T.done, paused = !run && T.e && !T.done;
             $('tmStart').style.display = idle ? '' : 'none'; $('tmPause').style.display = run ? '' : 'none'; $('tmResume').style.display = paused ? '' : 'none';
             $('tmStop').style.display = (run || paused) ? '' : 'none'; $('tmReset').style.display = T.done ? '' : 'none';
             $('tmClock').textContent = fmt(el());
             if (run && !tick) tick = setInterval(function () { $('tmClock').textContent = fmt(el()); }, 500);
             if (!run && tick) { clearInterval(tick); tick = null; }
         }
-        $('tmOn').onclick = function () { T.on = true; save(); draw(); };
         $('tmStart').onclick = function () { T.e = 0; T.s = Date.now(); T.done = false; save(); try { localStorage.setItem(key, '1'); } catch (e) {} unlock(); draw(); };
         $('tmPause').onclick = function () { T.e = el(); T.s = null; save(); draw(); };
         $('tmResume').onclick = function () { T.s = Date.now(); save(); draw(); };

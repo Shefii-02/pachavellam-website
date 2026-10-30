@@ -75,13 +75,8 @@
         </ol>
         @if (\App\Support\SafeHtml::text($exam->instruction) !== '')<div class="mt-2">{!! \App\Support\SafeHtml::clean($exam->instruction) !!}</div>@endif
 
-        @if ($done->count())
-            <h2 style="margin-top:18px">Your attempts</h2>
-            <div class="in-prev">
-                @foreach ($done as $d)
-                    <a href="{{ url('tests/attempt/' . $d->id . '/result') }}"><span>Attempt {{ $d->attempt_no }} · {{ optional($d->submitted_at)->format('d M Y, h:i a') }}</span><b>{{ $fmt($d->score) }} / {{ $fmt($d->max_score) }} <i class="bi bi-chevron-right"></i></b></a>
-                @endforeach
-            </div>
+        @if (!empty($summary))
+            @include('kpsc.partials.exam-summary', ['summary' => $summary])
         @endif
     </div>
 </div>

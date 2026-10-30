@@ -43,6 +43,7 @@ class TestController extends Controller
 
         return view('kpsc.tests.show', [
             'title' => $exam->title, 'exam' => $exam, 'paper' => $paper, 'access' => $this->engine->access($user, $exam), 'isOpen' => $this->engine->isOpen($exam),
+            'summary' => $user ? $this->engine->summary($exam, $user) : null,
             'open' => $open, 'done' => $done, 'left' => $exam->max_attempts ? max(0, $exam->max_attempts - $done->count()) : null,
         ]);
     }

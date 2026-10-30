@@ -484,13 +484,14 @@ class PublicCatalogController extends Controller
             $others = \App\Models\DailyExam::where('section', $legacy)->where('status', 1)
                 ->whereNull('series_season_id')   // an exam that sits in a season is listed inside that season only
                 ->when($caIds, fn ($q) => $q->where(fn ($w) => $w->whereNull('season_id')->orWhereNotIn('season_id', $caIds)))
-                ->when($kind === 'omr', fn ($q) => $q->orderByRaw('sort_no is null')->orderBy('sort_no'))   // OMR exams: the sort number, smallest first; no number goes last
+                ->orderByRaw('sort_no is null')->orderBy('sort_no')   // the sort number, smallest first; no number goes last
                 ->orderByDesc('exam_date')->orderByDesc('id')->paginate(15)->withQueryString();
             $sid = fn ($e) => $e->series_season_id;
         } else {
             $feature = \App\Models\ExamFeature::where('slug', $featureSlug)->first();
             $others = \App\Models\CourseExam::with('course:id,slug')->where('exam_id', $exam->id)->where('status', 'published')->when($feature, fn ($q) => $q->where('feature_id', $feature->id), fn ($q) => $q->whereRaw('1 = 0'))
                 ->whereNull('season_id')
+                ->orderByRaw('sort_no is null')->orderBy('sort_no')   // the sort number, smallest first; no number goes last
                 ->orderByDesc('start_at')->orderByDesc('entry_date')->orderByDesc('id')->paginate(15)->withQueryString();
             $sid = fn ($e) => $e->season_id;
         }

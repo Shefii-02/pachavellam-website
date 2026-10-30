@@ -61,9 +61,7 @@ class ModelExamController extends Controller
         $new_one  = new DailyExam();
         $new_one->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;   // season (free / paid)
         $new_one->free_access = $request->boolean('free_access');
-        if ($request->has('sort_no')) {   // only forms that show the field change it
-            $new_one->sort_no = $request->filled('sort_no') ? max(0, (int) $request->sort_no) : null;
-        }
+        if ($request->has('sort_no')) { $new_one->sort_no = $request->filled('sort_no') ? max(0, (int) $request->sort_no) : null; }
         $new_one->section    = "Model Exam";
         $new_one->exam_date  =  date('Y-m-d', strtotime($request->exam_date));
         $new_one->started_at =  date('Y-m-d H:i:s', strtotime($request->exam_started));
@@ -128,6 +126,7 @@ class ModelExamController extends Controller
         $new_one->category   = $request->category;
         $new_one->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;
         $new_one->free_access = $request->boolean('free_access');
+        if ($request->has('sort_no')) { $new_one->sort_no = $request->filled('sort_no') ? max(0, (int) $request->sort_no) : null; }
 
         try {
             $new_one->save();

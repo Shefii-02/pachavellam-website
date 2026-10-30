@@ -15,6 +15,10 @@
     </select>
     <div class="form-text">Seasons group the exams and decide free or paid. <a href="{{ url('admin/exam/kpsc/series/' . $kind) }}" target="_blank">Create / manage seasons</a></div>
 </div>
+<div class="col-md-6 mt-2">
+    <label class="form-label">Sort number</label>
+    <input type="number" min="0" class="form-control" name="sort_no" value="{{ old('sort_no', optional($examRow ?? null)->sort_no) }}" placeholder="optional - smallest shows first on the exams page">
+</div>
 <div class="col-md-6 mt-2 d-flex align-items-center">
     <div class="form-check form-switch">
         <input class="form-check-input" type="checkbox" role="switch" name="free_access" id="fa{{ $kind }}" value="1" {{ old('free_access', optional($examRow ?? null)->free_access) ? 'checked' : '' }}>

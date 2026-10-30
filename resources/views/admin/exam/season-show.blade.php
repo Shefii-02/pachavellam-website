@@ -58,7 +58,7 @@
                 @php $e = $it['model']; [$esL, $esC] = \App\Models\CourseExam::STATUSES[$e->status] ?? [$e->status, 'secondary']; @endphp
                 <tr data-type="course" data-id="{{ $e->id }}">
                     <td class="pv-drag" title="Drag to change the order">⠿</td>
-                    <td><a href="{{ $builder }}/{{ $e->id }}" class="fw-semibold">{{ $e->title }}</a><div class="small text-muted">{{ $e->sections_count }} section(s) · {{ $e->links_count }} question(s)</div></td>
+                    <td><a href="{{ $builder }}/{{ $e->id }}" class="fw-semibold">{{ $e->title }}</a><div class="small text-muted">{{ $e->sections_count }} section(s) · {{ $e->links_count }} question(s)@if ($e->sort_no !== null) · sort no. {{ $e->sort_no }}@endif</div></td>
                     <td class="small">{{ $e->start_at ? $e->start_at->format('d M Y') : ($e->entry_date ? \Illuminate\Support\Carbon::parse($e->entry_date)->format('d M Y') : '-') }}</td>
                     <td class="small text-nowrap">@if ($e->start_at || $e->end_at){{ $e->start_at?->format('d M, h:i a') ?? '…' }}<br>{{ $e->end_at?->format('d M, h:i a') ?? '…' }}@else - @endif</td>
                     <td class="text-center"><b>{{ (int) ($courseAttempts[$e->id] ?? 0) }}</b></td>
@@ -67,6 +67,7 @@
                     <td class="text-end text-nowrap">
                         <a href="{{ $builder }}/{{ $e->id }}/edit" class="btn btn-sm btn-light mb-0" title="Edit"><i class="bi bi-pencil"></i></a>
                         <a href="{{ $builder }}/{{ $e->id }}" class="btn btn-sm btn-light mb-0" title="Questions"><i class="bi bi-question-circle"></i></a>
+                        <button type="button" class="btn btn-sm btn-light mb-0 js-lb" title="Leaderboard ({{ (int) ($courseAttempts[$e->id] ?? 0) }} attempt(s))" data-type="course" data-id="{{ $e->id }}" data-n="{{ (int) ($courseAttempts[$e->id] ?? 0) }}" data-title="{{ $e->title }}"><i class="bi bi-trophy"></i></button>
                         <button type="button" class="btn btn-sm btn-light mb-0" title="Move / copy to another season" onclick="pvPlace('course',{{ $e->id }})"><i class="bi bi-arrow-left-right"></i></button>
                         <form class="d-inline" action="{{ $builder }}/{{ $e->id }}/status" method="POST">@csrf<input type="hidden" name="status" value="{{ $e->status === 'published' ? 'draft' : 'published' }}"><button class="btn btn-sm btn-light mb-0" title="{{ $e->status === 'published' ? 'Unpublish' : 'Publish' }}"><i class="bi {{ $e->status === 'published' ? 'bi-eye-slash' : 'bi-eye' }}"></i></button></form>
                         <form class="d-inline" action="{{ $builder }}/{{ $e->id }}" method="POST" onsubmit="return confirm('Move this exam to the Trash?')">@csrf @method('DELETE')<input type="hidden" name="back" value="{{ urldecode($back) }}"><button class="btn btn-sm btn-outline-danger mb-0" title="Delete"><i class="bi bi-trash"></i></button></form>
@@ -76,7 +77,7 @@
                 @php $d = $it['model']; @endphp
                 <tr data-type="legacy" data-id="{{ $d->id }}">
                     <td class="pv-drag" title="Drag to change the order">⠿</td>
-                    <td><span class="fw-semibold">{{ $d->exam_title ?: ($d->examtitle ?: 'Exam') }}</span> <span class="badge bg-dark">old KPSC</span></td>
+                    <td><span class="fw-semibold">{{ $d->exam_title ?: ($d->examtitle ?: 'Exam') }}</span> <span class="badge bg-dark">old KPSC</span>@if ($d->sort_no !== null)<div class="small text-muted">sort no. {{ $d->sort_no }}</div>@endif</td>
                     @php $att = $legacyAttempts->get($d->id); $n = (int) ($att->c ?? 0); @endphp
                     <td class="small">{{ $d->exam_date ? \Illuminate\Support\Carbon::parse($d->exam_date)->format('d M Y') : '-' }}</td>
                     <td class="small text-nowrap">@if ($d->started_at || $d->ended_at){{ $d->started_at ? \Illuminate\Support\Carbon::parse($d->started_at)->format('d M, h:i a') : '…' }}<br>{{ $d->ended_at ? \Illuminate\Support\Carbon::parse($d->ended_at)->format('d M, h:i a') : '…' }}@else - @endif</td>
@@ -192,9 +193,10 @@
         document.querySelectorAll('.js-lb').forEach(function (b) {
             b.addEventListener('click', function () {
                 document.getElementById('lbTitle').textContent = b.dataset.title; document.getElementById('lbSub').textContent = 'Loading…'; rows.innerHTML = ''; form.style.display = 'none';
-                form.action = @json($base . '/seasons/' . $season->id . '/clear-leaderboard/') + b.dataset.id;
+                var qs = b.dataset.type === 'course' ? '?type=course' : '';
+                form.action = @json($base . '/seasons/' . $season->id . '/clear-leaderboard/') + b.dataset.id + qs;
                 modal = modal || new bootstrap.Modal(el); modal.show();
-                fetch(@json($base . '/seasons/' . $season->id . '/leaderboard/') + b.dataset.id, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+                fetch(@json($base . '/seasons/' . $season->id . '/leaderboard/') + b.dataset.id + qs, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
                     .then(function (r) { if (!r.ok) throw 0; return r.json(); })
                     .then(function (d) {
                         document.getElementById('lbSub').textContent = d.total + ' attempt(s)' + (d.total > d.rows.length ? ' · showing the top ' + d.rows.length : '') + (d.cutoff != null ? ' · cutoff ' + d.cutoff : '');

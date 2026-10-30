@@ -359,6 +359,49 @@ class TestEngine
         return ['rank' => $above + 1, 'total' => $total, 'percentile' => $total > 1 ? round($below / ($total - 1) * 100, 1) : 100.0];
     }
 
+    /** What a student sees on the instructions page after finishing the test: every attempt with its marks, the totals, and the question-by-question summary of the latest attempt (null = no finished attempt yet). Same shape as McqExam::summary(). */
+    public function summary(CourseExam $exam, User $user): ?array
+    {
+        $done = CourseExamAttempt::where('user_id', $user->id)->where('course_exam_id', $exam->id)->where('status', 'submitted')->orderBy('attempt_no')->get();
+        if ($done->isEmpty()) {
+            return null;
+        }
+        $last = $done->last();
+        $key = $this->paper($exam, true);
+        $stats = $this->questionStats($exam, $key);
+        $board = $this->board($exam);
+        $rank = $this->rank($done->firstWhere('attempt_no', 1) ?? $done->first(), $board);
+        $answers = $last->answers ?: [];
+        $say = fn (array $t, array $idx) => implode(', ', array_map(fn ($k) => chr(64 + $k) . '. ' . ($t['o'][$k - 1] ?? ''), $idx));
+
+        $review = [];
+        foreach ($key['sections'] as $s) {
+            foreach ($s['questions'] as $q) {
+                $v = $answers[(string) $q['id']] ?? [];
+                $chosen = array_values(array_map('intval', (array) ($v['o'] ?? [])));
+                $t = $q['langs'][$last->lang ?? ''] ?? reset($q['langs']);
+                $review[] = [
+                    'n' => count($review) + 1, 'q' => $t['q'] ?? '', 'status' => $this->result($q, $chosen), 'notes' => $t['e'] ?? '',
+                    'mineHtml' => $chosen ? $say($t, $chosen) : null, 'ansHtml' => $say($t, $q['key']),
+                    'sec' => (int) ($v['t'] ?? 0), 'avgSec' => $stats[$q['id']]['avg'] ?? null, 'pct' => isset($stats[$q['id']]) ? $stats[$q['id']]['pct'] : null,
+                ];
+            }
+        }
+        $answered = $done->sum(fn ($a) => $a->correct + $a->wrong);
+
+        return [
+            'attempts' => $done->map(fn ($a) => [
+                'no' => (int) $a->attempt_no, 'mark' => round((float) $a->score, 2), 'right' => (int) $a->correct, 'wrong' => (int) $a->wrong, 'skipped' => (int) $a->skipped,
+                'sec' => (int) $a->time_used, 'at' => $a->submitted_at ? $a->submitted_at->format('d M Y, h:i a') : '', 'url' => url('tests/attempt/' . $a->id . '/result'),
+            ])->reverse()->values()->all(),
+            'count' => $done->count(), 'best' => round((float) $done->max('score'), 2), 'avg' => round((float) $done->avg('score'), 2),
+            'accuracy' => $answered > 0 ? round($done->sum('correct') * 100 / $answered, 1) : 0,
+            'avgSec' => (int) round($done->avg('time_used')), 'perQ' => $key['count'] ? (int) round($last->time_used / $key['count']) : null,
+            'latest' => (int) $last->attempt_no, 'rank' => $rank['rank'], 'participants' => $rank['total'], 'average' => $board->count() ? round((float) $board->avg('score'), 2) : 0,
+            'total' => $key['count'], 'review' => $review,
+        ];
+    }
+
     /** Per question: how many answered it, how many got it right, average seconds (from first attempts). */
     public function questionStats(CourseExam $exam, array $keyPaper): array
     {

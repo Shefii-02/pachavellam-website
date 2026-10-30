@@ -128,6 +128,30 @@ class McqExam
         return $attempt;
     }
 
+    /** What a student sees on the instructions page after finishing the exam: every attempt with its marks, the totals, and the question-by-question summary of the latest attempt (null = no finished attempt yet). */
+    public function summary(DailyExam $exam, $user): ?array
+    {
+        $done = DailyExamattempt::where('user_id', $user->id)->where('exam_id', $exam->id)->where('status', '2')->orderBy('attempt_no')->get();
+        if ($done->isEmpty()) {
+            return null;
+        }
+        $last = $done->last();
+        $r = $this->result($exam, $last, $user);
+        $answered = $done->sum(fn ($a) => $a->right + $a->wrong);
+
+        return [
+            'attempts' => $done->map(fn ($a) => [
+                'no' => (int) $a->attempt_no, 'mark' => round((float) $a->total_mark, 2), 'right' => (int) $a->right, 'wrong' => (int) $a->wrong, 'skipped' => (int) $a->skipped,
+                'sec' => (int) $a->attempt_time, 'at' => $a->attend_ended_at ? date('d M Y, h:i a', strtotime($a->attend_ended_at)) : '', 'url' => url('kpsc/mcq/' . $exam->id . '/result?attempt=' . $a->attempt_no),
+            ])->reverse()->values()->all(),
+            'count' => $done->count(), 'best' => round((float) $done->max('total_mark'), 2), 'avg' => round((float) $done->avg('total_mark'), 2),
+            'accuracy' => $answered > 0 ? round($done->sum('right') * 100 / $answered, 1) : 0,
+            'avgSec' => (int) round($done->avg('attempt_time')), 'perQ' => $r['total'] ? (int) round($last->attempt_time / $r['total']) : null,
+            'latest' => (int) $last->attempt_no, 'rank' => $r['rank'], 'participants' => $r['participants'], 'average' => $r['average'], 'total' => $r['total'],
+            'review' => array_map(fn ($q) => $q + ['mineHtml' => $q['o'][$q['chosen']] ?? null, 'ansHtml' => $q['o'][$q['correct']] ?? null], $r['review']),
+        ];
+    }
+
     /** Everything the result page shows for one finished attempt. */
     public function result(DailyExam $exam, DailyExamattempt $attempt, $user): array
     {

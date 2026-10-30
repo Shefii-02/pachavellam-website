@@ -5,7 +5,7 @@
 <style>
     .st-card { flex:none; width:132px; height:210px; border-radius:16px; background:#10243e center/cover; position:relative; cursor:pointer; border:3px solid #fff; outline:2px solid #ff5a5f; box-shadow:0 3px 10px rgba(0,0,0,.2); overflow:hidden; display:block; }
     .st-card.ach { outline-color:#f59e0b; }
-    @media (min-width:768px) { .st-card { width:170px; height:270px; } }
+    @media (min-width:768px) { .st-card { width:160px; height:170px; } }
     .row .st-card { width:100%; height:auto; aspect-ratio:9/14; }
     .st-card.ach::after { content:""; position:absolute; inset:0; background:linear-gradient(transparent 55%, rgba(0,0,0,.55)); }
     .st-card .pl { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); color:#fff; font-size:2.2rem; z-index:2; text-shadow:0 2px 8px rgba(0,0,0,.6); }

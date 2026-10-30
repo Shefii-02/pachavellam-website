@@ -254,6 +254,7 @@ class CaDailyexamController extends Controller
         $exam->status = $request->has('status') ? 1 : 0;
         $exam->series_season_id = $request->filled('series_season_id') ? (int) $request->series_season_id : null;   // season (free / paid)
         $exam->free_access = $request->boolean('free_access');
+        if ($request->has('sort_no')) { $exam->sort_no = $request->filled('sort_no') ? max(0, (int) $request->sort_no) : null; }
         $exam->save();
 
         return redirect($exam->season_id ? kpsc_cms('ca-daily-exam/seasons/' . $exam->season_id) : kpsc_cms('ca-daily-exam'))

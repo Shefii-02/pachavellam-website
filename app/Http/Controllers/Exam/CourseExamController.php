@@ -410,6 +410,7 @@ class CourseExamController extends Controller
             'season_id' => $this->seasonId($request),
             'is_paid' => $request->access === 'paid',
             'free_access' => $request->boolean('free_access'),
+            'sort_no' => $request->filled('sort_no') ? max(0, (int) $request->sort_no) : null,
             'instruction' => $instrType === 'text' || $instrType === null ? (SafeHtml::clean($request->instruction) ?: null) : null,
         ];
 
