@@ -68,12 +68,27 @@ class ExamSeriesController extends Controller
     {
         [$exam] = $this->scope($request, $examSlug, $kind);
         $data = $this->validated($request, $kind);
-        ExamSeason::where('exam_id', $exam->id)->where('kind', $kind)->increment('position');   // a new season shows first; the admin can move it
-        $season = ExamSeason::create($data + ['exam_id' => $exam->id, 'kind' => $kind, 'created_by' => $request->user()->id, 'position' => 1]);
+        $pos = $data['position'] ?? 1;   // no order typed: the new season shows first
+        unset($data['position']);
+        $season = ExamSeason::create($data + ['exam_id' => $exam->id, 'kind' => $kind, 'created_by' => $request->user()->id, 'position' => 9999]);
+        $this->placeAt($season, $pos);
         $this->cover($request, $season);
         app(\App\Services\SeasonAccess::class)->syncCourse($season->fresh(), $request->user()->id);
 
         return redirect($exam->examUrl('series/' . $kind . '/seasons/' . $season->id))->with('success', 'Season created. Now add its exams below.');
+    }
+
+    /** Put a season at a place (1 = first) among the seasons of its exam and series; the others move down and everything is renumbered 1..n. */
+    private function placeAt(ExamSeason $season, int $pos): void
+    {
+        $others = ExamSeason::where('exam_id', $season->exam_id)->where('kind', $season->kind)->where('id', '!=', $season->id)->orderBy('position')->orderByDesc('id')->get()->all();
+        array_splice($others, max(0, min($pos, count($others) + 1) - 1), 0, [$season]);
+        foreach ($others as $n => $s) {
+            if ((int) $s->position !== $n + 1) {
+                $s->position = $n + 1;
+                $s->save();
+            }
+        }
     }
 
     /** Show a season one place earlier (up) or later (down) in the listing: the positions of the series are renumbered 1..n. */
@@ -101,7 +116,13 @@ class ExamSeriesController extends Controller
     {
         [$exam] = $this->scope($request, $examSlug, $kind);
         $season = ExamSeason::where('exam_id', $exam->id)->where('kind', $kind)->findOrFail($id);
-        $season->update($this->validated($request, $kind));
+        $data = $this->validated($request, $kind);
+        $pos = $data['position'] ?? null;
+        unset($data['position']);
+        $season->update($data);
+        if ($pos) {
+            $this->placeAt($season, (int) $pos);
+        }
         $this->cover($request, $season);
         app(\App\Services\SeasonAccess::class)->syncCourse($season->fresh(), $request->user()->id);
 
@@ -262,7 +283,7 @@ class ExamSeriesController extends Controller
             'title' => 'required|string|max:150', 'tagline' => 'nullable|string|max:200', 'description' => 'nullable|string|max:3000',
             'basis' => 'nullable|in:subject,category,exam,other', 'basis_name' => 'nullable|string|max:120',
             'starts_on' => 'nullable|date', 'ends_on' => 'nullable|date|after_or_equal:starts_on',
-            'status' => 'required|in:draft,published,archived', 'cover_image' => 'nullable|image|max:3072',
+            'status' => 'required|in:draft,published,archived', 'cover_image' => 'nullable|image|max:3072', 'position' => 'nullable|integer|min:1|max:9999',
             'price' => [$paid ? 'required' : 'nullable', 'numeric', 'min:' . ($paid ? 1 : 0), 'max:1000000'],
             'discount_price' => ['nullable', 'numeric', 'min:0', 'max:1000000', $paid ? 'lt:price' : 'nullable'],
             'validity_type' => 'nullable|in:lifetime,days,date',

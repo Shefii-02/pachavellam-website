@@ -1,5 +1,6 @@
 @extends($layout)
 @section('content2')
+@include('admin.exam._drawer-style')
 @php
     $label = $exam->short_name ?: $exam->name;
     $paid = $access->isPaid($season);
@@ -25,6 +26,8 @@
     </div>
     <div class="d-flex gap-2 flex-wrap">
         <a href="{{ $season->publicUrl() }}" target="_blank" class="btn btn-sm btn-light mb-0"><i class="bi bi-box-arrow-up-right me-1"></i>See on website</a>
+        <button type="button" class="btn btn-sm btn-outline-success mb-0 js-share" @disabled($season->status !== 'published') data-url="{{ $season->publicUrl() }}" data-title="{{ $season->title }}"
+            data-text="{{ $season->title . ($season->tagline ? ' - ' . $season->tagline : '') . "\n" . ($season->is_paid ? 'Practise on Pachavellam:' : 'Practise free on Pachavellam:') }}"><i class="bi bi-share me-1"></i>Share</button>
         <button type="button" class="btn btn-sm btn-outline-primary mb-0" data-bs-toggle="modal" data-bs-target="#editSession"><i class="bi bi-pencil me-1"></i>Edit season</button>
     </div>
 </div>
@@ -86,7 +89,7 @@
 </div>
 
 {{-- Edit season --}}
-<div class="modal fade" id="editSession" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
+<div class="modal fade modal-drawer" id="editSession" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
     <form action="{{ $base }}/seasons/{{ $season->id }}" method="POST" enctype="multipart/form-data">@csrf @method('PUT')<input type="hidden" name="back" value="session">
         <div class="modal-header"><h5 class="modal-title"><i class="bi bi-pencil me-1"></i>Edit season</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
         <div class="modal-body"><div class="row g-2">@include('admin.exam._season-fields', ['s' => $season, 'p' => 'ed', 'special' => $special])</div></div>
@@ -96,7 +99,7 @@
 
 {{-- Add exams of the "Other exams" list (no season): move or copy them into this season --}}
 @if ($attachable->count() || $otherCourse->count())
-<div class="modal fade" id="attachExams" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
+<div class="modal fade modal-drawer modal-drawer-wide" id="attachExams" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
     <form action="{{ $base }}/seasons/{{ $season->id }}/place" method="POST">@csrf
         <div class="modal-header"><h5 class="modal-title"><i class="bi bi-link-45deg me-1"></i>Add from Other exams</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
         <div class="modal-body">
@@ -143,7 +146,7 @@
 
 {{-- Move / copy one exam of this season to another season --}}
 @if ($otherSeasons->count())
-<div class="modal fade" id="placeExam" tabindex="-1" aria-hidden="true"><div class="modal-dialog"><div class="modal-content">
+<div class="modal fade modal-drawer" id="placeExam" tabindex="-1" aria-hidden="true"><div class="modal-dialog"><div class="modal-content">
     <form id="placeForm" method="POST">@csrf
         <input type="hidden" id="placeId">
         <div class="modal-header"><h5 class="modal-title"><i class="bi bi-arrow-left-right me-1"></i>Move / copy to another season</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
@@ -168,6 +171,8 @@
     });
 </script>
 @endif
+@include('admin.exam._season-form-js')
+@include('admin.exam._share-drawer')
 <script>
     function pvSeasonPaid(p) { var on = document.getElementById(p + 'p').checked; document.getElementById(p + 'box').style.display = on ? '' : 'none'; }
     function pvSeasonValidity(p) {

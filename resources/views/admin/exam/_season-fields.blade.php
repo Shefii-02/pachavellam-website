@@ -6,11 +6,14 @@
 <div class="col-md-6"><label class="form-label small mb-0">Season title <span class="text-danger">*</span></label><input class="form-control" name="title" required maxlength="150" placeholder="e.g. History - Season 1" value="{{ $v('title') }}"></div>
 <div class="col-md-6"><label class="form-label small mb-0">Tagline</label><input class="form-control" name="tagline" maxlength="200" value="{{ $v('tagline') }}"></div>
 <div class="col-md-3"><label class="form-label small mb-0">Built around</label>
-    <select name="basis" class="form-select"><option value="">General</option>@foreach (\App\Models\ExamSeason::BASES as $bk => $bl)<option value="{{ $bk }}" {{ $v('basis') === $bk ? 'selected' : '' }}>{{ $bl }}</option>@endforeach</select></div>
-<div class="col-md-3"><label class="form-label small mb-0">Which subject / category / exam</label><input class="form-control" name="basis_name" maxlength="120" placeholder="e.g. Indian History" value="{{ $v('basis_name') }}"></div>
+    <select name="basis" id="{{ $p }}basis" class="form-select" onchange="pvBasisChange('{{ $p }}')"><option value="">General</option>@foreach (\App\Models\ExamSeason::BASES as $bk => $bl)<option value="{{ $bk }}" {{ $v('basis') === $bk ? 'selected' : '' }}>{{ $bl }}</option>@endforeach</select></div>
+<div class="col-md-3" id="{{ $p }}bnWrap"><label class="form-label small mb-0" id="{{ $p }}bnLbl">Which subject / category / exam</label>
+    <select class="form-select" id="{{ $p }}bnSel" name="basis_name" style="display:none" disabled></select>
+    <input class="form-control" id="{{ $p }}bnTxt" name="basis_name" maxlength="120" placeholder="e.g. Indian History" value="{{ $v('basis_name') }}" data-cur="{{ $v('basis_name') }}"></div>
 <div class="col-md-2"><label class="form-label small mb-0">Starts on</label><input type="date" class="form-control" name="starts_on" value="{{ old('starts_on', optional($s->starts_on ?? null)->format('Y-m-d')) }}"></div>
 <div class="col-md-2"><label class="form-label small mb-0">Ends on</label><input type="date" class="form-control" name="ends_on" value="{{ old('ends_on', optional($s->ends_on ?? null)->format('Y-m-d')) }}"></div>
 <div class="col-md-2"><label class="form-label small mb-0">Status</label><select name="status" class="form-select">@foreach (\App\Models\ExamSeason::STATUSES as $k => [$l])<option value="{{ $k }}" {{ $v('status', 'published') === $k ? 'selected' : '' }}>{{ $l }}</option>@endforeach</select></div>
+<div class="col-md-2"><label class="form-label small mb-0">Show order</label><input type="number" min="1" max="9999" class="form-control" name="position" value="{{ old('position', $s->position ?? '') }}" placeholder="1 = first" title="1 shows this season first in the listing"></div>
 <div class="col-md-6"><label class="form-label small mb-0">Cover</label><input type="file" class="form-control" name="cover_image" accept="image/*"></div>
 <div class="col-md-6"><label class="form-label small mb-0">About this season</label><textarea class="form-control" name="description" rows="1" maxlength="3000">{{ $v('description') }}</textarea></div>
 

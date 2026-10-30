@@ -1,5 +1,6 @@
 @extends($layout)
 @section('content2')
+@include('admin.exam._drawer-style')
 @php
     $label = $exam->short_name ?: $exam->name;
     $special = $kind === 'special';
@@ -42,6 +43,9 @@
                     <div class="mt-2"><b>{{ (int) ($c->c ?? 0) + $legacyN }}</b> exam(s) · {{ (int) ($c->p ?? 0) }} published</div>
                 </div>
                 <div class="card-footer bg-transparent d-flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-success mb-0 js-share" title="{{ $s->status === 'published' ? 'Share' : 'Publish the season to share it' }}" @disabled($s->status !== 'published')
+                        data-url="{{ $s->slug ? url($exam->slug . '/' . \App\Models\ExamSeason::PAGES[$kind] . '/' . $s->slug) : url('seasons/' . $s->id) }}" data-title="{{ $s->title }}"
+                        data-text="{{ $s->title . ($s->tagline ? ' - ' . $s->tagline : '') . "\n" . ($paid ? 'Practise on Pachavellam:' : 'Practise free on Pachavellam:') }}"><i class="bi bi-share"></i></button>
                     <form action="{{ $base }}/seasons/{{ $s->id }}/move/up" method="POST">@csrf<button class="btn btn-sm btn-outline-secondary mb-0" title="Show earlier" @disabled($loop->first)><i class="bi bi-arrow-left"></i></button></form>
                     <form action="{{ $base }}/seasons/{{ $s->id }}/move/down" method="POST">@csrf<button class="btn btn-sm btn-outline-secondary mb-0" title="Show later" @disabled($loop->last)><i class="bi bi-arrow-right"></i></button></form>
                     <a href="{{ $base }}/seasons/{{ $s->id }}" class="btn btn-sm btn-primary mb-0 flex-fill"><i class="bi bi-list-check me-1"></i>Manage exams</a>
@@ -55,7 +59,7 @@
 </div>
 
 {{-- New season --}}
-<div class="modal fade" id="newSession" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
+<div class="modal fade modal-drawer" id="newSession" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
     <form action="{{ $base }}/seasons" method="POST" enctype="multipart/form-data">@csrf
         <div class="modal-header"><h5 class="modal-title"><i class="bi bi-plus-circle me-1"></i>New {{ $special ? 'special exam' : '' }} season</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
         <div class="modal-body"><div class="row g-2">@include('admin.exam._season-fields', ['s' => null, 'p' => 'new', 'special' => $special])</div>
@@ -64,6 +68,8 @@
     </form>
 </div></div></div>
 @if ($errors->any() && old('title') && !request()->routeIs('*seasons.update'))<script>document.addEventListener('DOMContentLoaded', function () { new bootstrap.Modal(document.getElementById('newSession')).show(); });</script>@endif
+@include('admin.exam._season-form-js')
+@include('admin.exam._share-drawer')
 <script>
     function pvSeasonPaid(p) { var on = document.getElementById(p + 'p').checked; document.getElementById(p + 'box').style.display = on ? '' : 'none'; }
     function pvSeasonValidity(p) {
