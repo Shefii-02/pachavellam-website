@@ -3,8 +3,9 @@
      Nothing is drawn unless admin/ads has it switched on for this page. --}}
 @php $adUnit = isset($pos) ? \App\Support\Ads::inList($type, $page, $pos, $pageNo ?? 1) : \App\Support\Ads::web($type, $page); $adClient = \App\Models\SiteSetting::get('adsense_client'); @endphp
 @if ($adUnit && $adClient && $adUnit->slot)
-    <div class="pv-ad" style="grid-column:1/-1;flex:0 0 100%;width:100%;max-width:100%;margin:12px 0;text-align:center;overflow:hidden;min-height:110px">
+    <div class="pv-ad" style="grid-column:1/-1;flex:0 0 100%;width:100%;max-width:100%;margin:12px 0;text-align:center;overflow:hidden;{{ !empty($compact) ? 'max-height:110px;min-height:60px;opacity:.95;' : 'min-height:110px' }}">
         <div style="font-size:.65rem;color:#9aa3b2;text-transform:uppercase;letter-spacing:.06em">Advertisement</div>
-        <ins class="adsbygoogle" style="display:block" data-ad-client="{{ $adClient }}" data-ad-slot="{{ $adUnit->slot }}" data-ad-format="auto" data-full-width-responsive="true"></ins>
+        <ins class="adsbygoogle" style="display:block" data-ad-client="{{ $adClient }}" data-ad-slot="{{ $adUnit->slot }}" data-ad-format="{{ !empty($compact) ? 'horizontal' : 'auto' }}" data-full-width-responsive="{{ !empty($compact) ? 'false' : 'true' }}"></ins>
+        <script>try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}</script>
     </div>
 @endif

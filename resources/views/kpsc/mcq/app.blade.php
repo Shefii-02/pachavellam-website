@@ -91,12 +91,18 @@ window.MCQ.csrf = @json(csrf_token());
     var closeModal = function () { $('mqOv').classList.remove('on'); };
     var post = function (url, body, keep) { return fetch(url, { method: 'POST', credentials: 'same-origin', keepalive: !!keep, headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': C.csrf }, body: JSON.stringify(body) }); };
 
+    /* save / unsave a question (shown in My account > Saved questions) */
+    function bookmark(qid, done) {
+        var base = C.mode === 'play' ? C.urls.questions.replace(/\/questions$/, '') : location.origin + '/kpsc/mcq/' + C.examId;
+        post(base + '/bookmark', { question_id: qid }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) { done(d.saved); }).catch(function () { alert('Could not save the question. Try again.'); });
+    }
     /* ===================== the exam ===================== */
     function play() {
-        var S = { qs: [], ans: {}, marked: {}, vis: {}, sec: {}, cur: 0, endAt: null, t0: Date.now(), e0: 0, qs0: Date.now(), filter: 'all', busy: false }, saveT = null, tickT = null;
+        var S = { bm: {}, qs: [], ans: {}, marked: {}, vis: {}, sec: {}, cur: 0, endAt: null, t0: Date.now(), e0: 0, qs0: Date.now(), filter: 'all', busy: false }, saveT = null, tickT = null;
         root.innerHTML = '<div class="mq-card">Loading the exam…</div>';
         fetch(C.urls.questions, { credentials: 'same-origin', headers: { 'Accept': 'application/json' } }).then(function (r) { if (!r.ok) throw r.status; return r.json(); }).then(function (d) {
             S.qs = d.questions; if (!S.qs.length) { root.innerHTML = '<div class="mq-card">This exam has no questions yet.</div>'; return; }
+            (d.bookmarked || []).forEach(function (k) { S.bm[k] = 1; });
             var sv = d.saved || {};
             Object.keys(sv.answers || {}).forEach(function (k) { S.ans[k] = sv.answers[k]; });
             (sv.marked || []).forEach(function (k) { S.marked[k] = 1; }); (sv.visited || []).forEach(function (k) { S.vis[k] = 1; });
@@ -130,12 +136,12 @@ window.MCQ.csrf = @json(csrf_token());
             var q = S.qs[S.cur], sel = S.ans[q.id], last = S.cur === S.qs.length - 1;
             var opts = Object.keys(q.o).map(function (k) { return '<button type="button" class="mq-opt' + (sel == k ? ' on' : '') + '" data-o="' + k + '"><span class="l">' + L[k] + '</span><span>' + q.o[k] + '</span></button>'; }).join('');
             $('mqQ').innerHTML = '<div class="mq-qh"><b>Question ' + (S.cur + 1) + ' <span style="color:var(--mu);font-weight:600">of ' + S.qs.length + '</span></b><span class="sp"></span>'
-                + (S.marked[q.id] ? '<span class="mq-st rev">Marked for review</span>' : '') + '</div><div class="mq-q">' + q.q + '</div><div class="mq-opts">' + opts + '</div>'
+                + (S.marked[q.id] ? '<span class="mq-st rev">Marked for review</span>' : '') + '<button type="button" class="mq-btn mq-bm" id="bBm" title="Save this question to your profile">' + (S.bm[q.id] ? '★ Saved' : '☆ Save') + '</button></div><div class="mq-q">' + q.q + '</div><div class="mq-opts">' + opts + '</div>'
                 + '<div class="mq-bar"><button class="mq-btn" id="bPrev"' + (S.cur === 0 ? ' disabled' : '') + '>‹ Previous</button><button class="mq-btn" id="bClr"' + (sel == null ? ' disabled' : '') + '>Clear</button><span class="sp"></span>'
                 + '<button class="mq-btn mark" id="bMark">' + (S.marked[q.id] ? 'Unmark review' : 'Mark for review') + (last ? '' : ' & Next') + '</button>'
                 + '<button class="mq-btn pri" id="bNext">' + (last ? 'Save' : 'Save & Next ›') + '</button></div>';
             $('mqQ').querySelectorAll('.mq-opt').forEach(function (b) { b.onclick = function () { pick(b.dataset.o); }; });
-            $('bPrev').onclick = function () { go(S.cur - 1); }; $('bClr').onclick = clear; $('bMark').onclick = mark; $('bNext').onclick = next;
+            $('bBm').onclick = function () { bookmark(q.id, function (on) { if (on) S.bm[q.id] = 1; else delete S.bm[q.id]; drawQ(); }); }; $('bPrev').onclick = function () { go(S.cur - 1); }; $('bClr').onclick = clear; $('bMark').onclick = mark; $('bNext').onclick = next;
         }
         function drawPal() {
             var c = counts();
@@ -233,7 +239,7 @@ window.MCQ.csrf = @json(csrf_token());
                     + '<span style="flex:1"></span><span>You: ' + tm(q.sec) + '</span>' + (q.avgSec != null ? '<span>Avg: ' + tm(q.avgSec) + '</span>' : '') + (q.pct != null ? '<span>' + q.pct + '% answered correctly</span>' : '') + '</div>'
                     + '<div class="mq-q">' + q.q + '</div><div class="mq-opts">' + opts + '</div>'
                     + (q.notes ? '<div class="mq-sol"><h6>Solution / Notes</h6>' + q.notes + '</div>' : '')
-                    + '<div style="margin-top:10px"><button class="mq-btn" data-rep="' + q.n + '">⚑ Report</button></div></div>';
+                    + '<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap"><button class="mq-btn" data-rep="' + q.n + '">⚑ Report</button><button class="mq-btn" data-bm="' + q.id + '">' + (q.saved ? '★ Saved' : '☆ Save question') + '</button></div></div>';
             }).join('');
             return '<div class="mq-fil">' + chips + '</div>' + (list || '<div class="mq-card">Nothing in this filter.</div>');
         }
@@ -246,6 +252,7 @@ window.MCQ.csrf = @json(csrf_token());
             root.innerHTML = head() + (tab === 'ov' ? overview() : tab === 'sol' ? solutions() : board()) + '<div style="text-align:center;margin:16px 0"><a class="mq-btn pri" href="' + esc(C.back) + '">✕ Close</a></div>';
             root.querySelectorAll('[data-t]').forEach(function (b) { b.onclick = function () { tab = b.dataset.t; draw(); }; });
             root.querySelectorAll('[data-f]').forEach(function (b) { b.onclick = function () { filter = b.dataset.f; draw(); }; });
+            root.querySelectorAll('[data-bm]').forEach(function (b) { b.onclick = function () { var id = +b.dataset.bm; bookmark(id, function (on) { R.review.forEach(function (q) { if (q.id === id) q.saved = on; }); draw(); }); }; });
             root.querySelectorAll('[data-rep]').forEach(function (b) { b.onclick = function () { open(b.dataset.rep); }; });
             root.querySelectorAll('[data-q]').forEach(function (a) { a.onclick = function (e) { e.preventDefault(); tab = 'sol'; filter = 'all'; draw(); var t = $('sq' + a.dataset.q); if (t) t.scrollIntoView({ behavior: 'smooth' }); }; });
             var sel = $('attSel'); if (sel) sel.onchange = function () { location.href = location.pathname + '?attempt=' + sel.value; };

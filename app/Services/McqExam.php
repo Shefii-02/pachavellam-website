@@ -79,6 +79,7 @@ class McqExam
         return [
             'questions' => $this->questions($exam)->map(fn ($q) => ['id' => $q->id, 'q' => self::html($q->question), 'o' => $this->options($q)])->values(),
             'saved' => ['answers' => (object) ($saved['answers'] ?? []), 'marked' => $saved['marked'] ?? [], 'seconds' => (object) ($saved['seconds'] ?? []), 'visited' => $saved['visited'] ?? [], 'cur' => $saved['cur'] ?? 0],
+            'bookmarked' => \Illuminate\Support\Facades\Schema::hasTable('question_bookmarks') ? \App\Models\QuestionBookmark::where('user_id', $attempt->user_id)->where('exam_id', $exam->id)->pluck('question_id')->all() : [],
             'remaining' => $remaining, 'elapsed' => time() - strtotime($attempt->attend_started_at),
         ];
     }
@@ -168,13 +169,14 @@ class McqExam
             ->where('a.exam_id', $exam->id)->where('t.attempt_no', 1)->where('t.status', '2')
             ->selectRaw('a.question_id, avg(a.seconds) as avg_sec, sum(a.chosen is not null) as answered, sum(a.is_correct = 1) as ok')->groupBy('a.question_id')->get()->keyBy('question_id');
 
+        $saved = \Illuminate\Support\Facades\Schema::hasTable('question_bookmarks') ? array_flip(\App\Models\QuestionBookmark::where('user_id', $attempt->user_id)->where('exam_id', $exam->id)->pluck('question_id')->all()) : [];
         $review = [];
         foreach ($qs as $i => $q) {
             $m = $mine->get($q->id);
             $s = $stat->get($q->id);
             $chosen = $m->chosen ?? null;
             $review[] = [
-                'n' => $i + 1, 'q' => self::html($q->question), 'o' => $this->options($q), 'chosen' => $chosen, 'correct' => $this->correctIndex($q),
+                'id' => $q->id, 'saved' => isset($saved[$q->id]), 'n' => $i + 1, 'q' => self::html($q->question), 'o' => $this->options($q), 'chosen' => $chosen, 'correct' => $this->correctIndex($q),
                 'status' => $chosen === null ? 'skipped' : ($m->is_correct ? 'correct' : 'wrong'), 'marked' => (bool) ($m->marked ?? false),
                 'notes' => self::html($q->notes), 'sec' => (int) ($m->seconds ?? 0),
                 'avgSec' => $s ? (int) round($s->avg_sec) : null, 'pct' => $s && $s->answered > 0 ? (int) round($s->ok * 100 / $s->answered) : null,

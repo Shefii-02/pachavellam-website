@@ -16,6 +16,7 @@ class AdPages
         'article_detail' => 'Article / announcement page',
         'category' => 'Category page',
         'series' => 'Exam series list (daily / OMR / GK / CA / special)',
+        'exam_intro' => 'Exam instructions page (small ad, never while answering)',
         'my_courses' => 'My courses (bought)',
     ];
 

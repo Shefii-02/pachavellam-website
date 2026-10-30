@@ -282,6 +282,7 @@
             </div>
         </details>
 
+        <a class="pf-link" href="{{ url('my-account/bookmarks') }}"><span class="ic"><i class="bi bi-bookmark-star-fill"></i></span>Saved questions<i class="bi bi-chevron-right ms-auto" style="color:var(--pv-muted)"></i></a>
         <a class="pf-link" href="{{ url('my-tests') }}"><span class="ic"><i class="bi bi-ui-checks"></i></span>My tests<i class="bi bi-chevron-right ms-auto" style="color:var(--pv-muted)"></i></a>
         <a class="pf-link" href="{{ url('my-tests/analysis') }}"><span class="ic"><i class="bi bi-graph-up-arrow"></i></span>Test performance analysis<i class="bi bi-chevron-right ms-auto" style="color:var(--pv-muted)"></i></a>
         <a class="pf-link" href="{{ url('/') }}#counselling"><span class="ic"><i class="bi bi-headset"></i></span>Talk to a counsellor<i class="bi bi-chevron-right ms-auto" style="color:var(--pv-muted)"></i></a>

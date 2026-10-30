@@ -39,6 +39,7 @@ Route::group(['prefix' => 'kpsc', 'as' => 'kpsc'], function () {
 
 
 
+    Route::post('mcq/{id}/bookmark', 'cms\McqBookmarkController@toggle')->whereNumber('id')->middleware(['auth', 'throttle:60,1']);
     Route::get('mcq/{id}/questions', 'cms\McqExamController@questions')->whereNumber('id')->middleware(['auth', 'season.access']);
     Route::post('mcq/{id}/progress', 'cms\McqExamController@progress')->whereNumber('id')->middleware(['auth', 'season.access']);
     Route::post('mcq/{id}/submit', 'cms\McqExamController@submit')->whereNumber('id')->middleware(['auth', 'season.access']);

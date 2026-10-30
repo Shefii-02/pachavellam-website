@@ -208,6 +208,7 @@ Route::middleware(['auth', 'throttle:60,1'])->group(function () {
     Route::match(['get', 'post'], 'exams/favourite/{id}', 'StudentHubController@favourite')->whereNumber('id');
     Route::get('my-account', 'StudentHubController@account');
     Route::get('my-account/trend', 'StudentHubController@trend');
+    Route::get('my-account/bookmarks', 'cms\McqBookmarkController@index');   // saved MCQ questions
     Route::get('my-courses/{id}', 'MyCourseController@show')->whereNumber('id');   // a bought course, tab by tab
     Route::post('my-account/referral', 'ReferralController@apply')->middleware('throttle:10,1');
     Route::post('my-account/profile','StudentHubController@updateProfile');
