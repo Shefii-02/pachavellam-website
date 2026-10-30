@@ -36,9 +36,13 @@
     .mq-modal { background:var(--card); color:var(--tx); border-radius:16px; width:100%; max-width:460px; padding:20px; } .mq-modal h5 { font-weight:800; margin-bottom:10px; }
     .mq-tbl { width:100%; border-collapse:collapse; margin:10px 0; font-size:.9rem; } .mq-tbl td { border:1px solid var(--bd); padding:7px 10px; } .mq-tbl td:last-child { text-align:center; font-weight:800; }
     .mq-pbtn { display:none; }
+    .mq-pclose, .mq-pbd { display:none; }
     @media (max-width:900px) {
         .mq-grid { grid-template-columns:1fr; } .mq-pbtn { display:inline-block; }
         .mq-pal { position:fixed; left:0; right:0; bottom:0; z-index:1050; border-radius:18px 18px 0 0 !important; transform:translateY(105%); transition:transform .22s; box-shadow:0 -8px 30px rgba(0,0,0,.25); } .mq-pal.open { transform:none; }
+        .mq-pal { max-height:80vh; overflow:auto; } .mq-pal .mq-nums { max-height:38vh; }
+        .mq-pclose { display:inline-block; margin-left:8px; border:1px solid var(--bd); background:var(--card); color:var(--tx); border-radius:10px; padding:4px 12px; font-weight:800; font-size:.8rem; }
+        .mq-pbd { position:fixed; inset:0; z-index:1040; background:rgba(0,0,0,.45); } .mq-pbd.on { display:block; }
         .mq-nums { max-height:38vh; } .mq-bar .mq-btn { flex:1 1 auto; padding:10px 8px; }
     }
     /* result */
@@ -118,10 +122,11 @@ window.MCQ.csrf = @json(csrf_token());
             root.innerHTML = '<div class="mq-top"><h1>' + esc(C.title) + '</h1><span class="mq-chip" id="mqT">--:--</span>'
                 + '<button class="mq-btn" id="fsm" title="Smaller text">A−</button><button class="mq-btn" id="fsp" title="Larger text">A+</button>'
                 + '<button class="mq-btn mq-pbtn" id="palBtn">☰ <span id="palN"></span></button><button class="mq-btn bad" id="subBtn">Submit</button></div>'
-                + '<div class="mq-grid"><div class="mq-card" id="mqQ"></div><div class="mq-card mq-pal" id="mqPal"></div></div>';
+                + '<div class="mq-grid"><div class="mq-card" id="mqQ"></div><div class="mq-card mq-pal" id="mqPal"></div></div><div class="mq-pbd" id="palBd"></div>';
             $('fsm').onclick = function () { setFs(-1); }; $('fsp').onclick = function () { setFs(1); };
-            $('palBtn').onclick = function () { $('mqPal').classList.toggle('open'); }; $('subBtn').onclick = confirmSubmit;
+            $('palBtn').onclick = function () { setPal(!$('mqPal').classList.contains('open')); }; $('palBd').onclick = function () { setPal(false); }; $('subBtn').onclick = confirmSubmit;
         }
+        function setPal(on) { $('mqPal').classList.toggle('open', on); $('palBd').classList.toggle('on', on); }
         function st(i) {
             var id = S.qs[i].id, a = S.ans[id] != null, m = S.marked[id];
             return a && m ? 'am' : m ? 'mk' : a ? 'an' : S.vis[id] ? 'na' : 'nv';
@@ -150,12 +155,13 @@ window.MCQ.csrf = @json(csrf_token());
                 var s = st(i), dim = S.filter !== 'all' && !(S.filter === 'an' ? (s === 'an' || s === 'am') : S.filter === 'mk' ? (s === 'mk' || s === 'am') : s === S.filter);
                 return '<button class="mq-n ' + s + (i === S.cur ? ' cur' : '') + (dim ? ' dim' : '') + '" data-i="' + i + '">' + (i + 1) + '</button>';
             }).join('');
-            $('mqPal').innerHTML = '<h6>Question palette <span style="float:right;color:var(--mu)">' + c.an + '/' + S.qs.length + ' answered</span></h6><div class="mq-fil">' + fil + '</div><div class="mq-nums">' + nums + '</div>'
+            $('mqPal').innerHTML = '<h6 style="display:flex;align-items:center">Question palette <span style="margin-left:auto;color:var(--mu)">' + c.an + '/' + S.qs.length + ' answered</span><button type="button" class="mq-pclose" id="palX">✕ Close</button></h6><div class="mq-fil">' + fil + '</div><div class="mq-nums">' + nums + '</div>'
                 + '<div class="mq-leg"><span><i style="background:var(--ok)"></i>Answered ' + c.an + '</span><span><i style="background:#fde8e8"></i>Not answered ' + c.na + '</span><span><i style="background:var(--mark)"></i>Marked ' + c.mk + '</span><span><i style="background:#e9edf3"></i>Not visited ' + c.nv + '</span></div>'
                 + '<p style="font-size:.72rem;color:var(--mu);margin:10px 0 0">Keys: A–D choose · ← → move · M mark · C clear</p>';
             $('palN').textContent = c.an + '/' + S.qs.length;
+            $('palX').onclick = function () { setPal(false); };
             $('mqPal').querySelectorAll('[data-f]').forEach(function (b) { b.onclick = function () { S.filter = b.dataset.f; drawPal(); }; });
-            $('mqPal').querySelectorAll('[data-i]').forEach(function (b) { b.onclick = function () { go(+b.dataset.i); $('mqPal').classList.remove('open'); }; });
+            $('mqPal').querySelectorAll('[data-i]').forEach(function (b) { b.onclick = function () { go(+b.dataset.i); setPal(false); }; });
         }
         function flush() { var id = S.qs[S.cur].id, now = Date.now(); S.sec[id] = (S.sec[id] || 0) + Math.round((now - S.qs0) / 1000); S.qs0 = now; }
         function go(i) { if (i < 0 || i >= S.qs.length) return; flush(); S.cur = i; S.vis[S.qs[i].id] = 1; draw(); queue(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
