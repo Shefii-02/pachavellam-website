@@ -52,7 +52,7 @@
     @if (count($active))
     <div class="row g-3">
     @foreach ($active as $se)
-        <div class="col-12 col-md-6"><div class="sr-card">
+        <div class="col-12 col-md-4"><div class="sr-card">
             <div class="im" style="{{ !empty($se->cover) ? "height:auto;aspect-ratio:16/9;background:#10243e url('" . $se->cover . "') center/cover" : "background:linear-gradient(135deg," . $accent . ",#10243e)" }}">@if (empty($se->cover))<i class="bi {{ $icon }}"></i>@endif<em class="act">Active</em></div>
             <div class="bd">
                 <div class="fw-bold" style="line-height:1.3">@if ($se->url)<a href="{{ $se->url }}" style="color:inherit;text-decoration:none">{{ $se->title }}</a>@else{{ $se->title }}@endif</div>
