@@ -33,7 +33,7 @@ window.addEventListener('load', function () {
 window.addEventListener('load', function () {
     var el = document.getElementById('lbDrawer'); if (!el || !window.bootstrap) return;
     var oc = new bootstrap.Offcanvas(el), list = document.getElementById('lbList'), pod = document.getElementById('lbPodium');
-    var cur = null, page = 0, more = false, busy = false, sentinel = null, seen = {};
+    var cur = null, curBase = null, page = 0, more = false, busy = false, sentinel = null, seen = {};
     var urlBase = @json(url('kpsc/model-exam-leaderboard-data'));
     var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
     var ini = function (n) { return esc((n || '?').trim().charAt(0).toUpperCase()); };
@@ -49,7 +49,7 @@ window.addEventListener('load', function () {
     }
     function load() {
         if (busy || !cur) return; busy = true;
-        fetch(urlBase + '/' + cur + '?page=' + (page + 1), { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (d) {
+        fetch((curBase || urlBase) + '/' + cur + '?page=' + (page + 1), { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (d) {
             busy = false; page++;
             if (!d.ended) { list.innerHTML = '<div class="lb-msg"><i class="bi bi-hourglass-split d-block fs-3"></i>The leaderboard opens when the exam ends.</div>'; return; }
             if (sentinel) sentinel.remove();
@@ -76,7 +76,7 @@ window.addEventListener('load', function () {
     var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting && more) { io.disconnect(); load(); } }, { root: list, rootMargin: '150px' });
     document.addEventListener('click', function (e) {
         var b = e.target.closest('[data-lb]'); if (!b) return;
-        cur = b.dataset.lb; page = 0; more = false; busy = false; sentinel = null;
+        cur = b.dataset.lb; curBase = b.dataset.lbBase || null; page = 0; more = false; busy = false; sentinel = null;
         document.getElementById('lbTitle').textContent = b.dataset.title || 'Leaderboard'; document.getElementById('lbSub').textContent = '';
         pod.innerHTML = ''; list.innerHTML = '<div class="lb-msg">Loading…</div>'; document.getElementById('lbMe').style.display = 'none';
         oc.show(); load();
@@ -102,7 +102,7 @@ window.addEventListener('load', function () {
             if (!e.isIntersecting) return;
             io.unobserve(e.target);
             var c = e.target;
-            fetch(urlBase + '/' + c.dataset.omr, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
+            fetch((c.dataset.sum || urlBase) + '/' + c.dataset.omr, { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' })
                 .then(function (r) { return r.json(); }).then(function (d) { fill(c, d); })
                 .catch(function () { c.querySelectorAll('.omr-body').forEach(function (b) { b.textContent = 'Could not load.'; }); });
         });

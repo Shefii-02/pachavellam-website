@@ -96,6 +96,7 @@ class SeasonController extends Controller
             $rows[] = (object) ($span($d->started_at, $d->ended_at) + ['title' => $d->exam_title ?: ($d->examtitle ?: 'Exam'), 'date' => $d->exam_date ? Carbon::parse($d->exam_date)->format('d M Y') . ($d->started_at ? ', ' . Carbon::parse($d->started_at)->format('h:i a') : '') : ($d->started_at ? Carbon::parse($d->started_at)->format('d M Y, h:i a') : ''), 'tag' => $t, 'tagc' => $c, 'state' => $state, 'done' => $attended, 'paid' => false,
                 'attended' => $attended, 'bucket' => $bucket($c, $attended), 'pos' => $d->season_position,
                 'omr' => $d->section === 'Model Exam', 'omrId' => $d->id,
+                'dailyId' => $d->section !== 'Model Exam' ? $d->id : null,
                 'answerKey' => $d->section === 'Model Exam' && $state !== 'locked' && $c !== 'up' ? url('kpsc/model-exam/' . $d->exam_date . '/' . $d->id . '/answerkey') : null,
                 'url' => $state === 'locked' ? null : url($base . '/' . $d->exam_date . '/' . $d->id), 'sort' => $sortKey($d->exam_date ?: $d->started_at, $d->started_at, $d->id)]);
         }

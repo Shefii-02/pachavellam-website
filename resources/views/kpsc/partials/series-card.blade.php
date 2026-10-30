@@ -40,7 +40,7 @@
     $href = $locked ? ($lockUrl ?? (auth()->check() ? $r->url : url('sign-in'))) : $r->url;
     if ($locked && !auth()->check()) { $href = url('sign-in'); }
 @endphp
-<div class="col-12 col-md-6"><a class="sr-card sr-xc {{ $locked ? 'lock' : '' }}" href="{{ $href }}">
+<div class="col-12 col-md-6"><div class="sr-card sr-xc {{ $locked ? 'lock' : '' }}" @if (!empty($r->dailyId) && !$locked && $r->tagc !== 'up') data-omr="{{ $r->dailyId }}" data-sum="{{ url('kpsc/daily-exam-summary') }}" @endif>
     <div class="bd">
         <div class="d-flex justify-content-between align-items-center mb-2">
             <span class="small text-muted">@isset($n)#{{ $n }} · @endisset{{ $r->date }}</span>
@@ -51,14 +51,19 @@
         </div>
         <div class="fw-bold" style="line-height:1.3;min-height:2.6em">{{ \Illuminate\Support\Str::limit($r->title, 70) }}@if ($r->paid)<span class="sr-paid">PAID</span>@endif</div>
         @include('kpsc.partials.series-card-dates', ['r' => $r])
-        <div class="mt-2 text-end">
-            @if ($locked)<span class="sr-go off">Unlock</span>
-            @elseif ($r->done)<span class="sr-go done"><i class="bi bi-check2"></i> Attempted</span>
+        <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
+            @if ($locked)<a class="sr-go off" href="{{ $href }}">Unlock</a>
             @elseif ($r->tagc === 'up')<span class="sr-go off">Opens soon</span>
-            @elseif ($r->tagc === 'end')<span class="sr-go off">Practice</span>
-            @else<span class="sr-go">Attempt</span>@endif
+            @elseif ($r->done)<a class="sr-go done" href="{{ $href }}"><i class="bi bi-check2"></i> Attempted</a>
+            @elseif ($r->tagc === 'end')<a class="sr-go off" href="{{ $href }}">Practice</a>
+            @else<a class="sr-go" href="{{ $href }}">Attempt</a>@endif
+            @if (!empty($r->dailyId) && !$locked && $r->tagc !== 'up')<span class="small text-muted ms-auto omr-last"></span>@endif
         </div>
+        @if (!empty($r->dailyId) && !$locked && $r->tagc !== 'up')
+        <details class="omr-dr mt-2" data-w="mine"><summary><i class="bi bi-clock-history"></i> My attempts</summary><div class="omr-body small">Loading…</div></details>
+        <button type="button" class="omr-lb-btn mt-2" data-lb="{{ $r->dailyId }}" data-lb-base="{{ url('kpsc/daily-exam-leaderboard-data') }}" data-title="{{ $r->title }}"><i class="bi bi-trophy-fill"></i> Leaderboard <i class="bi bi-chevron-right ms-auto"></i></button>
+        @endif
     </div>
-</a></div>
+</div></div>
 
 @endif

@@ -3,6 +3,7 @@
         .omr-dr { border-top:1px solid var(--pv-border); padding:6px 0; } .omr-dr > summary { cursor:pointer; font-size:.82rem; font-weight:700; color:var(--pv-text); list-style:none; } .omr-dr > summary::-webkit-details-marker { display:none; } .omr-dr > summary::after { content:'\F282'; font-family:'bootstrap-icons'; float:right; transition:transform .2s; } .omr-dr[open] > summary::after { transform:rotate(180deg); }
         .omr-body { padding-top:6px; color:var(--pv-muted); } .omr-body .ol { display:flex; justify-content:space-between; gap:8px; padding:3px 0; border-bottom:1px dashed var(--pv-border); } .omr-body .ol b { color:var(--pv-text); }
         .omr-lb-btn { display:flex; align-items:center; gap:8px; width:100%; border:0; border-radius:12px; padding:9px 12px; font-size:.84rem; font-weight:800; color:#5b3b00; background:linear-gradient(135deg,#ffe29a,#ffc247); cursor:pointer; }
+        a.omr-lb-btn { text-decoration:none !important; color:#5b3b00 !important; }
         #lbDrawer { --bs-offcanvas-width:420px; max-width:100vw; background:var(--pv-surface); color:var(--pv-text); }
         #lbDrawer .lb-head { background:linear-gradient(160deg,#1b2a41,#0a8f5b); color:#fff; padding:14px 16px 0; }
         #lbDrawer .lb-head h5 { font-size:1rem; font-weight:800; margin:0;color:#fff; } #lbDrawer .lb-head small { opacity:.8; }

@@ -31,6 +31,8 @@ Route::group(['prefix' => 'kpsc', 'as' => 'kpsc'], function () {
     Route::get('model-exam/{date}/{id}', 'cms\HomeController@get_model_date_based_questions')->middleware('season.access');
     Route::post('model-exam/store-result/{id}', 'cms\HomeController@store_model_exam_results')->middleware(['auth', 'season.access']);
     Route::get('model-exam/{date}/{id}/leaderboard', 'cms\HomeController@model_exam_leaderboard');
+    Route::get('daily-exam-summary/{id}', 'PublicCatalogController@dailySummary')->whereNumber('id');   // the same two drawers on the daily exam cards
+    Route::get('daily-exam-leaderboard-data/{id}', 'PublicCatalogController@dailyLeaderboard')->whereNumber('id');
     Route::get('model-exam-summary/{id}', 'PublicCatalogController@omrSummary')->whereNumber('id');   // drawers on the OMR listing: my attempts + leaderboard
     Route::get('model-exam-leaderboard-data/{id}', 'PublicCatalogController@omrLeaderboard')->whereNumber('id');
     Route::get('model-exam/{date}/{id}/answerkey', 'cms\HomeController@model_exam_answerkey');

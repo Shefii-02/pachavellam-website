@@ -352,6 +352,48 @@ class PublicCatalogController extends Controller
         return response()->json(['loggedIn' => (bool) $user, 'ended' => $ended, 'cutoff' => $cutoff, 'mine' => $mine, 'title' => $exam->exam_title ?: ($exam->examtitle ?: 'Exam')]);
     }
 
+    /** JSON for the "My attempts" dropdown of a daily exam card: the student's own finished attempts, latest first. */
+    public function dailySummary(Request $request, $id)
+    {
+        $exam = \App\Models\DailyExam::where('section', '<>', 'Model Exam')->where('status', 1)->findOrFail($id);
+        $user = auth()->user();
+        $mine = $user ? \App\Models\DailyExamattempt::where('exam_id', $exam->id)->where('user_id', $user->id)->where('status', '2')->orderByDesc('id')->limit(20)->get()->map(fn ($a) => [
+            'name' => $user->name, 'right' => (int) $a->right, 'wrong' => (int) $a->wrong, 'mark' => round((float) $a->total_mark, 2), 'below' => false,
+            'at' => $a->attend_ended_at ? \Illuminate\Support\Carbon::parse($a->attend_ended_at)->format('d M Y, h:i a') : ''])->values() : collect();
+
+        return response()->json(['loggedIn' => (bool) $user, 'ended' => true, 'cutoff' => null, 'mine' => $mine, 'title' => $exam->exam_title ?: ($exam->examtitle ?: 'Exam')]);
+    }
+
+    /** The leaderboard drawer of a daily exam: first attempts finished inside the exam window, 25 per page, plus the signed-in student's own rank. */
+    public function dailyLeaderboard(Request $request, $id)
+    {
+        $exam = \App\Models\DailyExam::where('section', '<>', 'Model Exam')->where('status', 1)->findOrFail($id);
+        $per = 25;
+        $page = max(1, (int) $request->query('page', 1));
+        $base = fn () => \App\Models\DailyExamattempt::leftJoin('users', 'users.id', 'kpsc_daily_exams_attempt.user_id')->where('kpsc_daily_exams_attempt.exam_id', $exam->id)
+            ->where('kpsc_daily_exams_attempt.status', '2')->where('kpsc_daily_exams_attempt.attempt_no', 1)
+            ->when($exam->ended_at, fn ($q) => $q->where('kpsc_daily_exams_attempt.attend_ended_at', '<=', $exam->ended_at));
+        $order = fn ($q) => $q->orderByDesc('kpsc_daily_exams_attempt.total_mark')->orderBy('kpsc_daily_exams_attempt.attempt_time')->orderBy('kpsc_daily_exams_attempt.id');
+        $total = $base()->count();
+        $user = auth()->user();
+        $rows = $order($base())->select('kpsc_daily_exams_attempt.*', 'users.name as uname')->skip(($page - 1) * $per)->take($per)->get();
+        $out = $rows->values()->map(fn ($a, $i) => ['rank' => ($page - 1) * $per + $i + 1, 'name' => $a->uname ?: 'Student', 'right' => (int) $a->right, 'wrong' => (int) $a->wrong,
+            'mark' => round((float) $a->total_mark, 2), 'me' => $user && $a->user_id == $user->id]);
+
+        $me = null;
+        if ($user) {
+            $best = $order($base())->where('kpsc_daily_exams_attempt.user_id', $user->id)->select('kpsc_daily_exams_attempt.*')->first();
+            if ($best) {
+                $rank = $base()->where(fn ($q) => $q->where('kpsc_daily_exams_attempt.total_mark', '>', $best->total_mark)
+                    ->orWhere(fn ($w) => $w->where('kpsc_daily_exams_attempt.total_mark', $best->total_mark)->where(fn ($x) => $x->where('kpsc_daily_exams_attempt.attempt_time', '<', $best->attempt_time)
+                        ->orWhere(fn ($y) => $y->where('kpsc_daily_exams_attempt.attempt_time', $best->attempt_time)->where('kpsc_daily_exams_attempt.id', '<', $best->id)))))->count() + 1;
+                $me = ['rank' => $rank, 'name' => $user->name ?: 'You', 'mark' => round((float) $best->total_mark, 2), 'right' => (int) $best->right, 'wrong' => (int) $best->wrong, 'below' => false];
+            }
+        }
+
+        return response()->json(['ended' => true, 'cutoff' => null, 'rows' => $out, 'total' => $total, 'more' => $page * $per < $total, 'me' => $me, 'loggedIn' => (bool) $user]);
+    }
+
     /** The leaderboard drawer of an OMR exam: 25 students per page (ranked), plus the signed-in student's own best rank. Opens once the exam has ended. */
     public function omrLeaderboard(Request $request, $id)
     {
@@ -433,6 +475,7 @@ class PublicCatalogController extends Controller
                 'date' => $legacyRow ? ($e->exam_date ? \Illuminate\Support\Carbon::parse($e->exam_date)->format('d M Y') : '') : ($e->start_at ? $e->start_at->format('d M Y, h:i a') : ($e->entry_date ? \Illuminate\Support\Carbon::parse($e->entry_date)->format('d M Y') : '')),
                 'omr' => $legacyRow && $e->section === 'Model Exam', 'omrId' => $legacyRow ? $e->id : null,
                 'answerKey' => $legacyRow && $e->section === 'Model Exam' ? url('kpsc/model-exam/' . $e->exam_date . '/' . $e->id . '/answerkey') : null,
+                'dailyId' => $legacyRow && $e->section !== 'Model Exam' ? $e->id : null,
                 'tag' => $t, 'tagc' => $c, 'state' => $state, 'inPaid' => $se && $access->isPaid($se), 'paid' => false, 'done' => $legacyRow && in_array($e->id, $done),
                 'url' => $state === 'locked' && $se ? $access->buyUrl($se) : $examUrl,
                 'sort' => ($legacyRow ? (string) $e->exam_date : ($e->start_at ? $e->start_at->format('Y-m-d') : '0000-00-00')) . sprintf('%08d', $e->id),
