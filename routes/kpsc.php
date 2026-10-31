@@ -28,7 +28,7 @@ Route::group(['prefix' => 'kpsc', 'as' => 'kpsc'], function () {
     Route::get('daily-exam', fn () => redirect(url('kpsc/daily-exams'), 301));   // renamed: /kpsc/daily-exams
 
     Route::get('model-exam', fn () => redirect(url('kpsc/omr-exams'), 301));   // renamed: /kpsc/omr-exams
-    Route::get('model-exam/{date}/{id}', 'cms\HomeController@get_model_date_based_questions')->middleware('season.access');
+    Route::get('model-exam/{date}/{id}', 'cms\HomeController@get_model_date_based_questions')->middleware(['auth', 'season.access']);   // attempting an exam needs an account: a guest signs in first and comes back here
     Route::post('model-exam/store-result/{id}', 'cms\HomeController@store_model_exam_results')->middleware(['auth', 'season.access']);
     Route::get('model-exam/{date}/{id}/leaderboard', 'cms\HomeController@model_exam_leaderboard');
     Route::get('daily-exam-summary/{id}', 'PublicCatalogController@dailySummary')->whereNumber('id');   // the same two drawers on the daily exam cards
