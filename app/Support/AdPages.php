@@ -16,10 +16,11 @@ class AdPages
         'article_detail' => 'Article / announcement page',
         'category' => 'Category page',
         'series' => 'Exam series list (daily / OMR / GK / CA / special)',
+        'bulletin' => 'PSC Bulletin list',
         'exam_intro' => 'Exam instructions page (small ad, never while answering)',
         'my_courses' => 'My courses (bought)',
     ];
 
     /** Pages that are long paged lists (in-list ads and "every N items" make sense there). */
-    public const LISTS = ['courses', 'classes', 'articles', 'category', 'series'];
+    public const LISTS = ['courses', 'classes', 'articles', 'category', 'series', 'bulletin'];
 }

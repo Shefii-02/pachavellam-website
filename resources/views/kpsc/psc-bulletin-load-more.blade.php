@@ -17,6 +17,7 @@
             <span class="bl-dl" aria-label="Download"><i class="fa fa-download"></i></span>
         </a>
     </div>
+    @include('partials.ad-slot', ['type' => 'web_infeed', 'page' => 'bulletin', 'pos' => $loop->iteration, 'pageNo' => $pscbulletin->currentPage()])
 @endforeach
 @unless ($pscbulletin->hasMorePages())
     <span class="bl-end" hidden></span>

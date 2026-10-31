@@ -30,6 +30,10 @@
     .bl-more { text-align: center; margin-top: 18px; }
     .bl-more .btn { border-radius: 24px; padding: 8px 28px; }
     .bl-state { text-align: center; color: #6c757d; font-size: 14px; padding: 18px 0; }
+    .bl-skel .bl-card { pointer-events: none; padding-right: 14px; }
+    .bl-skel .bl-date, .bl-skel .bl-line { background: linear-gradient(90deg, #eceff1 25%, #f7f9fa 50%, #eceff1 75%); background-size: 200% 100%; animation: bl-shimmer 1.2s linear infinite; }
+    .bl-skel .bl-line { height: 12px; border-radius: 6px; margin-bottom: 9px; }
+    @keyframes bl-shimmer { to { background-position: -200% 0; } }
     .bl-spin { width: 28px; height: 28px; border: 3px solid #cfe3a8; border-top-color: #77ab09; border-radius: 50%; display: inline-block; animation: bl-rot .8s linear infinite; }
     @keyframes bl-rot { to { transform: rotate(360deg); } }
 </style>
@@ -52,7 +56,8 @@
         </div>
 
         <div id="results" class="bl-grid"></div>
-        <div class="bl-state ajax-loading"><span class="bl-spin"></span></div>
+        <div class="bl-state ajax-loading" style="display:none"></div>
+        <div id="bl-sentinel" style="height:1px"></div>
         <div class="bl-more"><a class="btn btn-primary load_more" href="#" style="display:none">Load more</a></div>
     </div>
 </div>
@@ -63,12 +68,22 @@
     var SITEURL = "{{ url('/') }}";
     var page = 1;
     var loading = false;
+    var done = false;
+    var skeleton = '<div class="bl-col bl-skel"><div class="bl-card"><div class="bl-date"></div><div class="bl-body"><div class="bl-line" style="width:70%"></div><div class="bl-line" style="width:45%"></div><div class="bl-line" style="width:30%;margin:0"></div></div></div></div>';
     load_more(page);
 
     $('body').on('click', '.load_more', function (e) {
         e.preventDefault();
-        if (!loading) { load_more(++page); }
+        next();
     });
+
+    function next() { if (!loading && !done) { load_more(++page); } }
+
+    // load the next page when the end of the list scrolls into view (the button is the fallback)
+    if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (en) { if (en[0].isIntersecting && page > 0 && $('#results').children().length) { next(); } }, { rootMargin: '400px' })
+            .observe(document.getElementById('bl-sentinel'));
+    }
 
     $('body').on('click', '.dwn_c', function () {
         $.ajax({ url: "{{ url('kpsc/psc-bulletin-downloading') }}", data: { dwn_id: $(this).data('id') }, cache: false });
@@ -76,24 +91,33 @@
 
     function load_more(page) {
         loading = true;
-        $('.ajax-loading').html('<span class="bl-spin"></span>').show();
+        $('.ajax-loading').hide();
         $('.load_more').hide();
+        $('#results').append($(skeleton + skeleton + skeleton).addClass('bl-ph'));   // shimmer cards while the page loads
         $.ajax({ url: SITEURL + "/kpsc/psc-bulletin?page=" + page, type: "get", dataType: "html" })
             .done(function (data) {
                 var $d = $('<div>').html(data);
+                $d.find('script').remove();   // ad scripts are started below, once the ads are in the page
                 var last = $d.find('.bl-end').remove().length > 0;   // the partial marks the last page
                 var empty = $.trim($d.html()).length === 0;
+                $('#results .bl-ph').remove();
                 $('#results').append($d.children());
-                if (empty && page === 1) {
-                    $('.ajax-loading').text('No bulletins yet.');
-                } else if (last || empty) {
-                    $('.ajax-loading').hide();
+                $('#results ins.adsbygoogle:not([data-adsbygoogle-status])').each(function () {
+                    try { (window.adsbygoogle = window.adsbygoogle || []).push({}); } catch (e) {}
+                });
+                if (last || empty) {
+                    done = true;
+                    $('.ajax-loading').text(empty && page === 1 ? 'No bulletins yet.' : "You've reached the end.").show();
                 } else {
-                    $('.ajax-loading').hide();
                     $('.load_more').show();
                 }
             })
-            .fail(function () { $('.ajax-loading').text('Could not load bulletins. Please try again.'); $('.load_more').show(); })
+            .fail(function () {
+                $('#results .bl-ph').remove();
+                $('.ajax-loading').text('Could not load bulletins. Tap Load more to try again.').show();
+                $('.load_more').show();
+                page--;
+            })
             .always(function () { loading = false; });
     }
 </script>
