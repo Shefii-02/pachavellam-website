@@ -17,8 +17,8 @@
         .lb-row { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:12px; margin-bottom:5px; background:var(--pv-surface-2); }
         .lb-row .rk { width:30px; text-align:center; font-weight:800; color:var(--pv-muted); } .lb-row .nm { flex:1; min-width:0; font-weight:700; font-size:.88rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .lb-row small { color:var(--pv-muted); display:block; font-weight:500; font-size:.7rem; }
         .lb-row .mk { font-weight:800; color:#0a8f5b; }
-        .lb-row.me { background:#e7f6ef; border:2px solid #22c55e; } .lb-row.me .nm { color:#0a6b46; }
-        #lbMe { border-top:2px solid #22c55e; background:#e7f6ef; padding:10px 14px; display:none; } #lbMe .lb-row { margin:0; background:transparent; padding:0; } #lbMe .tag { font-size:.68rem; font-weight:800; color:#0a6b46; text-transform:uppercase; letter-spacing:.05em; }
+        .lb-row.me { background:#e7f6ef; border:2px solid #22c55e; box-shadow:0 0 0 3px rgba(34,197,94,.25); } .lb-row.me .nm { color:#0a6b46; }
+        #lbMe { position:sticky; bottom:0; z-index:3; box-shadow:0 -6px 16px rgba(0,0,0,.15); border-top:2px solid #22c55e; background:#e7f6ef; padding:10px 14px; display:none; } #lbMe .lb-row { margin:0; background:transparent; padding:0; } #lbMe .tag { font-size:.68rem; font-weight:800; color:#0a6b46; text-transform:uppercase; letter-spacing:.05em; }
         .lb-msg { text-align:center; color:var(--pv-muted); padding:24px 10px; font-size:.88rem; }
         .sr-pg { display:flex; justify-content:space-between; align-items:center; margin-top:14px; font-size:.85rem; color:var(--pv-muted); }
         #lbSub{

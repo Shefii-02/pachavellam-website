@@ -33,6 +33,7 @@ window.addEventListener('load', function () {
 window.addEventListener('load', function () {
     var el = document.getElementById('lbDrawer'); if (!el || !window.bootstrap) return;
     var oc = new bootstrap.Offcanvas(el), list = document.getElementById('lbList'), pod = document.getElementById('lbPodium');
+    var meRank = 0, meIo = null;
     var cur = null, curBase = null, page = 0, more = false, busy = false, sentinel = null, seen = {};
     var urlBase = @json(url('kpsc/model-exam-leaderboard-data'));
     var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
@@ -46,6 +47,14 @@ window.addEventListener('load', function () {
             var a = rows[x[0]];
             return '<div class="lb-pd ' + x[1] + (a.me ? ' me' : '') + '"><div class="av">' + (x[0] === 0 ? '<i class="bi bi-trophy-fill crown"></i>' : '') + ini(a.name) + '</div><div class="nm">' + esc(a.name) + '</div><div class="mk">' + a.mark + ' marks</div><div class="bar">' + a.rank + '</div></div>';
         }).join('');
+    }
+    /* the fixed "Your rank" card stays until the student scrolls to their own highlighted row */
+    function watchMe() {
+        var row = list.querySelector('.lb-row.me');
+        if (!row || meRank <= 3 || !('IntersectionObserver' in window)) return;
+        if (meIo) meIo.disconnect();
+        meIo = new IntersectionObserver(function (es) { document.getElementById('lbMe').style.display = es[0].isIntersecting ? 'none' : 'block'; }, { root: list, threshold: 0.6 });
+        meIo.observe(row);
     }
     function load() {
         if (busy || !cur) return; busy = true;
@@ -63,10 +72,11 @@ window.addEventListener('load', function () {
                     cut.innerHTML = d.cutoff == null ? '' : (d.me.below
                         ? '<b style="color:#a4242a"><i class="bi bi-exclamation-triangle-fill"></i> Below cutoff.</b> Your mark ' + d.me.mark + ' is ' + (Math.round((d.cutoff - d.me.mark) * 100) / 100) + ' short of the cutoff ' + d.cutoff + '. Keep practising!'
                         : '<b style="color:#0a6b46"><i class="bi bi-check-circle-fill"></i> Above cutoff</b> (' + d.cutoff + '). Well done!');
-                    document.getElementById('lbMe').style.display = 'block';
+                    meRank = d.me.rank; document.getElementById('lbMe').style.display = meRank > 3 ? 'block' : 'none';   // top 3 are already on the podium
                 }
             }
             list.insertAdjacentHTML('beforeend', d.rows.filter(function (a) { return a.rank > 3; }).map(row).join(''));
+            watchMe();
             more = d.more;
             if (more) {
                 sentinel = document.createElement('div'); sentinel.className = 'lb-msg'; sentinel.textContent = 'Loading more…'; list.appendChild(sentinel); io.observe(sentinel);
@@ -76,7 +86,7 @@ window.addEventListener('load', function () {
     var io = new IntersectionObserver(function (es) { if (es[0].isIntersecting && more) { io.disconnect(); load(); } }, { root: list, rootMargin: '150px' });
     document.addEventListener('click', function (e) {
         var b = e.target.closest('[data-lb]'); if (!b) return;
-        cur = b.dataset.lb; curBase = b.dataset.lbBase || null; page = 0; more = false; busy = false; sentinel = null;
+        meRank = 0; if (meIo) { meIo.disconnect(); meIo = null; } cur = b.dataset.lb; curBase = b.dataset.lbBase || null; page = 0; more = false; busy = false; sentinel = null;
         document.getElementById('lbTitle').textContent = b.dataset.title || 'Leaderboard'; document.getElementById('lbSub').textContent = '';
         pod.innerHTML = ''; list.innerHTML = '<div class="lb-msg">Loading…</div>'; document.getElementById('lbMe').style.display = 'none';
         oc.show(); load();
