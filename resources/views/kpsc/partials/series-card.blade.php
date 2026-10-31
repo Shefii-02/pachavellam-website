@@ -16,14 +16,7 @@
                 <span class="sr-go off">Opens soon</span>
             @else
             <a class="sr-go {{ $omrLocked ? 'off' : '' }}" href="{{ $omrHref }}">{{ $omrLocked ? 'Unlock' : ($r->tagc === 'end' ? 'Practice' : 'Attempt') }}</a>
-            @if ($r->answerKey)<a class="sr-go off" href="{{ $r->answerKey }}"><i class="bi bi-key"></i> Answer key</a>@endif
-            @if (!$omrLocked)
-                @auth
-                    <button type="button" class="sr-go off" data-mark="{{ $r->omrId }}" data-title="{{ $r->title }}"><i class="bi bi-upload"></i> Upload marks</button>
-                @else
-                    <a class="sr-go off" href="{{ url('sign-in') }}"><i class="bi bi-upload"></i> Upload marks</a>
-                @endauth
-            @endif
+            {{-- answer key and upload marks are inside the exam page (tabs), so they are not repeated on the card --}}
             <span class="small text-muted ms-auto omr-last"></span>
             @endif
         </div>
