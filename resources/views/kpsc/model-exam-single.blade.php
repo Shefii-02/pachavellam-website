@@ -78,6 +78,7 @@
                         @else<div class="alert alert-success py-2 mb-0"><b>Above cutoff</b> ({{ $cut }}). Well done!</div>@endif
                     @endif
                 </div>
+            @else
             @guest
                 <div class="xt-mark"><h5 class="mb-1">Upload your marks</h5><p class="xt-note mb-3">Sign in to upload your marks and see them here.</p><a class="btn btn-success" href="{{ url('sign-in') }}">Sign in</a></div>
             @else
@@ -97,7 +98,7 @@
 
         <div class="xt-pane" id="pane-ak">
             @if ($akUrl)@include('kpsc.partials.pdf-viewer', ['pdfId' => 'ak', 'pdfUrl' => $akUrl])@else<p class="text-muted">The answer key is not uploaded yet.</p>@endif
-            <p class="xt-note">Check your OMR sheet, then use <b>Upload your marks</b> on the exam list to save your result.</p>
+            <p class="xt-note">Check your OMR sheet, then open the <b>Upload marks</b> tab to save your result.</p>
         </div>
         @endif
 
@@ -109,7 +110,7 @@
                 <li>Read the instructions and tick that you understood them, then press <b>Start exam</b>.</li>
                 <li>Open the <b>Question paper</b> tab and mark your answers on the OMR sheet. Use the optional timer to see how long you take.</li>
                 <li>Open the <b>Answer key</b> tab, count your correct and wrong answers and calculate your mark (1 mark for a correct answer, 1/3 mark deducted for a wrong one).</li>
-                <li>Upload your marks from the exam list. The leaderboard opens when the exam ends.</li>
+                <li>Open the <b>Upload marks</b> tab and save your counts. The leaderboard opens when the exam ends.</li>
             </ol>
             <h5>Why time yourself?</h5>
             <p>The Kerala PSC written test is a race against the clock. Recording the time you take on each model exam shows whether you are getting faster, and comparing it with the average time of other students tells you where you need more speed practice.</p>
