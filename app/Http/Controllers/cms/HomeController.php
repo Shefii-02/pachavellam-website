@@ -279,6 +279,16 @@ class HomeController extends Controller
 
     }
 
+    /** One bulletin, read in the page (PDF viewer, as the OMR exam shows its question paper) with a download button. */
+    public function bulletinShow($id){
+        $bulletin = Bulletin::where('status',1)->findOrFail($id);
+        $title = 'PSC Bulletin ' . date('F Y', strtotime($bulletin->month_year));
+        $fileUrl = url(Storage::url('bullet-in/'.$bulletin->file_name));
+        $others = Bulletin::where('status',1)->where('id','!=',$bulletin->id)->orderby('month_year','desc')->orderBy('issue','desc')->limit(6)->get();
+
+        return view('kpsc.psc-bulletin-show',compact('bulletin','title','fileUrl','others'));
+    }
+
     public function notify(){
         $title = "Notification";
         $redirection = url('kpsc');

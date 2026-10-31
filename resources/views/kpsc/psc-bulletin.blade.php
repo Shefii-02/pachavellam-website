@@ -25,6 +25,10 @@
     .bl-meta { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
     .bl-chip { background: #e8f1ff; color: #1d5fc4; font-size: 11px; font-weight: 600; border-radius: 20px; padding: 2px 10px; }
     .bl-count { font-size: 12px; color: #6c757d; }
+    .bl-open { color: inherit; text-decoration: none; }
+    .bl-open::after { content: ""; position: absolute; inset: 0; border-radius: 14px; }   /* the whole card opens the reader */
+    .bl-read { margin-left: auto; font-size: 12px; font-weight: 700; color: #0a8f5b; }
+    .bl-dl { z-index: 1; text-decoration: none !important; }
     .bl-dl { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; background: #77ab09; color: #fff; display: flex; align-items: center; justify-content: center; }
     .bl-dl .fa { margin: 0; }
     .bl-more { text-align: center; margin-top: 18px; }
