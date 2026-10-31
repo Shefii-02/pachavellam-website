@@ -30,6 +30,8 @@
     .pv-season summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:8px; padding:6px 4px; } .pv-season summary::-webkit-details-marker { display:none; }
     .pv-sn { flex:1; min-width:0; } .pv-sn b { display:block; font-size:.86rem; color:var(--pv-text,#1b2a41); } .pv-sn small { color:var(--pv-muted,#6b7280); font-size:.72rem; }
     .pv-season summary em.act { font-style:normal; font-size:.64rem; font-weight:800; background:#e7f6ef; color:#0a6b46; border-radius:10px; padding:2px 9px; } .pv-season summary > i { transition:transform .2s; color:var(--pv-muted,#6b7280); } .pv-season[open] summary > i { transform:rotate(180deg); }
+    .pv-card:not(.pv-card-ad) .google-auto-placed, .pv-card:not(.pv-card-ad) ins.adsbygoogle, .pv-card:not(.pv-card-ad) .pv-ad { display:none !important; }   /* no ads inside a card: they break its layout */
+    .pv-card-ad { display:flex; align-items:center; justify-content:center; min-height:160px; padding:0; overflow:hidden; } .pv-card-ad .pv-ad { margin:0 !important; }
     .pv-season-link { display:flex; align-items:center; gap:8px; padding:8px 10px; text-decoration:none; } a.pv-season-link:hover { background:rgba(0,0,0,.03); }
     .pv-season ul { margin-top:2px; } .pv-none { color:var(--pv-muted,#6b7280); font-size:.8rem; padding:6px 8px; }
     .pv-card ul { list-style:none; margin:0; padding:0; display:grid; gap:2px; }
@@ -155,6 +157,9 @@
                     @endif
                     <footer>@if ($f->all)<a href="{{ $f->all }}">See all <i class="bi bi-arrow-right"></i></a>@elseif (!count($f->items))<span>Coming soon</span>@endif</footer>
                 </section>
+                {{-- the ad sits in its own grid cell, the same size as a card, never inside one --}}
+                @php $pvAd = \App\Support\Ads::inList('web_infeed', 'exam', $loop->iteration); @endphp
+                @if ($pvAd)<section class="pv-card pv-card-ad">@include('partials.ad-slot', ['type' => 'web_infeed', 'page' => 'exam', 'pos' => $loop->iteration])</section>@endif
             @endforeach
         </div>
     @endif
