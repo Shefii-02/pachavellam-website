@@ -58,6 +58,9 @@ function remove_slug($value)
 
 function ads_space_sport($item_key)
 {
+     if (\App\Support\Ads::suppressed()) {
+          return '';
+     }
      $item_key = $item_key + 1;
      if (($item_key % 8 == 0)) {
 
@@ -102,6 +105,9 @@ function small_ads_space_sport($item_key)
 
 function bottom_single_ads()
 {
+     if (\App\Support\Ads::suppressed()) {
+          return '';
+     }
      return '<div class="col-lg-12 text-center">
                         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2428477024574809"
                              crossorigin="anonymous"></script>
@@ -125,6 +131,9 @@ function bottom_double_ads()
 
 function single_ads_show()
 {
+     if (\App\Support\Ads::suppressed()) {
+          return '';
+     }
 
      return '<div class="col-lg-12 text-center">
                    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2428477024574809"

@@ -24,7 +24,7 @@ class AdsController extends Controller
 
         return view('admin.content.ads', [
             'app' => AdUnit::where('platform', 'app')->orderBy('id')->get(), 'web' => AdUnit::where('platform', 'web')->orderBy('id')->get(), 'pages' => AdPages::ALL, 'lists' => AdPages::LISTS,
-            'master' => SiteSetting::get('ads_master', '0') === '1', 'appOn' => SiteSetting::get('ads_app', '0') === '1', 'webOn' => SiteSetting::get('ads_web', '0') === '1', 'client' => SiteSetting::get('adsense_client'), 'quiet' => SiteSetting::get('ads_quiet_minutes', '3'), 'sessionMax' => SiteSetting::get('ads_session_max', '3'),
+            'master' => SiteSetting::get('ads_master', '0') === '1', 'appOn' => SiteSetting::get('ads_app', '0') === '1', 'webOn' => SiteSetting::get('ads_web', '0') === '1', 'client' => SiteSetting::get('adsense_client'), 'blockUrls' => SiteSetting::get('ads_block_urls', ''), 'quiet' => SiteSetting::get('ads_quiet_minutes', '3'), 'sessionMax' => SiteSetting::get('ads_session_max', '3'),
         ]);
     }
 
@@ -36,7 +36,7 @@ class AdsController extends Controller
             'u' => 'nullable|array', 'u.*.unit_android' => 'nullable|string|max:80', 'u.*.unit_ios' => 'nullable|string|max:80', 'u.*.slot' => ['nullable', 'regex:/^\d{4,20}$/'],
             'u.*.pages' => 'nullable|array', 'u.*.pages.*' => 'in:' . implode(',', array_keys(AdPages::ALL)),
             'u.*.every_n' => ['nullable', 'integer', 'max:100', fn ($a, $v, $fail) => ($v !== null && $v !== '' && (int) $v !== 0 && (int) $v < 4) ? $fail('Show an ad after every 4 items or more (0 = none) so ads never crowd the list.') : null],
-            'quiet' => 'nullable|integer|min:0|max:60', 'session_max' => 'nullable|integer|min:0|max:20', 'u.*.max_per_page' => 'nullable|integer|min:1|max:20', 'u.*.start_page' => 'nullable|integer|min:1|max:50', 'u.*.cap_minutes' => 'nullable|integer|min:0|max:1440',
+            'block_urls' => 'nullable|string|max:4000', 'quiet' => 'nullable|integer|min:0|max:60', 'session_max' => 'nullable|integer|min:0|max:20', 'u.*.max_per_page' => 'nullable|integer|min:1|max:20', 'u.*.start_page' => 'nullable|integer|min:1|max:50', 'u.*.cap_minutes' => 'nullable|integer|min:0|max:1440',
         ], ['adsense_client.regex' => 'The AdSense publisher id looks like ca-pub-1234567890123456.', 'u.*.slot.regex' => 'An AdSense ad slot id is a number.']);
 
         SiteSetting::put('ads_master', $request->boolean('master') ? '1' : '0');
@@ -44,6 +44,7 @@ class AdsController extends Controller
         SiteSetting::put('ads_web', $request->boolean('web_on') ? '1' : '0');
         SiteSetting::put('ads_quiet_minutes', (string) (int) $request->input('quiet', 3));
         SiteSetting::put('ads_session_max', (string) (int) $request->input('session_max', 3));
+        SiteSetting::put('ads_block_urls', trim((string) $request->input('block_urls')) ?: null);
         SiteSetting::put('adsense_client', trim((string) $request->input('adsense_client')) ?: null);
 
         foreach (AdUnit::all() as $unit) {

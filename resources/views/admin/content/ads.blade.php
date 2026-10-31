@@ -18,6 +18,11 @@
                 <div class="col-md-4"><label class="form-label">At most … full-screen ads per visit</label><input type="number" min="0" max="20" class="form-control" name="session_max" value="{{ $sessionMax }}"></div>
                 <div class="col-12 form-text">Calm rules: full-screen ads (interstitial, app-open) never appear on sign in, payment, tests or while a form is being filled, and the app-open ad only after a long break. Banners and in-list ads sit on reading pages only.</div>
             </div>
+            <div class="mt-3">
+                <label class="form-label fw-bold">Pages without ads (website)</label>
+                <textarea class="form-control font-monospace" name="block_urls" rows="5" placeholder="tests/*&#10;kpsc/mcq/*&#10;kpsc/model-exam/*&#10;sign-in">{{ old('block_urls', $blockUrls) }}</textarea>
+                <div class="form-text">One address per line, without the domain; <b>*</b> matches anything (<code>kpsc/psc-bulletin/*</code>). On these pages the AdSense script is not loaded at all, so <b>manual ads, the bottom banner and Google auto ads</b> are all off. Apps use the page tick-boxes of each ad below.</div>
+            </div>
             <div class="col-md-5 mt-3"><label class="form-label">AdSense publisher id</label><input class="form-control" name="adsense_client" value="{{ old('adsense_client', $client) }}" placeholder="ca-pub-1234567890123456"></div>
         </div></div>
 

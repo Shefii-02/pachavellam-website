@@ -77,7 +77,7 @@
      
         <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-TBNJK6JTCL"></script>
-    @unless (View::hasSection('no_ads'))   {{-- a page with too little content for ads sets @section('no_ads', '1') --}}
+    @unless (\App\Support\Ads::suppressed())   {{-- a page with too little content sets @section('no_ads', '1'); more pages are listed in admin/ads --}}
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2428477024574809"
          crossorigin="anonymous"></script>
     @endunless

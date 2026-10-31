@@ -81,7 +81,7 @@
         $_SERVER['HTTP_USER_AGENT'] == 'Android' ||
             $_SERVER['HTTP_USER_AGENT'] ==
                 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3')
-    @else
+    @elseif (!\App\Support\Ads::suppressed())
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2428477024574809"
             crossorigin="anonymous" onerror="adLoadFailed();"></script>
 
@@ -114,6 +114,7 @@
 
     @include('partials.site-footer')
 
+    @unless (\App\Support\Ads::suppressed())
     <div id="mobileB">
 
         <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2428477024574809"
@@ -126,6 +127,7 @@
         </script>
 
     </div>
+    @endunless
 
 
 

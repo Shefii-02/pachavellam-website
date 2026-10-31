@@ -46,10 +46,36 @@ class Ads
         return $paid;
     }
 
+    /**
+     * Is every website ad (manual slots, the bottom banner and the AdSense script that also runs Google's auto ads) switched off on this page?
+     * Yes when the page sets @section('no_ads', '1'), or its address matches a line of "Pages without ads" in admin/ads
+     * (one address per line, no domain, * is a wildcard: tests/*, kpsc/mcq/*, kpsc/psc-bulletin/*).
+     */
+    public static function suppressed(): bool
+    {
+        static $byUrl = [];
+        if (\Illuminate\Support\Facades\View::hasSection('no_ads')) {
+            return true;
+        }
+        $path = trim(request()->path(), '/') ?: '/';
+        if (!array_key_exists($path, $byUrl)) {
+            $byUrl[$path] = false;
+            foreach (preg_split('/\R/', (string) SiteSetting::get('ads_block_urls', '')) as $line) {
+                $line = trim(preg_replace('#^https?://[^/]+#i', '', trim($line)), " \t/");
+                if ($line !== '' && \Illuminate\Support\Str::is($line === '' ? '/' : $line, $path)) {
+                    $byUrl[$path] = true;
+                    break;
+                }
+            }
+        }
+
+        return $byUrl[$path];
+    }
+
     /** A website unit to show on a page (banner / article ad), or null. */
     public static function web(string $type, string $page): ?AdUnit
     {
-        if (!self::platformOn('web')) {
+        if (!self::platformOn('web') || self::suppressed()) {
             return null;
         }
         $u = self::units('web')->firstWhere('type', $type);

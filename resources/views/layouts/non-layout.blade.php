@@ -77,8 +77,10 @@
      
         <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-TBNJK6JTCL"></script>
+    @unless (\App\Support\Ads::suppressed())
     <script async  src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2428477024574809"
          crossorigin="anonymous" onerror="adLoadFailed();"></script>
+    @endunless
    
     <!--     <script async custom-element="amp-ad" src="https://cdn.ampproject.org/v0/amp-ad-0.1.js"></script>-->
 
