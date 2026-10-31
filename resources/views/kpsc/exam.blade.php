@@ -30,6 +30,7 @@
     .pv-season summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:8px; padding:6px 4px; } .pv-season summary::-webkit-details-marker { display:none; }
     .pv-sn { flex:1; min-width:0; } .pv-sn b { display:block; font-size:.86rem; color:var(--pv-text,#1b2a41); } .pv-sn small { color:var(--pv-muted,#6b7280); font-size:.72rem; }
     .pv-season summary em.act { font-style:normal; font-size:.64rem; font-weight:800; background:#e7f6ef; color:#0a6b46; border-radius:10px; padding:2px 9px; } .pv-season summary > i { transition:transform .2s; color:var(--pv-muted,#6b7280); } .pv-season[open] summary > i { transform:rotate(180deg); }
+    .pv-season-link { display:flex; align-items:center; gap:8px; padding:8px 10px; text-decoration:none; } a.pv-season-link:hover { background:rgba(0,0,0,.03); }
     .pv-season ul { margin-top:2px; } .pv-none { color:var(--pv-muted,#6b7280); font-size:.8rem; padding:6px 8px; }
     .pv-card ul { list-style:none; margin:0; padding:0; display:grid; gap:2px; }
     .pv-card li a { display:flex; align-items:center; gap:8px; padding:7px 8px; border-radius:10px; text-decoration:none; color:var(--pv-text,#1b2a41); background:var(--pv-surface-2,#f4f6f8); }
@@ -136,16 +137,12 @@
                     </header>
                     @if (count($f->seasons))
                         @foreach ($f->seasons as $se)
-                            <details class="pv-season" @if ($loop->first) open @endif>
-                                <summary><span class="pv-sn"><b>{{ $se->title }}</b><small>{{ $se->sub }} · {{ $se->total }} exam{{ $se->total == 1 ? '' : 's' }}</small></span>@if (!empty($se->paid))<em class="act" style="background:#fff3d6;color:#8a5500">₹{{ $se->price }}</em>@endif<em class="act">Active</em><i class="bi bi-chevron-down"></i></summary>
-                                <ul>
-                                    @forelse ($se->items as $it)
-                                        <li><a href="{{ $it->url }}"><span class="pv-i"><b>@if (!empty($it->lock))<i class="bi bi-lock-fill"></i> @endif{{ \Illuminate\Support\Str::limit($it->title, 48) }}</b>@if ($it->sub)<small>{{ $it->sub }}</small>@endif</span><em class="{{ in_array($it->tag, ['Live now', 'Upcoming']) ? 'hot' : '' }}">{{ $it->tag }}</em></a></li>
-                                    @empty
-                                        <li class="pv-none">No exams in this season yet.</li>
-                                    @endforelse
-                                </ul>
-                            </details>
+                            @php $seIn = '<span class="pv-sn"><b>' . e($se->title) . '</b><small>' . e($se->sub) . ' · ' . $se->total . ' exam' . ($se->total == 1 ? '' : 's') . '</small></span>' . (!empty($se->paid) ? '<em class="act" style="background:#fff3d6;color:#8a5500">₹' . e($se->price) . '</em>' : '<em class="act">Free</em>'); @endphp
+                            @if (!empty($se->url))
+                                <a href="{{ $se->url }}" class="pv-season pv-season-link">{!! $seIn !!}</a>
+                            @else
+                                <div class="pv-season pv-season-link">{!! $seIn !!}</div>
+                            @endif
                         @endforeach
                     @elseif (count($f->items))
                         <ul>
