@@ -6,7 +6,7 @@
     .bl-page { background: #f4f7f1 url(https://www.pachavellam.com/assets/images/bg-pacha-area.jpg) center / cover fixed no-repeat; min-height: 100vh; padding: 18px 0 40px; }
     .bl-hero { background: linear-gradient(135deg, #3f7d1d, #77ab09); color: #fff; border-radius: 16px; padding: 22px 20px; box-shadow: 0 6px 18px rgba(63, 125, 29, .25); }
     .bl-hero h1 { font-size: 22px; font-weight: 700; margin: 0 0 6px; }
-    .bl-hero p { margin: 0; font-size: 14px; line-height: 1.8; opacity: .95; }
+    .bl-hero p { margin: 0; font-size: 14px; line-height: 1.8; opacity: .95; color: #fff; }
     .bl-share { display: flex; align-items: center; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
     .bl-share span { font-size: 13px; opacity: .9; }
     .bl-share a { width: 36px; height: 36px; border-radius: 50%; background: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; text-decoration: none; }
