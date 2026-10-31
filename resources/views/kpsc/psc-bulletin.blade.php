@@ -12,31 +12,19 @@
     .bl-share a { width: 36px; height: 36px; border-radius: 50%; background: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; text-decoration: none; }
     .bl-grid { display: flex; flex-wrap: wrap; margin: 18px -8px 0; }
     .bl-col { width: 100%; padding: 8px; }
-    @media (min-width: 576px) { .bl-col { width: 50%; } }
-    @media (min-width: 992px) { .bl-col { width: 33.3333%; } }
-    .bl-card { position: relative; display: flex; align-items: center; gap: 14px; height: 100%; background: #fff; border-radius: 14px; padding: 14px 52px 14px 14px; color: #212529; text-decoration: none; box-shadow: 0 2px 10px rgba(0, 0, 0, .06); transition: transform .15s, box-shadow .15s; }
-    .bl-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0, 0, 0, .12); color: #212529; text-decoration: none; }
-    .bl-date { flex: 0 0 62px; height: 68px; border-radius: 12px; background: #eef6df; color: #3f7d1d; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; }
-    .bl-month { font-size: 18px; font-weight: 700; text-transform: uppercase; }
-    .bl-year { font-size: 12px; font-weight: 600; opacity: .8; }
-    .bl-body { min-width: 0; flex: 1; }
-    .bl-title { font-size: 15px; font-weight: 700; margin: 0 0 2px; }
-    .bl-file { font-size: 12px; color: #6c757d; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .bl-meta { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
-    .bl-chip { background: #e8f1ff; color: #1d5fc4; font-size: 11px; font-weight: 600; border-radius: 20px; padding: 2px 10px; }
-    .bl-count { font-size: 12px; color: #6c757d; }
-    .bl-open { color: inherit; text-decoration: none; }
-    .bl-open::after { content: ""; position: absolute; inset: 0; border-radius: 14px; }   /* the whole card opens the reader */
-    .bl-read { margin-left: auto; font-size: 12px; font-weight: 700; color: #0a8f5b; }
-    .bl-dl { z-index: 1; text-decoration: none !important; }
-    .bl-dl { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 50%; background: #77ab09; color: #fff; display: flex; align-items: center; justify-content: center; }
-    .bl-dl .fa { margin: 0; }
+    @media (min-width: 768px) { .bl-col { width: 50%; } }   /* two cards a row, like the OMR exam list */
+    .sr-card { display: block; height: 100%; background: var(--pv-surface, #fff); border: 1px solid var(--pv-border, #e5e7eb); border-radius: 16px; overflow: hidden; box-shadow: 0 2px 10px rgba(0, 0, 0, .06); color: var(--pv-text, #16202e); }
+    .sr-card .bd { padding: 12px; }
+    .sr-chip { font-size: .66rem; font-weight: 800; border-radius: 10px; padding: 2px 9px; background: #eef0f3; color: #4b5563; } .sr-chip.fr { background: #e7f6ef; color: #0a6b46; }
+    .sr-go { display: inline-block; border-radius: 20px; padding: 5px 14px; font-size: .78rem; font-weight: 800; background: var(--pv-green, #0a8f5b); color: var(--pv-on-brand, #fff) !important; text-decoration: none !important; }
+    .sr-go.off { background: var(--pv-surface, #fff); border: 1px solid var(--pv-border, #e5e7eb); color: var(--pv-muted, #667) !important; }
+    .bl-ttl { font-weight: 700; line-height: 1.3; min-height: 2.6em; }
+    .bl-file { font-size: .76rem; color: var(--pv-muted, #667); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
     .bl-more { text-align: center; margin-top: 18px; }
     .bl-more .btn { border-radius: 24px; padding: 8px 28px; }
     .bl-state { text-align: center; color: #6c757d; font-size: 14px; padding: 18px 0; }
-    .bl-skel .bl-card { pointer-events: none; padding-right: 14px; }
-    .bl-skel .bl-date, .bl-skel .bl-line { background: linear-gradient(90deg, #eceff1 25%, #f7f9fa 50%, #eceff1 75%); background-size: 200% 100%; animation: bl-shimmer 1.2s linear infinite; }
-    .bl-skel .bl-line { height: 12px; border-radius: 6px; margin-bottom: 9px; }
+    .bl-skel .sr-card { pointer-events: none; }
+    .bl-skel .bl-line { height: 12px; border-radius: 6px; margin-bottom: 9px; background: linear-gradient(90deg, #eceff1 25%, #f7f9fa 50%, #eceff1 75%); background-size: 200% 100%; animation: bl-shimmer 1.2s linear infinite; }
     @keyframes bl-shimmer { to { background-position: -200% 0; } }
     .bl-spin { width: 28px; height: 28px; border: 3px solid #cfe3a8; border-top-color: #77ab09; border-radius: 50%; display: inline-block; animation: bl-rot .8s linear infinite; }
     @keyframes bl-rot { to { transform: rotate(360deg); } }
@@ -73,7 +61,7 @@
     var page = 1;
     var loading = false;
     var done = false;
-    var skeleton = '<div class="bl-col bl-skel"><div class="bl-card"><div class="bl-date"></div><div class="bl-body"><div class="bl-line" style="width:70%"></div><div class="bl-line" style="width:45%"></div><div class="bl-line" style="width:30%;margin:0"></div></div></div></div>';
+    var skeleton = '<div class="bl-col bl-skel"><div class="sr-card"><div class="bd"><div class="bl-line" style="width:35%"></div><div class="bl-line" style="width:75%"></div><div class="bl-line" style="width:50%"></div><div class="bl-line" style="width:40%;height:26px;border-radius:20px;margin:0"></div></div></div></div>';
     load_more(page);
 
     $('body').on('click', '.load_more', function (e) {
