@@ -148,7 +148,7 @@ class PublicCatalogController extends Controller
                     $d = ['icon' => 'bi-journal-text', 'all' => url('articles')] + $content('article', fn ($a) => (object) ['title' => $a->title, 'sub' => optional($a->published_at ?? $a->created_at)->format('d M Y'), 'tag' => 'New', 'url' => url('articles/' . $a->id)], $n);
                     break;
                 case 'materials':
-                    $d = ['icon' => 'bi-file-earmark-arrow-down', 'all' => null] + $content('material', fn ($m) => (object) ['title' => $m->title, 'sub' => optional($m->published_at ?? $m->created_at)->format('d M Y'),
+                    $d = ['icon' => 'bi-file-earmark-arrow-down', 'all' => url($exam->slug . '/materials')] + $content('material', fn ($m) => (object) ['title' => $m->title, 'sub' => optional($m->published_at ?? $m->created_at)->format('d M Y'),
                         'tag' => 'Download', 'url' => $m->attachment ? Storage::url('files/' . $m->attachment) : ($m->landing_url ?: '#')], $n);
                     break;
                 case 'paid-classes':
@@ -199,7 +199,7 @@ class PublicCatalogController extends Controller
         foreach ([['syllabus', 'Syllabus', 'bi-files'], ['result', 'Results', 'bi-clipboard-check']] as [$kind, $name, $icon]) {
             $q = fn () => ContentItem::ofKind($kind)->live($exam->slug);
             if ($q()->exists()) {
-                $out[] = (object) ['name' => $name, 'description' => '', 'slug' => $kind, 'icon' => $icon, 'all' => null, 'total' => $q()->count(), 'live' => false,
+                $out[] = (object) ['name' => $name, 'description' => '', 'slug' => $kind, 'icon' => $icon, 'all' => url($exam->slug . '/' . ($kind === 'result' ? 'results' : $kind)), 'total' => $q()->count(), 'live' => false,
                     'items' => $q()->orderByDesc('published_at')->orderByDesc('id')->limit(3)->get()->map(fn ($m) => (object) ['title' => $m->title, 'sub' => optional($m->published_at ?? $m->created_at)->format('d M Y'), 'tag' => 'Download',
                         'url' => $m->attachment ? Storage::url('files/' . $m->attachment) : ($m->landing_url ?: '#')])->all()];
             }
@@ -282,6 +282,30 @@ class PublicCatalogController extends Controller
 
         return view('kpsc.free-classes', ['classes' => $classes, 'folders' => $folders, 'current' => $current, 'trail' => $trail, 'exam' => $exam,
             'exams' => CompetitiveExam::where('status', 1)->orderBy('position')->get(), 'title' => 'Free classes']);
+    }
+
+    /** Resources of one exam type (/{exam}/syllabus | materials | results): the folders staff made for it, then the files inside the folder being viewed (?folder=ID). */
+    public function examResource(Request $request, $slug, $resource)
+    {
+        $cfg = ['syllabus' => ['syllabus', 'Syllabus', 'bi-list-check'], 'materials' => ['material', 'Study materials', 'bi-file-earmark-arrow-down'], 'results' => ['result', 'Results', 'bi-clipboard-check']][$resource] ?? null;
+        abort_unless($cfg, 404);
+        [$kind, $label, $icon] = $cfg;
+        $exam = CompetitiveExam::where('slug', $slug)->where('status', 1)->firstOrFail();
+        $request->merge(['exam' => $exam->slug]);
+        [, $current, $trail, $folders] = $this->folderLevel($request, $kind);
+        abort_if($current && $current->exam_id && (int) $current->exam_id !== (int) $exam->id, 404);
+
+        $items = ContentItem::ofKind($kind)->live()->forExam($exam->slug)->where('folder_id', $current?->id)
+            ->orderByDesc('published_at')->orderByDesc('id')->paginate(24)->withQueryString();
+        $items->getCollection()->transform(function ($m) {
+            $m->open = $m->attachment ? Storage::url('files/' . $m->attachment) : ($m->landing_url ?: null);
+            $m->isFile = (bool) $m->attachment;
+
+            return $m;
+        });
+
+        return view('kpsc.exam-resource', ['exam' => $exam, 'resource' => $resource, 'label' => $label, 'icon' => $icon, 'items' => $items, 'folders' => $folders,
+            'current' => $current, 'trail' => $trail, 'title' => $label . ' - ' . ($exam->short_name ?: $exam->name)]);
     }
 
     public function freeClassById($id)

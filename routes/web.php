@@ -58,7 +58,7 @@ Route::get('/', 'cms\HomeController@homepage');
 // so it is fetched here, pointed at https, and cached for an hour.
 Route::get('chat-widget.js', function () {
     $js = \Illuminate\Support\Facades\Cache::remember('teamzo_widget_js', 3600, function () {
-        $r = \Illuminate\Support\Facades\Http::timeout(8)->get('https://api.teamzo.io/api/v1/public/widget/wgt_SDRFEwKm6bT9kzqVugBNLEabCvlY.js');
+        $r = \Illuminate\Support\Facades\Http::timeout(8)->get('https://api.teamzo.io/api/v1/public/widget/wgt_SDRFEwKm6bT9kzqVugBNLEabCvlY.js?v=1');
 
         return $r->successful() ? str_replace(['http:\/\/api.teamzo.io', 'http://api.teamzo.io'], ['https:\/\/api.teamzo.io', 'https://api.teamzo.io'], $r->body()) : null;
     });
@@ -272,6 +272,11 @@ Route::get('seasons/{id}/buy', 'SeasonController@buy')->whereNumber('id')->middl
 foreach (['daily-exams', 'omr-exams', 'gk-exams', 'ca-exams', 'special-exams'] as $seriesPage) {
     Route::get('{examSlug}/' . $seriesPage . '/{seasonSlug}', fn (\Illuminate\Http\Request $r, $examSlug, $seasonSlug) => app(\App\Http\Controllers\SeasonController::class)->showBySlug($r, $examSlug,  $seriesPage, $seasonSlug, app(\App\Services\SeasonAccess::class)))->where(['examSlug' => '[a-z0-9-]+', 'seasonSlug' => '[a-z0-9-]+']);
     Route::get('{examSlug}/' . $seriesPage, fn (\Illuminate\Http\Request $r, $examSlug) => app(\App\Http\Controllers\PublicCatalogController::class)->series($r, $examSlug, $seriesPage))->where('examSlug', '[a-z0-9-]+');
+}
+
+// syllabus, study materials and results of an exam type: /rrb/syllabus, /ssc/materials, /kpsc/results (folders: ?folder=ID)
+foreach (['syllabus', 'materials', 'results'] as $resourcePage) {
+    Route::get('{examSlug}/' . $resourcePage, fn (\Illuminate\Http\Request $r, $examSlug) => app(\App\Http\Controllers\PublicCatalogController::class)->examResource($r, $examSlug, $resourcePage))->where('examSlug', '[a-z0-9-]+');
 }
 
 // /{exam type slug}: the landing page of an exam type. Every route above wins first, so only addresses nothing else uses get here.

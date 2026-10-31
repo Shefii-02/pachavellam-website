@@ -509,7 +509,7 @@ class HomeController extends Controller
         $sub_category = remove_slug($sub_category);
         $qstn_answer_key = PrevQuestion::where('category',$category)->where('subcategory',$sub_category)->orderBy('id','desc')->get(); 
        
-        return view('kpsc.psc-prev-qstn-anskey',compact('qstn_answer_key','title','redirection'));
+        return view('kpsc.psc-prev-qstn-anskey',compact('qstn_answer_key','category','sub_category','title','redirection'));
         
     }
 

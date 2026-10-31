@@ -1,36 +1,28 @@
 @extends('layouts.kpsc-app')
 @extends('kpsc.section_header')
-@section('title', $title ?? "KPSC-Result-".$results_list[0]->type )
+@php $type = $results_list->first()->type ?? ''; @endphp
+@section('title', $title ?? "KPSC-Result-" . $type)
+@section('styles')
+@include('kpsc.partials.ca-style')
+@endsection
 @section('content')
-<div class="page-content-wrapper">
-    <!-- Trending News Wrapper-->
-    <div class="trending-news-wrapper">
-      
-      <div class="container">
-        <div class="d-flex align-items-center justify-content-between">
-          <h5 class="mb-3 newsten-title">Result-{{$results_list[0]->type}} </h5>
+<div class="page-content-wrapper ca-page">
+    <div class="container">
+        @include('kpsc.partials.ca-hero', ['heading' => 'Result' . ($type ? ' - ' . $type : ''), 'msg' => 'പിഎസ്സി റിസൾട്ടുകൾ ഇവിടെ ലഭിക്കും.',
+            'crumbs' => ['Results' => url('kpsc/psc-results')]])
+
+        <div class="ca-list">
+            @forelse ($results_list as $key => $list)
+                <div class="ca-row">
+                    <span class="ca-ic"><i class="fa fa-file-pdf-o"></i></span>
+                    <div class="t">{{ $list->title }}</div>
+                    <a class="ca-go" href="{{ Storage::url('files/' . $list->file_name) }}" download="{{ $list->title }}"><i class="fa fa-download"></i> Download</a>
+                </div>
+                {!! ads_space_sport($key) !!}
+            @empty
+                <div class="ca-empty">No results added in this category yet.</div>
+            @endforelse
         </div>
-      </div>
-      <div class="container">
-        @foreach($results_list as $key => $list)
-          <!-- Single Trending Post-->
-          <div class="single-trending-post d-flex">
-            <div class="post-content">
-              <a class="post-title" href="{{ Storage::url('files/'.$list->file_name) }}" download="{{$list->title}}">
-                {{$list->title}}
-              </a>
-              
-            </div>
-            <div class="post-thumbnail text-right">
-              <a  href="{{ Storage::url('files/'.$list->file_name) }}" download="{{$list->title}}">
-                <img src="{{url('psc/img/download-png.png')}}" alt="">
-              </a>
-            </div>
-          </div>
-                  {!! ads_space_sport($key) !!}
-        @endforeach
-      </div>
-      
     </div>
-  </div>
+</div>
 @endsection
