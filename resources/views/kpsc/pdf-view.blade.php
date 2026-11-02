@@ -1,0 +1,28 @@
+@extends('layouts.without-bottom')
+@extends('kpsc.section_header')
+@section('title', $title)
+@section('styles')
+    <style>
+        .xt-wrap { max-width: 980px; margin: 0 auto; padding: 14px 0 24px; }
+        .xt-tabs { display:flex; gap:6px; border-bottom:2px solid var(--pv-border,#e5e7eb); margin:10px 0 12px; overflow-x:auto; }
+        .xt-tab { border:0; background:transparent; padding:9px 18px; font-weight:800; font-size:.9rem; color:#0a8f5b; border-bottom:3px solid #0a8f5b; margin-bottom:-2px; white-space:nowrap; }
+        .xt-note { font-size:.8rem; color:var(--pv-muted,#667); margin:6px 0 0; }
+        .xt-info { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:8px; }
+        .xt-chip { background:var(--pv-chip,#eef0f3); border-radius:18px; padding:4px 12px; font-size:.78rem; font-weight:700; }
+        .xt-about { margin-top:22px; line-height:1.6; font-size:.92rem; } .xt-about h5 { font-weight:800; margin:14px 0 6px; }
+        .xt-more { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:8px; }
+        .xt-more a { background:var(--pv-surface,#fff); border:1px solid var(--pv-border,#e5e7eb); border-radius:12px; padding:10px 12px; color:inherit; text-decoration:none; font-weight:700; font-size:.85rem; }
+        .xt-more a small { display:block; font-weight:600; color:var(--pv-muted,#667); }
+    </style>
+@endsection
+@section('content')
+    <div class="page-content-wrapper"><div class="container"><div class="xt-wrap">
+        <h4>{{ $title }}</h4>
+        @include('kpsc.partials.pdf-viewer', ['pdfId' => 'pf', 'pdfUrl' => $fileUrl])
+        <p class="xt-note">Pinch or use + / − to zoom. Use <b>Download</b> to keep a copy.</p>
+        <p class="mt-3 mb-0"><a href="javascript:history.back()">&larr; Back</a></p>
+    </div></div></div>
+@endsection
+@section('scripts')
+    <script>if (window.pvStart && window.pvStart.pf) window.pvStart.pf();</script>
+@endsection

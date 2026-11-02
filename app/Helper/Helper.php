@@ -54,6 +54,17 @@ function remove_slug($value)
      return ucwords(str_replace('-', ' ', $value));
 }
 
+/** A PDF on our own storage opens in the portal's PDF viewer first (Open / Download are inside it); anything else keeps its own link. */
+function pdf_view_url($fileUrl, $title = '')
+{
+     $path = (string) parse_url((string) $fileUrl, PHP_URL_PATH);
+     if (!preg_match('/\.pdf$/i', $path) || strpos($path, '/storage/') !== 0) {
+          return $fileUrl;
+     }
+
+     return url('kpsc/pdf-viewer') . '?' . http_build_query(['f' => $path, 't' => $title]);
+}
+
 //ads place spot
 
 function ads_space_sport($item_key)

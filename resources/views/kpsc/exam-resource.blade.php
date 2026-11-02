@@ -57,7 +57,7 @@
                             @if ($m->published_at ?? $m->created_at)<div class="small text-muted fw-normal"><i class="fa fa-calendar"></i> {{ ($m->published_at ?? $m->created_at)->format('d M Y') }}</div>@endif
                         </div>
                         @if ($m->open)
-                            <a class="ca-go" target="_blank" rel="noopener" href="{{ $m->open }}" @if ($m->isFile) download="{{ $m->title }}" @endif>@if ($m->isFile)<i class="fa fa-download"></i> Download @else Open @endif</a>
+                            <a class="ca-go" @if ($m->isFile) href="{{ pdf_view_url($m->open, $m->title) }}" @else target="_blank" rel="noopener" href="{{ $m->open }}" @endif>@if ($m->isFile)<i class="fa fa-eye"></i> View @else Open @endif</a>
                         @endif
                     </div>
                 @endforeach

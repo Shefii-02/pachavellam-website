@@ -19,7 +19,7 @@
                         {{ $list->title }}
                         @if ($list->date)<div class="small text-muted fw-normal"><i class="fa fa-calendar"></i> {{ $list->date }}</div>@endif
                     </div>
-                    <a class="ca-go" href="{{ Storage::url('files/' . $list->file_name) }}" download="{{ $list->title }}"><i class="fa fa-download"></i> Download</a>
+                    <a class="ca-go" href="{{ pdf_view_url(Storage::url('files/' . $list->file_name), $list->title) }}"><i class="fa fa-eye"></i> View</a>
                 </div>
                 {!! ads_space_sport($key) !!}
             @empty

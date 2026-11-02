@@ -107,6 +107,7 @@ Route::group(['prefix' => 'kpsc', 'as' => 'kpsc'], function () {
 
     Route::get('explore', 'cms\HomeController@explore');
 
+    Route::get('pdf-viewer', 'cms\HomeController@pdfViewer');
     Route::get('psc-bulletin', 'cms\HomeController@bulletin');
     Route::get('psc-bulletin/{id}', 'cms\HomeController@bulletinShow')->where('id', '[0-9]+');
     Route::get('notify', 'cms\HomeController@notify');

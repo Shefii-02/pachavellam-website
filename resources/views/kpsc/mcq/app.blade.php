@@ -16,6 +16,7 @@
     .mq-btn.pri { background:var(--pri); border-color:var(--pri); color:#fff; } .mq-btn.ok { background:var(--ok); border-color:var(--ok); color:#fff; } .mq-btn.bad { background:var(--bad); border-color:var(--bad); color:#fff; } .mq-btn.mark { border-color:var(--mark); color:var(--mark); } .mq-btn[disabled] { opacity:.45; }
     .mq-grid { display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:12px; align-items:start; }
     .mq-card { background:var(--card); border:1px solid var(--bd); border-radius:16px; padding:16px; }
+    .mq-card h6 { color:#fff; }
     .mq-qh { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px; } .mq-qh b { font-size:1rem; } .mq-qh .sp { flex:1; }
     .mq-q { font-size:calc(var(--fs) * 1.08); line-height:1.6; margin-bottom:14px; overflow-wrap:anywhere; background:var(--opt); border-radius:12px; padding:12px 14px; } .mq-q img, .mq-opt img, .mq-sol img { max-width:100%; height:auto; }
     .mq-opts { display:grid; gap:8px; }

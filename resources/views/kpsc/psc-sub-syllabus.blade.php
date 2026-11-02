@@ -20,7 +20,7 @@
                         {{ $list->title }}
                         @if ($list->category_no)<div class="small text-muted fw-normal">Category No: {{ $list->category_no }}</div>@endif
                     </div>
-                    <a class="ca-go" href="{{ $file }}" download="{{ $list->title }}"><i class="fa fa-download"></i> Download</a>
+                    <a class="ca-go" href="{{ pdf_view_url($file, $list->title) }}"><i class="fa fa-eye"></i> View</a>
                 </div>
                 {!! ads_space_sport($key) !!}
             @empty

@@ -16,8 +16,8 @@
                     <span class="ca-ic"><i class="fa fa-file-pdf-o"></i></span>
                     <div class="t">{{ $list->title }}</div>
                     <div class="d-flex flex-wrap gap-2" style="gap:8px">
-                        @if ($list->qstn_paper)<a class="ca-go" href="{{ Storage::url('files/' . $list->qstn_paper) }}" download="{{ $list->title }}"><i class="fa fa-download"></i> Question paper</a>@endif
-                        @if ($list->ans_key)<a class="ca-go" style="background:#1d5fc4" href="{{ Storage::url('files/' . $list->ans_key) }}" download="{{ $list->title }}"><i class="fa fa-key"></i> Answer key</a>@endif
+                        @if ($list->qstn_paper)<a class="ca-go" href="{{ pdf_view_url(Storage::url('files/' . $list->qstn_paper), $list->title . ' - Question paper') }}"><i class="fa fa-eye"></i> Question paper</a>@endif
+                        @if ($list->ans_key)<a class="ca-go" style="background:#1d5fc4" href="{{ pdf_view_url(Storage::url('files/' . $list->ans_key), $list->title . ' - Answer key') }}"><i class="fa fa-key"></i> Answer key</a>@endif
                     </div>
                 </div>
                 {!! ads_space_sport($key) !!}

@@ -280,6 +280,18 @@ class HomeController extends Controller
     }
 
     /** One bulletin, read in the page (PDF viewer, as the OMR exam shows its question paper) with a download button. */
+    /** Any PDF kept in our public storage, shown in the inline viewer (Open and Download are in its bar). */
+    public function pdfViewer(Request $request){
+        $path = (string) $request->query('f');
+        if (strpos($path, '/storage/') !== 0 || strpos($path, '..') !== false || !preg_match('/\.pdf$/i', $path)) {
+            abort(404);
+        }
+        $title = trim(strip_tags((string) $request->query('t'))) ?: 'PDF';
+        $fileUrl = url($path);
+
+        return view('kpsc.pdf-view', compact('title','fileUrl'));
+    }
+
     public function bulletinShow($id){
         $bulletin = Bulletin::where('status',1)->findOrFail($id);
         $title = 'PSC Bulletin ' . date('F Y', strtotime($bulletin->month_year));
