@@ -14,9 +14,21 @@
         .xt-wrap { max-width: 980px; margin: 0 auto; padding: 14px 0 24px; }
         .xt-tabs { display:flex; gap:6px; border-bottom:2px solid var(--pv-border,#e5e7eb); margin:10px 0 12px; overflow-x:auto; }
         .xt-tab { border:0; background:transparent; padding:9px 18px; font-weight:800; font-size:.9rem; color:var(--pv-muted,#667); border-bottom:3px solid transparent; margin-bottom:-2px; white-space:nowrap; }
-        .lb-row { display:flex; align-items:center; gap:10px; padding:9px 4px; border-bottom:1px solid var(--pv-border,#e5e7eb); } .lb-row.me, .lb-me { background:#e8f7f0; border-radius:8px; padding:9px 10px; }
-        .lb-row .rk { min-width:34px; font-weight:800; color:#0a8f5b; } .lb-row .nm { flex:1; font-weight:600; } .lb-row .nm small { display:block; font-weight:400; color:var(--pv-muted,#667); } .lb-row .mk { font-weight:800; }
-        .lb-msg { padding:18px 4px; color:var(--pv-muted,#667); text-align:center; }
+        #pane-lb .lb-head { background:linear-gradient(160deg,#1b2a41,#0a8f5b); color:#fff; padding:14px 16px 0; border-radius:14px 14px 0 0; }
+        #pane-lb .lb-head h5 { font-size:1rem; font-weight:800; margin:0; color:#fff; } #lbSub { font-size:.78rem; color:#fff; opacity:.85; display:block; margin-top:2px; }
+        .lb-podium { display:flex; align-items:flex-end; justify-content:center; gap:8px; padding:16px 6px 0; min-height:190px; }
+        .lb-pd { flex:1; max-width:120px; text-align:center; color:#fff; } .lb-pd .av { width:46px; height:46px; margin:0 auto 4px; border-radius:50%; background:#fff; color:#1b2a41; font-weight:800; display:flex; align-items:center; justify-content:center; border:3px solid var(--c); position:relative; }
+        .lb-pd.p1 .av { width:58px; height:58px; font-size:1.2rem; } .lb-pd .crown { position:absolute; top:-18px; left:50%; transform:translateX(-50%); color:#ffd23f; font-size:1.2rem; }
+        .lb-pd .nm { font-size:.76rem; font-weight:700; line-height:1.2; max-height:2.4em; overflow:hidden; } .lb-pd .mk { font-size:.72rem; opacity:.85; }
+        .lb-pd .bar { margin-top:6px; border-radius:10px 10px 0 0; background:var(--c); color:#1b2a41; font-weight:900; font-size:1.3rem; display:flex; align-items:center; justify-content:center; } .lb-pd.p1 .bar { height:74px; } .lb-pd.p2 .bar { height:54px; } .lb-pd.p3 .bar { height:40px; }
+        .lb-pd.p1 { --c:#ffc83d; } .lb-pd.p2 { --c:#cfd6df; } .lb-pd.p3 { --c:#e0a070; } .lb-pd.me .av { box-shadow:0 0 0 3px #22c55e; }
+        #lbList { padding:8px 0; }
+        .lb-row { display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:12px; margin-bottom:5px; background:var(--pv-surface-2,#f3f5f7); }
+        .lb-row .rk { width:30px; text-align:center; font-weight:800; color:var(--pv-muted,#667); } .lb-row .nm { flex:1; min-width:0; font-weight:700; font-size:.88rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .lb-row small { color:var(--pv-muted,#667); display:block; font-weight:500; font-size:.7rem; }
+        .lb-row .mk { font-weight:800; color:#0a8f5b; }
+        .lb-row.me { background:#e7f6ef; border:2px solid #22c55e; box-shadow:0 0 0 3px rgba(34,197,94,.25); } .lb-row.me .nm { color:#0a6b46; }
+        #lbMe { position:sticky; bottom:0; z-index:3; box-shadow:0 -6px 16px rgba(0,0,0,.15); border-top:2px solid #22c55e; background:#e7f6ef; padding:10px 14px; display:none; border-radius:0 0 14px 14px; } #lbMe .lb-row { margin:0; background:transparent; padding:0; } #lbMe .tag { font-size:.68rem; font-weight:800; color:#0a6b46; text-transform:uppercase; letter-spacing:.05em; }
+        .lb-msg { text-align:center; color:var(--pv-muted,#667); padding:24px 10px; font-size:.88rem; }
         .xt-tab.on { color:#0a8f5b; border-color:#0a8f5b; } .xt-tab[disabled] { opacity:.45; }
         .xt-pane { display:none; } .xt-pane.on { display:block; }
         .xt-bar { display:flex; gap:8px; justify-content:flex-end; margin-bottom:8px; }
@@ -106,9 +118,9 @@
         </div>
 
         <div class="xt-pane" id="pane-lb">
-            <p class="xt-note" id="lbSub"></p>
-            <div id="lbMe" class="lb-me" style="display:none"></div>
+            <div class="lb-head"><h5>Leaderboard</h5><small id="lbSub"></small><div class="lb-podium" id="lbPodium"></div></div>
             <div id="lbList"><div class="lb-msg">Loading…</div></div>
+            <div id="lbMe"><div class="tag">Your rank</div><div class="lb-row" id="lbMeRow"></div><div id="lbCut" class="small pb-1"></div></div>
             <button type="button" class="btn btn-outline-success btn-sm mt-2" id="lbMore" style="display:none">Load more</button>
         </div>
         @endif
@@ -153,20 +165,33 @@
         var lbPage = 0, lbBusy = false, lbDone = false;
         var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
         var lbRow = function (a) { return '<div class="lb-row' + (a.me ? ' me' : '') + '"><span class="rk">' + a.rank + '</span><span class="nm">' + esc(a.name) + (a.me ? ' (You)' : '') + '<small>' + a.right + ' right · ' + a.wrong + ' wrong</small></span><span class="mk">' + a.mark + '</span></div>'; };
+        function lbPodium(rows) {
+            document.getElementById('lbPodium').innerHTML = [[0, 'p1'], [1, 'p2'], [2, 'p3']].filter(function (x) { return rows[x[0]]; }).map(function (x) {
+                var a = rows[x[0]];
+                return '<div class="lb-pd ' + x[1] + (a.me ? ' me' : '') + '"><div class="av">' + (x[0] === 0 ? '<i class="bi bi-trophy-fill crown"></i>' : '') + esc((a.name || '?').trim().charAt(0).toUpperCase()) + '</div><div class="nm">' + esc(a.name) + '</div><div class="mk">' + a.mark + ' marks</div><div class="bar">' + a.rank + '</div></div>';
+            }).join('');
+        }
         function loadLb() {
             if (lbBusy || lbDone) return; lbBusy = true;
             var list = document.getElementById('lbList'), more = document.getElementById('lbMore');
             fetch(@json(url('kpsc/model-exam-leaderboard-data/' . $examdetails->id)) + '?page=' + (lbPage + 1), { headers: { 'Accept': 'application/json' }, credentials: 'same-origin', cache: 'no-store' })
                 .then(function (r) { return r.json(); }).then(function (d) {
                     lbBusy = false; lbPage++;
-                    if (!d.ended) { lbDone = true; list.innerHTML = '<div class="lb-msg">The leaderboard opens when the exam ends.</div>'; return; }
+                    if (!d.ended) { lbDone = true; list.innerHTML = '<div class="lb-msg"><i class="bi bi-hourglass-split d-block fs-3"></i>The leaderboard opens when the exam ends.</div>'; return; }
                     if (lbPage === 1) {
                         list.innerHTML = '';
                         document.getElementById('lbSub').textContent = d.total + ' student' + (d.total == 1 ? '' : 's') + (d.cutoff != null ? ' · Cutoff ' + d.cutoff : '');
+                        lbPodium(d.rows.slice(0, 3));
                         if (!d.rows.length) list.innerHTML = '<div class="lb-msg">No marks uploaded yet.</div>';
-                        if (d.me) { var m = document.getElementById('lbMe'); m.style.display = 'block'; m.innerHTML = '<b>Your rank #' + d.me.rank + '</b> · ' + d.me.mark + ' marks (' + d.me.right + ' right, ' + d.me.wrong + ' wrong)' + (d.cutoff != null ? (d.me.below ? ' · <span style="color:#a4242a">below cutoff</span>' : ' · <span style="color:#0a6b46">above cutoff</span>') : ''); }
+                        if (d.me) {
+                            document.getElementById('lbMeRow').innerHTML = '<span class="rk">#' + d.me.rank + '</span><span class="nm">' + esc(d.me.name) + '<small>' + d.me.right + ' right · ' + d.me.wrong + ' wrong</small></span><span class="mk">' + d.me.mark + '</span>';
+                            document.getElementById('lbCut').innerHTML = d.cutoff == null ? '' : (d.me.below
+                                ? '<b style="color:#a4242a"><i class="bi bi-exclamation-triangle-fill"></i> Below cutoff.</b> Your mark ' + d.me.mark + ' is ' + (Math.round((d.cutoff - d.me.mark) * 100) / 100) + ' short of the cutoff ' + d.cutoff + '.'
+                                : '<b style="color:#0a6b46"><i class="bi bi-check-circle-fill"></i> Above cutoff</b> (' + d.cutoff + '). Well done!');
+                            if (d.me.rank > 3) document.getElementById('lbMe').style.display = 'block';   // top 3 are already on the podium
+                        }
                     }
-                    list.insertAdjacentHTML('beforeend', d.rows.map(lbRow).join(''));
+                    list.insertAdjacentHTML('beforeend', d.rows.filter(function (a) { return a.rank > 3; }).map(lbRow).join(''));
                     more.style.display = d.more ? '' : 'none'; if (!d.more) lbDone = true;
                 }).catch(function () { lbBusy = false; if (lbPage === 0) document.getElementById('lbList').innerHTML = '<div class="lb-msg">Could not load the leaderboard.</div>'; });
         }
