@@ -14,6 +14,9 @@
         .xt-wrap { max-width: 980px; margin: 0 auto; padding: 14px 0 24px; }
         .xt-tabs { display:flex; gap:6px; border-bottom:2px solid var(--pv-border,#e5e7eb); margin:10px 0 12px; overflow-x:auto; }
         .xt-tab { border:0; background:transparent; padding:9px 18px; font-weight:800; font-size:.9rem; color:var(--pv-muted,#667); border-bottom:3px solid transparent; margin-bottom:-2px; white-space:nowrap; }
+        .lb-row { display:flex; align-items:center; gap:10px; padding:9px 4px; border-bottom:1px solid var(--pv-border,#e5e7eb); } .lb-row.me, .lb-me { background:#e8f7f0; border-radius:8px; padding:9px 10px; }
+        .lb-row .rk { min-width:34px; font-weight:800; color:#0a8f5b; } .lb-row .nm { flex:1; font-weight:600; } .lb-row .nm small { display:block; font-weight:400; color:var(--pv-muted,#667); } .lb-row .mk { font-weight:800; }
+        .lb-msg { padding:18px 4px; color:var(--pv-muted,#667); text-align:center; }
         .xt-tab.on { color:#0a8f5b; border-color:#0a8f5b; } .xt-tab[disabled] { opacity:.45; }
         .xt-pane { display:none; } .xt-pane.on { display:block; }
         .xt-bar { display:flex; gap:8px; justify-content:flex-end; margin-bottom:8px; }
@@ -38,6 +41,7 @@
             <button class="xt-tab" data-pane="qp">Question paper</button>
             <button class="xt-tab" data-pane="ak" id="akTab">Answer key</button>
             <button class="xt-tab" data-pane="mk" id="mkTab">{{ $myMark ? 'My marks' : 'Upload marks' }}</button>
+            <button class="xt-tab" data-pane="lb" id="lbTab">Leaderboard</button>
         </div>
 
         <div class="xt-pane" id="pane-ins">
@@ -100,6 +104,13 @@
             @if ($akUrl)@include('kpsc.partials.pdf-viewer', ['pdfId' => 'ak', 'pdfUrl' => $akUrl])@else<p class="text-muted">The answer key is not uploaded yet.</p>@endif
             <p class="xt-note">Check your OMR sheet, then open the <b>Upload marks</b> tab to save your result.</p>
         </div>
+
+        <div class="xt-pane" id="pane-lb">
+            <p class="xt-note" id="lbSub"></p>
+            <div id="lbMe" class="lb-me" style="display:none"></div>
+            <div id="lbList"><div class="lb-msg">Loading…</div></div>
+            <button type="button" class="btn btn-outline-success btn-sm mt-2" id="lbMore" style="display:none">Load more</button>
+        </div>
         @endif
 
         <div class="xt-about">
@@ -130,12 +141,36 @@
         var keyOpen = @json($ended || $uploaded) || seen;   // the paper and the key are open
         var tabs = document.querySelectorAll('.xt-tab'), akTab = document.getElementById('akTab'), qpTab = document.querySelector('.xt-tab[data-pane=qp]'), mkTab = document.getElementById('mkTab');
         // the instructions come first: the question paper and the answer key open after "Start exam" (or when the exam is over / marks are uploaded)
-        function show(name) {
-            if (name !== 'ins' && !keyOpen) return;
+        function show(name, fromHash) {
+            if (name !== 'ins' && name !== 'lb' && !keyOpen) return;
+            if (!fromHash) { try { history.replaceState(null, '', '#' + name); } catch (e) {} }   // the open tab is kept in the URL (#qp, #ak, #mk, #lb)
+            if (name === 'lb') loadLb();
             tabs.forEach(function (t) { t.classList.toggle('on', t.dataset.pane === name); });
             document.querySelectorAll('.xt-pane').forEach(function (p) { p.classList.toggle('on', p.id === 'pane-' + name); });
             if (window.pvStart && window.pvStart[name]) window.pvStart[name]();   // the PDF loads when its tab opens
         }
+        // leaderboard tab: 25 per page, opens when the exam has ended
+        var lbPage = 0, lbBusy = false, lbDone = false;
+        var esc = function (t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+        var lbRow = function (a) { return '<div class="lb-row' + (a.me ? ' me' : '') + '"><span class="rk">' + a.rank + '</span><span class="nm">' + esc(a.name) + (a.me ? ' (You)' : '') + '<small>' + a.right + ' right · ' + a.wrong + ' wrong</small></span><span class="mk">' + a.mark + '</span></div>'; };
+        function loadLb() {
+            if (lbBusy || lbDone) return; lbBusy = true;
+            var list = document.getElementById('lbList'), more = document.getElementById('lbMore');
+            fetch(@json(url('kpsc/model-exam-leaderboard-data/' . $examdetails->id)) + '?page=' + (lbPage + 1), { headers: { 'Accept': 'application/json' }, credentials: 'same-origin', cache: 'no-store' })
+                .then(function (r) { return r.json(); }).then(function (d) {
+                    lbBusy = false; lbPage++;
+                    if (!d.ended) { lbDone = true; list.innerHTML = '<div class="lb-msg">The leaderboard opens when the exam ends.</div>'; return; }
+                    if (lbPage === 1) {
+                        list.innerHTML = '';
+                        document.getElementById('lbSub').textContent = d.total + ' student' + (d.total == 1 ? '' : 's') + (d.cutoff != null ? ' · Cutoff ' + d.cutoff : '');
+                        if (!d.rows.length) list.innerHTML = '<div class="lb-msg">No marks uploaded yet.</div>';
+                        if (d.me) { var m = document.getElementById('lbMe'); m.style.display = 'block'; m.innerHTML = '<b>Your rank #' + d.me.rank + '</b> · ' + d.me.mark + ' marks (' + d.me.right + ' right, ' + d.me.wrong + ' wrong)' + (d.cutoff != null ? (d.me.below ? ' · <span style="color:#a4242a">below cutoff</span>' : ' · <span style="color:#0a6b46">above cutoff</span>') : ''); }
+                    }
+                    list.insertAdjacentHTML('beforeend', d.rows.map(lbRow).join(''));
+                    more.style.display = d.more ? '' : 'none'; if (!d.more) lbDone = true;
+                }).catch(function () { lbBusy = false; if (lbPage === 0) document.getElementById('lbList').innerHTML = '<div class="lb-msg">Could not load the leaderboard.</div>'; });
+        }
+        document.getElementById('lbMore').addEventListener('click', loadLb);
         function unlock() { keyOpen = true; [akTab, qpTab, mkTab].forEach(function (t) { t.disabled = false; t.title = ''; }); }
         if (!keyOpen) { [akTab, qpTab, mkTab].forEach(function (t) { t.disabled = true; t.title = 'Opens after you start the exam'; }); }
         tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.pane); }); });
@@ -173,7 +208,10 @@
         draw();
 
         document.addEventListener('exam-start', function () { try { localStorage.setItem(key, '1'); } catch (e) {} unlock(); show('qp'); });
-        show(@json(session('success') || $errors->any() ? 'mk' : 'ins'));
+        var fromUrl = function () { var h = (location.hash || '').slice(1); return document.getElementById('pane-' + h) ? h : null; };
+        window.addEventListener('hashchange', function () { var h = fromUrl(); if (h) show(h, true); });
+        show(@json(session('success') || $errors->any() ? 'mk' : 'ins'), true);
+        var h0 = fromUrl(); if (h0 && !(@json((bool) (session('success') || $errors->any())))) show(h0, true);
     })();
     </script>
 @endif
