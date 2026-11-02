@@ -427,7 +427,7 @@ class PublicCatalogController extends Controller
         }
         $per = 25;
         $page = max(1, (int) $request->query('page', 1));
-        $base = fn () => \App\Models\ModelExamAttempt::where('exam_id', $exam->id)->where('answer_uploaded', '<=', $exam->ended_at);
+        $base = fn () => \App\Models\ModelExamAttempt::where('exam_id', $exam->id);   // every uploaded attempt, as the admin leaderboard counts them
         $total = $base()->count();
         $user = auth()->user();
         $rows = $base()->orderByDesc('total_mark')->orderBy('created_at')->orderBy('id')->skip(($page - 1) * $per)->take($per)->get();
