@@ -103,7 +103,10 @@
 (function () {
     var tabs = document.querySelectorAll('.ss-tab'); if (!tabs.length) return;
     function show(k) { tabs.forEach(function (t) { t.classList.toggle('on', t.dataset.tab === k); }); document.querySelectorAll('.ss-pane').forEach(function (p) { p.classList.toggle('on', p.id === 'ss-pane-' + k); }); }
-    tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.tab); }); });
+    tabs.forEach(function (t) { t.addEventListener('click', function () { show(t.dataset.tab); try { history.replaceState(null, '', '#' + t.dataset.tab); } catch (e) {} }); });   // the open tab is kept in the URL (#live, #done, #missed)
+    var fromUrl = function () { var h = (location.hash || '').slice(1); return document.getElementById('ss-pane-' + h) ? h : null; };
+    var h0 = fromUrl(); if (h0) show(h0);
+    window.addEventListener('hashchange', function () { var h = fromUrl(); if (h) show(h); });
 })();
 </script>
 @endsection

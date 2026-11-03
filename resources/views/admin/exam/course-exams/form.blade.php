@@ -12,10 +12,12 @@
     ])->all();
     $examPdf = $editing ? $item->instruction_pdf : null;
     $instrType = old('instruction_type', $examPdf ? 'pdf' : ($editing && \App\Support\SafeHtml::text($item->instruction) !== '' ? 'text' : 'none'));
+    $saved = \App\Models\ExamInstruction::orderBy('kind')->orderBy('name')->get(['id', 'name', 'kind', 'body']);   // templates from admin/kpsc/exam-instructions
     $instruction = old('instruction', $editing ? strip_tags(str_replace(['<br>', '</p>'], "\n", (string) $item->instruction)) : '');
 @endphp
 @include('admin.question-library._alerts')
 
+<style>.cke_notifications_area { display: none !important; }</style>
 <form action="{{ $editing ? $manageUrl . '/' . $item->id : $manageUrl }}" method="POST" enctype="multipart/form-data" id="examForm">
     @csrf
     @if ($editing) @method('PUT') @endif
@@ -147,6 +149,7 @@
                 </div>
                 <div class="col-md-9" id="instrText" style="display:none">
                     <label class="form-label">Instructions text</label>
+                    @if ($saved->count())<select class="form-select form-select-sm mb-2 saved-instr" data-target="[name=instruction]"><option value="">Pick a saved instruction…</option>@foreach ($saved as $si)<option value="{{ $si->id }}">{{ $si->name }} ({{ strtoupper($si->kind) }})</option>@endforeach</select>@endif
                     <textarea name="instruction" rows="3" class="form-control">{{ $instruction }}</textarea>
                 </div>
                 <div class="col-md-9" id="instrPdf" style="display:none">
@@ -194,7 +197,7 @@
             <div class="col-md-2"><label class="form-label small">Negative mark</label><input type="number" step="0.01" min="0" data-f="negative_mark" class="form-control form-control-sm" placeholder="exam"></div>
             <div class="col-md-3"><label class="form-label small">Section instructions</label>
                 <select data-f="instruction_type" class="form-select form-select-sm instr-type"><option value="none">None</option><option value="text">Write as text</option><option value="pdf">Upload a PDF</option></select></div>
-            <div class="col-md-9 instr-text" style="display:none"><label class="form-label small">Instructions text</label><textarea data-f="instruction" rows="2" class="form-control form-control-sm"></textarea></div>
+            <div class="col-md-9 instr-text" style="display:none"><label class="form-label small">Instructions text</label>@if ($saved->count())<select class="form-select form-select-sm mb-1 saved-instr" data-target="[data-f=instruction]"><option value="">Pick a saved instruction…</option>@foreach ($saved as $si)<option value="{{ $si->id }}">{{ $si->name }} ({{ strtoupper($si->kind) }})</option>@endforeach</select>@endif<textarea data-f="instruction" rows="2" class="form-control form-control-sm"></textarea></div>
             <div class="col-md-9 instr-pdf" style="display:none"><label class="form-label small">Instructions PDF</label><input type="file" data-pdf accept="application/pdf" class="form-control form-control-sm"><div class="form-text pdf-current"></div></div>
         </div>
     </div>
@@ -254,6 +257,12 @@
             : 'One section: the questions are listed together. Time and marks come from the exam above (optional overrides here).';
     }
     count.addEventListener('change', render);
+    var savedBodies = @json($saved->pluck('body', 'id'));
+    document.addEventListener('change', function (e) {   // a saved instruction fills the text box next to it (exam and sections alike)
+        var sel = e.target.closest('.saved-instr'); if (!sel || !sel.value) return;
+        var box = sel.parentNode.querySelector(sel.dataset.target); if (box) box.value = savedBodies[sel.value] || '';
+        sel.value = '';
+    });
     var et = document.getElementById('instrType');
     function showExamInstr() {
         document.getElementById('instrText').style.display = et.value === 'text' ? '' : 'none';

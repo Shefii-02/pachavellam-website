@@ -60,7 +60,7 @@
                                 <div class="im" style="{{ $co->cover_image ? "background-image:url('" . Storage::url($co->cover_image) . "')" : '' }}"></div>
                                 @include('kpsc.partials.item-actions', ['url' => $cu, 'copy' => $copy])
                                 <div class="bd"><div class="fw-bold" style="min-height:2.6em;line-height:1.3">{{ $co->title }}</div>
-                                    <div class="d-flex justify-content-between align-items-center mt-2"><span class="small text-muted">{{ $co->validityLabel() }}</span>
+                                    <div class="d-flex justify-content-between flex-column align-items-center mt-2"><span class="small text-muted">{{ $co->validityLabel() }}</span>
                                         <span class="fw-bold" style="color:#0a8f5b">{{ $co->isFree() ? 'Free' : $money($co->effectivePrice()) }}@if (!$co->isFree() && $co->price > $co->effectivePrice()) <s class="small text-muted fw-normal">{{ $money($co->price) }}</s>@endif</span></div></div>
                             </a></div>
                         @endforeach
