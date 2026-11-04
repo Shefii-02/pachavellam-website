@@ -220,6 +220,7 @@ Route::group(['prefix' => 'admin', 'middleware' => ['admin.area']], function () 
         Route::get('create', 'Content\ContentItemController@create');
         Route::get('import', 'Content\ContentItemController@importForm');
         Route::post('import', 'Content\ContentItemController@importStore');
+        Route::post('upload', 'Content\ContentItemController@bulkUpload');
         Route::post('/', 'Content\ContentItemController@store');
         Route::get('{id}/edit', 'Content\ContentItemController@edit')->whereNumber('id');
         Route::put('{id}', 'Content\ContentItemController@update')->whereNumber('id');

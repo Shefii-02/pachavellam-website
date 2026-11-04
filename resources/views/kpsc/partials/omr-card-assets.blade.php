@@ -60,12 +60,13 @@ window.addEventListener('load', function () {
         if (busy || !cur) return; busy = true;
         fetch((curBase || urlBase) + '/' + cur + '?page=' + (page + 1), { headers: { 'Accept': 'application/json' }, credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (d) {
             busy = false; page++;
-            if (!d.ended) { list.innerHTML = '<div class="lb-msg"><i class="bi bi-hourglass-split d-block fs-3"></i>The leaderboard opens when the exam ends.</div>'; return; }
+            if (!d.ended) { list.innerHTML = '<div class="lb-msg"><i class="bi bi-hourglass-split d-block fs-3"></i>The leaderboard opens when the exam ends' + (d.endsAt ? ' (' + esc(d.endsAt) + ')' : '') + '.</div>'; return; }
             if (sentinel) sentinel.remove();
             if (page === 1) {
                 document.getElementById('lbSub').textContent = d.total + ' student' + (d.total == 1 ? '' : 's') + (d.cutoff != null ? ' · Cutoff ' + d.cutoff : '');
                 podium(d.rows.slice(0, 3)); list.innerHTML = '';
                 if (!d.rows.length) list.innerHTML = '<div class="lb-msg">No marks uploaded yet.</div>';
+                if (d.notice) list.insertAdjacentHTML('afterbegin', '<div class="lb-msg" style="color:#a4242a"><i class="bi bi-exclamation-triangle-fill"></i> ' + esc(d.notice) + '</div>');
                 if (d.me) {
                     document.getElementById('lbMeRow').innerHTML = '<span class="rk">#' + d.me.rank + '</span><span class="nm">' + esc(d.me.name) + '<small>' + d.me.right + ' right · ' + d.me.wrong + ' wrong</small></span><span class="mk">' + d.me.mark + '</span>';
                     var cut = document.getElementById('lbCut');

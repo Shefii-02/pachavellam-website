@@ -55,6 +55,14 @@
                 </form>
             </div>
         </div>
+        <form action="{{ $base . '/upload' }}" method="POST" enctype="multipart/form-data" class="border rounded-3 p-2 mb-3 d-flex align-items-center flex-wrap gap-2">@csrf
+            <input type="hidden" name="exam" value="{{ $exam->slug }}"><input type="hidden" name="folder_id" value="{{ $current?->id }}">
+            <span class="small"><i class="bi bi-cloud-upload"></i> Upload to <b>{{ $current ? $current->title : 'top level' }}</b></span>
+            <input type="file" name="files[]" multiple required accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" class="form-control form-control-sm" style="max-width:340px">
+            <button class="btn btn-sm btn-primary mb-0">Upload files</button>
+            <span class="small text-muted">Each file becomes an item named after the file. Use "Add" to pick from the library or add a link.</span>
+            @error('files')<div class="text-danger small w-100">{{ $message }}</div>@enderror @error('files.*')<div class="text-danger small w-100">{{ $message }}</div>@enderror
+        </form>
     @endif
 
     <form method="GET" class="row g-2 mb-3">@if (request('folder'))<input type="hidden" name="folder" value="{{ request('folder') }}">@endif

@@ -97,6 +97,33 @@ class ContentItemController extends Controller
         return redirect(url('admin/stories'))->with('message', $msg . '.');
     }
 
+    /** Syllabus / Study Materials / Results: several files dropped into the folder being viewed, one item per file (title = file name). */
+    public function bulkUpload(Request $request, string $section)
+    {
+        $this->allow($request);
+        $m = $this->meta($section);
+        abort_unless(!empty($m['folders']), 404);
+        $data = $request->validate([
+            'exam' => 'required|string', 'folder_id' => 'nullable|integer',
+            'files' => 'required|array|min:1|max:30', 'files.*' => 'file|mimes:pdf,doc,docx,xls,xlsx,jpg,jpeg,png|max:10240',
+        ]);
+        $exam = CompetitiveExam::where('slug', $data['exam'])->firstOrFail();
+        $allowed = StaffAccess::examIds($request->user());
+        abort_unless($allowed === null || in_array($exam->id, $allowed, true), 403, 'You do not have access to this exam type.');
+        $folder = !empty($data['folder_id']) ? ContentFolder::where('exam_id', $exam->id)->where('kind', $m['kind'])->findOrFail($data['folder_id']) : null;
+
+        foreach ($request->file('files') as $file) {
+            $name = Str::random(40) . '.' . $file->extension();
+            $file->storeAs('files/content-files', $name, 'public');
+            $item = ContentItem::create(['kind' => $m['kind'], 'title' => Str::limit(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME), 250, ''),
+                'attachment' => 'content-files/' . $name, 'folder_id' => $folder?->id, 'published_at' => now(), 'status' => 1, 'created_by' => $request->user()->id]);
+            $item->update(['position' => $item->id]);
+            $item->exams()->sync([$exam->id]);
+        }
+
+        return redirect(url('admin/content/' . $section . '?exam=' . $exam->slug . ($folder ? '&folder=' . $folder->id : '')))->with('message', count($request->file('files')) . ' file(s) uploaded');
+    }
+
     public function create(Request $request, string $section)
     {
         $this->allow($request);

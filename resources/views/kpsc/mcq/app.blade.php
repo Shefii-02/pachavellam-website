@@ -251,6 +251,7 @@ window.MCQ.csrf = @json(csrf_token());
             return '<div class="mq-fil">' + chips + '</div>' + (list || '<div class="mq-card">Nothing in this filter.</div>');
         }
         function board() {
+            if (!R.ended) return '<div class="mq-card" style="text-align:center"><h6 style="font-weight:800">Leaderboard</h6><p style="margin:0;color:var(--mu)">The leaderboard opens when the exam time ends' + (R.endsAt ? ' (' + esc(R.endsAt) + ')' : '') + '.</p></div>';
             var me = R.board.some(function (b) { return b.me; });
             return '<div class="mq-card"><h6 style="font-weight:800;margin-bottom:10px">Leaderboard · first attempts</h6>' + (R.board.length ? R.board.map(function (b) { return '<div class="mq-row' + (b.me ? ' me' : '') + '"><span class="rk">' + b.rank + '</span><span class="nm">' + esc(b.name) + (b.me ? ' (You)' : '') + '</span><span style="color:var(--mu);font-size:.8rem">' + tm(b.sec) + '</span><span class="mk">' + b.mark + '</span></div>'; }).join('') : '<p>No results yet.</p>')
                 + (!me && R.rank ? '<div class="mq-row me"><span class="rk">#' + R.rank + '</span><span class="nm">You</span><span class="mk">' + R.score + '</span></div>' : '') + '</div>';

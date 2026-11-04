@@ -392,6 +392,10 @@ class PublicCatalogController extends Controller
     public function dailyLeaderboard(Request $request, $id)
     {
         $exam = \App\Models\DailyExam::where('section', '<>', 'Model Exam')->where('status', 1)->findOrFail($id);
+        // an exam with a session (end time) shows its leaderboard only once the session is over
+        if ($exam->ended_at && \Illuminate\Support\Carbon::parse($exam->ended_at)->isFuture()) {
+            return response()->json(['ended' => false, 'endsAt' => \Illuminate\Support\Carbon::parse($exam->ended_at)->format('d M Y, h:i a'), 'rows' => [], 'total' => 0, 'more' => false, 'me' => null, 'loggedIn' => (bool) auth()->user()]);
+        }
         $per = 25;
         $page = max(1, (int) $request->query('page', 1));
         $base = fn () => \App\Models\DailyExamattempt::leftJoin('users', 'users.id', 'kpsc_daily_exams_attempt.user_id')->where('kpsc_daily_exams_attempt.exam_id', $exam->id)
@@ -415,7 +419,15 @@ class PublicCatalogController extends Controller
             }
         }
 
-        return response()->json(['ended' => true, 'cutoff' => null, 'rows' => $out, 'total' => $total, 'more' => $page * $per < $total, 'me' => $me, 'loggedIn' => (bool) $user]);
+        // after the session: someone who did not finish inside it is told so (no first attempt completed before the end time)
+        $notice = null;
+        if ($user && !$base()->where('kpsc_daily_exams_attempt.user_id', $user->id)->exists()) {
+            $notice = \App\Models\DailyExamattempt::where('user_id', $user->id)->where('exam_id', $exam->id)->exists()
+                ? 'You started this exam but did not complete it before the exam time ended, so you are not on the leaderboard.'
+                : 'You did not attend this exam, so you are not on the leaderboard.';
+        }
+
+        return response()->json(['ended' => true, 'cutoff' => null, 'rows' => $out, 'total' => $total, 'more' => $page * $per < $total, 'me' => $me, 'notice' => $notice, 'loggedIn' => (bool) $user]);
     }
 
     /** The leaderboard drawer of an OMR exam: 25 students per page (ranked), plus the signed-in student's own best rank. Opens once the exam has ended. */

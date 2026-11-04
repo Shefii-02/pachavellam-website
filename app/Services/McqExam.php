@@ -190,7 +190,8 @@ class McqExam
             $rank = (clone $first)->where(fn ($q) => $q->where('total_mark', '>', $myFirst->total_mark)->orWhere(fn ($w) => $w->where('total_mark', $myFirst->total_mark)->where('attempt_time', '<', $myFirst->attempt_time)))->count() + 1;
             $pct = $total > 0 ? round((clone $first)->where('total_mark', '<', $myFirst->total_mark)->count() * 100 / $total, 1) : null;
         }
-        $board = (clone $first)->leftJoin('users', 'users.id', '=', 'kpsc_daily_exams_attempt.user_id')
+        $ended = !$exam->ended_at || strtotime($exam->ended_at) <= time();
+        $board = !$ended ? [] : (clone $first)->leftJoin('users', 'users.id', '=', 'kpsc_daily_exams_attempt.user_id')
             ->orderByDesc('total_mark')->orderBy('attempt_time')->limit(10)->get(['kpsc_daily_exams_attempt.user_id', 'users.name', 'kpsc_daily_exams_attempt.total_mark', 'kpsc_daily_exams_attempt.attempt_time'])
             ->map(fn ($r, $i) => ['rank' => $i + 1, 'name' => $r->name ?: 'Student', 'mark' => round((float) $r->total_mark, 2), 'sec' => (int) $r->attempt_time, 'me' => $r->user_id == $attempt->user_id]);
 
@@ -205,7 +206,7 @@ class McqExam
             'accuracy' => $answered > 0 ? round($attempt->right * 100 / $answered, 1) : 0, 'sec' => (int) $attempt->attempt_time, 'duration' => $exam->duration_min ? $exam->duration_min * 60 : null,
             'negative' => round(self::NEGATIVE, 2), 'rank' => $rank, 'participants' => $total, 'percentile' => $pct,
             'topper' => round((float) (clone $first)->max('total_mark'), 2), 'average' => round((float) (clone $first)->avg('total_mark'), 2),
-            'cutoff' => $cut, 'belowCutoff' => $cut !== null && (float) $attempt->total_mark < $cut, 'ended' => !$exam->ended_at || strtotime($exam->ended_at) <= time(),
+            'cutoff' => $cut, 'belowCutoff' => $cut !== null && (float) $attempt->total_mark < $cut, 'ended' => $ended, 'endsAt' => $exam->ended_at ? date('d M Y, h:i a', strtotime($exam->ended_at)) : null,
             'board' => $board, 'review' => $review,
         ];
     }
