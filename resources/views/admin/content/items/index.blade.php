@@ -18,7 +18,31 @@
 
 
     @if (!empty($m['folders']) && !$folderMode)
-        <div class="alert alert-info py-2 small">These are kept in folders for each exam type. Choose an exam type below and press Filter to open its folders.</div>
+        @php $folderCounts = \App\Models\ContentFolder::where('kind', $m['kind'])->selectRaw('exam_id, count(*) c')->groupBy('exam_id')->pluck('c', 'exam_id'); @endphp
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <b>Exam types</b>
+            <button type="button" class="btn btn-sm btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#addFolderModal"><i class="bi bi-folder-plus me-1"></i>Add folder</button>
+        </div>
+        <div class="row g-2 mb-3">
+            @foreach ($exams as $e)
+                <div class="col-6 col-md-4 col-lg-3"><a href="{{ url('admin/content/' . $m['section'] . '?exam=' . $e->slug) }}" class="border rounded-3 p-2 d-flex align-items-center gap-2 text-decoration-none text-reset h-100">
+                    <i class="bi bi-folder-fill fs-4" style="color:{{ $e->color ?: '#f5a524' }}"></i><span><b>{{ $e->short_name ?: $e->name }}</b><span class="d-block small text-muted">{{ (int) ($folderCounts[$e->id] ?? 0) }} folder(s)</span></span></a></div>
+            @endforeach
+        </div>
+
+        <div class="modal fade" id="addFolderModal" tabindex="-1"><div class="modal-dialog"><form class="modal-content" action="{{ url('admin/content/' . $m['section'] . '/folders') }}" method="POST">@csrf
+            <div class="modal-header"><h5 class="modal-title"><i class="bi bi-folder-plus me-1"></i>Add folder</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+            <div class="modal-body">
+                <label class="form-label">Exam type <span class="text-danger">*</span></label>
+                <select name="exam" class="form-select mb-3" required><option value="">Choose one exam type</option>@foreach ($exams as $e)<option value="{{ $e->slug }}" {{ old('exam') === $e->slug ? 'selected' : '' }}>{{ $e->short_name ?: $e->name }}</option>@endforeach</select>
+                <label class="form-label">Folder name <span class="text-danger">*</span></label>
+                <input name="title" class="form-control" value="{{ old('title') }}" required maxlength="150" placeholder="e.g. 2025 Notifications">
+                @error('title')<div class="text-danger small">{{ $message }}</div>@enderror @error('exam')<div class="text-danger small">{{ $message }}</div>@enderror
+                <div class="form-text">The folder is created at the top level of this exam type. Open it to add sub folders and upload files.</div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-light mb-0" data-bs-dismiss="modal">Cancel</button><button class="btn btn-primary mb-0">Create folder</button></div>
+        </form></div></div>
+        @if ($errors->has('title') || $errors->has('exam'))<script>document.addEventListener('DOMContentLoaded', function () { if (window.bootstrap) new bootstrap.Modal(document.getElementById('addFolderModal')).show(); });</script>@endif
     @endif
 
     @if ($folderMode)
