@@ -11,6 +11,17 @@
     .ca-ct { display: block; font-size: .72rem; font-weight: 600; color: var(--pv-muted, #667); }
 </style>
 @endsection
+@section('scripts')
+<script>
+document.getElementById('caShare').onclick = function () {
+    var b = this, u = location.href, t = document.title, html = b.innerHTML;
+    function done() { b.innerHTML = '<i class="fa fa-check"></i> Link copied'; setTimeout(function () { b.innerHTML = html; }, 1800); }
+    if (navigator.share) { navigator.share({ title: t, url: u }).catch(function () {}); return; }
+    if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(u).then(done); return; }
+    var x = document.createElement('textarea'); x.value = u; document.body.appendChild(x); x.select(); try { document.execCommand('copy'); done(); } catch (e) { prompt('Copy this link', u); } x.remove();
+};
+</script>
+@endsection
 @section('content')
 @php
     $name = $exam->short_name ?: $exam->name;
@@ -28,6 +39,7 @@
     <div class="container">
         @include('kpsc.partials.ca-hero', ['heading' => $heading, 'msg' => $msg, 'crumbs' => $crumbs])
 
+        <div class="text-end mt-2"><button type="button" class="ca-share" id="caShare" style="border:1px solid var(--pv-border,#e5e7eb);background:var(--pv-surface,#fff);color:inherit;border-radius:20px;padding:5px 14px;font-size:.8rem;font-weight:700"><i class="fa fa-share-alt"></i> Share this page</button></div>
         <div class="ca-tabs">@foreach ($tabs as $k => $l)<a class="{{ $k === $resource ? 'on' : '' }}" href="{{ url($exam->slug . '/' . $k) }}">{{ $l }}</a>@endforeach</div>
 
         @if ($folders->count())

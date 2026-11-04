@@ -51,6 +51,7 @@
             <i class="bi bi-folder2-open"></i>
             <a href="{{ $q() }}" class="fw-semibold">{{ $exam->short_name ?: $exam->name }}</a>
             @foreach ($trail as $t)<span class="text-muted">/</span> @if ($loop->last)<b>{{ $t->title }}</b>@else<a href="{{ $q($t->id) }}">{{ $t->title }}</a>@endif @endforeach
+            <button type="button" class="btn btn-sm btn-outline-secondary py-0 ms-auto mb-0" data-copy="{{ url($exam->slug . '/' . $m['section']) . ($current ? '?folder=' . $current->id : '') }}"><i class="bi bi-link-45deg"></i> Copy page link</button>
         </div>
 
         <div class="row g-2 mb-3">
@@ -61,6 +62,7 @@
                             <div class="small text-muted">{{ $f->items_count }} item(s) · {{ $f->folders_count }} folder(s)</div></a>
                         <div class="dropdown"><button class="btn btn-sm btn-light mb-0" data-bs-toggle="dropdown"><i class="bi bi-three-dots-vertical"></i></button>
                             <ul class="dropdown-menu dropdown-menu-end p-2" style="min-width:230px">
+                                <li><button type="button" class="btn btn-sm btn-outline-secondary w-100 mb-2" data-copy="{{ url($exam->slug . '/' . $m['section'] . '?folder=' . $f->id) }}"><i class="bi bi-link-45deg"></i> Copy page link</button></li>
                                 <li><form action="{{ $base . '/folders/' . $f->id }}" method="POST">@csrf @method('PUT')
                                     <input class="form-control form-control-sm mb-1" name="title" value="{{ $f->title }}" required maxlength="150">
                                     <select name="parent_id" class="form-select form-select-sm mb-1"><option value="">Top level</option>@foreach ($allFolders->where('id', '!=', $f->id) as $af)<option value="{{ $af->id }}" {{ $f->parent_id == $af->id ? 'selected' : '' }}>{{ $af->path() }}</option>@endforeach</select>
@@ -172,6 +174,8 @@
                         </form>
                     </td>
                     <td class="text-end text-nowrap">
+                        @php $openUrl = $it->attachment ? pdf_view_url(Storage::url('files/' . $it->attachment), $it->title) : $it->link_url; @endphp
+                        @if ($openUrl)<button type="button" class="btn btn-sm btn-circle btn-light" title="Copy link" data-copy="{{ \Illuminate\Support\Str::startsWith($openUrl, 'http') ? $openUrl : url($openUrl) }}"><i class="bi bi-link-45deg"></i></button>@endif
                         <a href="{{ url('admin/content/' . $m['section'] . '/' . $it->id . '/edit') }}" class="btn btn-sm btn-circle btn-info" title="Edit"><i class="bi bi-pencil"></i></a>
                         <form action="{{ url('admin/content/' . $m['section'] . '/' . $it->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this {{ $m['one'] }}?')">@csrf @method('DELETE')
                             <button class="btn btn-sm btn-circle btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
@@ -187,4 +191,13 @@
     <div class="mt-3">@include('admin.partials.per-page', ['p' => $list])
 {{ $list->links() }}</div>
 </div>
+<script>
+document.addEventListener('click', function (e) {
+    var b = e.target.closest('[data-copy]'); if (!b) return;
+    var u = b.dataset.copy, html = b.innerHTML;
+    function done() { b.innerHTML = '<i class="bi bi-check2"></i> Copied'; setTimeout(function () { b.innerHTML = html; }, 1500); }
+    if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(u).then(done); return; }
+    var t = document.createElement('textarea'); t.value = u; t.style.position = 'fixed'; t.style.opacity = 0; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); done(); } catch (x) { prompt('Copy this link', u); } t.remove();
+});
+</script>
 @endsection
