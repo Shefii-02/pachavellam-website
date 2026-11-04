@@ -49,8 +49,8 @@
     @endif
 
     {!! $heading('Study Content') !!}
-    {!! $link(url('admin/kpsc/material'), 'bi-file-earmark-arrow-down-fill', 'Study Material', active_menu('material')) !!}
-    {!! $link(url('admin/kpsc/syllabus'), 'bi-plus-slash-minus', 'Syllabus', active_menu('syllabus')) !!}
+    {!! $link(url('admin/content/materials?exam=kpsc'), 'bi-file-earmark-arrow-down-fill', 'Study Material', $is('admin/content/materials*')) !!}
+    {!! $link(url('admin/content/syllabus?exam=kpsc'), 'bi-plus-slash-minus', 'Syllabus', $is('admin/content/syllabus*')) !!}
     {!! $link(url('admin/kpsc/subjects'), 'bi-journal-text', 'Subjects', active_menu('subjects')) !!}
     {!! $link(url('admin/kpsc/prev-qstn'), 'bi-question-circle', 'PYQ', active_menu('prev-qstn')) !!}
     {!! $link(url('admin/kpsc/psc-bulletin'), 'bi-patch-question-fill', 'Psc Bulletin', active_menu('psc-bulletin')) !!}
@@ -58,7 +58,7 @@
     {!! $link(url('admin/kpsc/special-videos'), 'bi-camera-reels', 'Youtube Class', active_menu('special-videos')) !!}
 
     {!! $heading('Results') !!}
-    {!! $link(url('admin/kpsc/psc-results'), 'bi-file-earmark-spreadsheet', 'Psc Results', active_menu('psc-results')) !!}
+    {!! $link(url('admin/content/results?exam=kpsc'), 'bi-file-earmark-spreadsheet', 'Results', $is('admin/content/results*')) !!}
 @else
     @if (\App\Support\StaffAccess::can($me, 'Exam courses manage') && $examModel)
         @php $seriesCourse = \App\Http\Controllers\Exam\ExamSeriesController::seriesCourseId($examModel); @endphp

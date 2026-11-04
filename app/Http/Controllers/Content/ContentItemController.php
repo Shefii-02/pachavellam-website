@@ -121,7 +121,14 @@ class ContentItemController extends Controller
             $item->exams()->sync([$exam->id]);
         }
 
-        return redirect(url('admin/content/' . $section . '?exam=' . $exam->slug . ($folder ? '&folder=' . $folder->id : '')))->with('message', count($request->file('files')) . ' file(s) uploaded');
+        $msg = count($request->file('files')) . ' file(s) uploaded';
+        if ($request->expectsJson()) {
+            session()->flash('message', $msg);
+
+            return response()->json(['ok' => true]);
+        }
+
+        return redirect(url('admin/content/' . $section . '?exam=' . $exam->slug . ($folder ? '&folder=' . $folder->id : '')))->with('message', $msg);
     }
 
     public function create(Request $request, string $section)

@@ -64,7 +64,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area
         Route::post('syllabus/delete/{id}', 'cms\SyllabusController@delete')->name('syllabus.delete');
         Route::post('syllabus/update-syllabus', 'cms\SyllabusController@update_syllabus');
 
-        Route::resource('syllabus', 'cms\SyllabusController');
+        // folders and sub folders, files uploaded inside them: the common screen (admin/content/syllabus?exam=kpsc)
+        Route::get('syllabus', fn () => redirect(url('admin/content/syllabus?exam=kpsc')))->name('syllabus.index');
+        Route::resource('syllabus', 'cms\SyllabusController')->except(['index']);
 
 
         Route::post('new-qa/delete/{id}', 'cms\NewmodalQaController@delete')->name('new-qa.delete');
@@ -76,7 +78,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area
         Route::post('material/delete/{id}', 'cms\MaterialController@delete')->name('material.delete');
         Route::post('material/update-material', 'cms\MaterialController@update_material');
 
-        Route::resource('material', 'cms\MaterialController');
+        // folders and sub folders, files uploaded inside them: the common screen (admin/content/materials?exam=kpsc)
+        Route::get('material', fn () => redirect(url('admin/content/materials?exam=kpsc')))->name('material.index');
+        Route::resource('material', 'cms\MaterialController')->except(['index']);
 
 
         // Capsule moved to the main sidebar (admin/capsule)
@@ -85,7 +89,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area
         Route::post('psc-results/delete/{id}', 'cms\PscresultsController@delete')->name('psc-results.delete');
         Route::post('psc-results/update-pscresults', 'cms\PscresultsController@update_pscresults');
 
-        Route::resource('psc-results', 'cms\PscresultsController');
+        // folders and sub folders, files uploaded inside them: the common screen (admin/content/results?exam=kpsc)
+        Route::get('psc-results', fn () => redirect(url('admin/content/results?exam=kpsc')))->name('psc-results.index');
+        Route::resource('psc-results', 'cms\PscresultsController')->except(['index']);
 
         Route::post('daily-ca/delete/{id}', 'cms\CurrentAffairsController@delete')->name('daily-ca.delete');
         Route::post('daily-ca/update-pscresults', 'cms\CurrentAffairsController@update_dailyca');

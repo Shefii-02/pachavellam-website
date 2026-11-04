@@ -55,14 +55,67 @@
                 </form>
             </div>
         </div>
-        <form action="{{ $base . '/upload' }}" method="POST" enctype="multipart/form-data" class="border rounded-3 p-2 mb-3 d-flex align-items-center flex-wrap gap-2">@csrf
-            <input type="hidden" name="exam" value="{{ $exam->slug }}"><input type="hidden" name="folder_id" value="{{ $current?->id }}">
-            <span class="small"><i class="bi bi-cloud-upload"></i> Upload to <b>{{ $current ? $current->title : 'top level' }}</b></span>
-            <input type="file" name="files[]" multiple required accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png" class="form-control form-control-sm" style="max-width:340px">
-            <button class="btn btn-sm btn-primary mb-0">Upload files</button>
-            <span class="small text-muted">Each file becomes an item named after the file. Use "Add" to pick from the library or add a link.</span>
-            @error('files')<div class="text-danger small w-100">{{ $message }}</div>@enderror @error('files.*')<div class="text-danger small w-100">{{ $message }}</div>@enderror
-        </form>
+        <div class="border rounded-3 p-3 mb-3" id="upBox" data-url="{{ $base . '/upload' }}" data-exam="{{ $exam->slug }}" data-folder="{{ $current?->id }}" data-csrf="{{ csrf_token() }}">
+            <div id="upDrop" class="text-center rounded-3 p-4" style="border:2px dashed #9aa5b5;cursor:pointer">
+                <i class="bi bi-cloud-arrow-up fs-1 d-block"></i>
+                <b>Drop files here or click to browse</b>
+                <div class="small text-muted">Uploading into <b>{{ $current ? $current->path() : $exam->short_name . ' (top level)' }}</b> · PDF, Word, Excel, JPG, PNG · up to 10 MB each, 30 at a time</div>
+                <input type="file" id="upFiles" multiple hidden accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+            </div>
+            <div id="upList" class="row g-2 mt-1"></div>
+            <div id="upBar" class="progress mt-2 d-none" style="height:8px"><div class="progress-bar" style="width:0"></div></div>
+            <div id="upErr" class="text-danger small mt-1"></div>
+            <div class="mt-2 d-none" id="upActions"><button type="button" id="upGo" class="btn btn-sm btn-primary mb-0"><i class="bi bi-upload me-1"></i>Upload <span id="upCount"></span></button> <button type="button" id="upClear" class="btn btn-sm btn-light mb-0">Clear</button>
+                <a href="{{ url('admin/content/' . $m['section'] . '/create') }}?exam={{ $exam->slug }}{{ $current ? '&folder=' . $current->id : '' }}" class="btn btn-sm btn-outline-secondary mb-0 float-end">Or add one with details / library / link</a></div>
+        </div>
+        <script>
+        (function () {
+            var box = document.getElementById('upBox'), drop = document.getElementById('upDrop'), inp = document.getElementById('upFiles'), list = document.getElementById('upList'),
+                acts = document.getElementById('upActions'), err = document.getElementById('upErr'), bar = document.getElementById('upBar'), files = [];
+            var ok = /\.(pdf|docx?|xlsx?|jpe?g|png)$/i;
+            function size(n) { return n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.ceil(n / 1024) + ' KB'; }
+            function icon(f) { return /\.pdf$/i.test(f.name) ? 'bi-file-earmark-pdf text-danger' : /\.docx?$/i.test(f.name) ? 'bi-file-earmark-word text-primary' : /\.xlsx?$/i.test(f.name) ? 'bi-file-earmark-excel text-success' : 'bi-file-earmark-image'; }
+            function esc(t) { var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+            function draw() {
+                list.innerHTML = files.map(function (f, i) {
+                    var th = /^image\//.test(f.type) ? '<img src="' + URL.createObjectURL(f) + '" style="width:100%;height:80px;object-fit:cover" class="rounded">' : '<i class="bi ' + icon(f) + '" style="font-size:2.6rem"></i>';
+                    return '<div class="col-6 col-md-3 col-lg-2"><div class="border rounded-3 p-2 text-center position-relative h-100"><button type="button" data-rm="' + i + '" class="btn-close position-absolute top-0 end-0 m-1" style="font-size:.6rem"></button>'
+                        + '<div class="d-flex align-items-center justify-content-center" style="height:80px">' + th + '</div><div class="small fw-semibold text-truncate mt-1" title="' + esc(f.name) + '">' + esc(f.name) + '</div><div class="small text-muted">' + size(f.size) + '</div></div></div>';
+                }).join('');
+                acts.classList.toggle('d-none', !files.length); document.getElementById('upCount').textContent = files.length ? '(' + files.length + ' file' + (files.length > 1 ? 's' : '') + ')' : '';
+                list.querySelectorAll('[data-rm]').forEach(function (b) { b.onclick = function () { files.splice(+b.dataset.rm, 1); draw(); }; });
+            }
+            function add(fl) {
+                err.textContent = '';
+                Array.prototype.forEach.call(fl, function (f) {
+                    if (!ok.test(f.name)) { err.textContent = f.name + ': file type not allowed.'; return; }
+                    if (f.size > 10485760) { err.textContent = f.name + ' is over 10 MB.'; return; }
+                    if (files.length < 30) files.push(f);
+                });
+                draw();
+            }
+            drop.onclick = function () { inp.click(); };
+            inp.onchange = function () { add(inp.files); inp.value = ''; };
+            ['dragover', 'dragenter'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.style.background = 'rgba(13,110,253,.08)'; }); });
+            ['dragleave', 'drop'].forEach(function (ev) { drop.addEventListener(ev, function (e) { e.preventDefault(); drop.style.background = ''; }); });
+            drop.addEventListener('drop', function (e) { add(e.dataTransfer.files); });
+            document.getElementById('upClear').onclick = function () { files = []; draw(); };
+            document.getElementById('upGo').onclick = function () {
+                var fd = new FormData(); fd.append('_token', box.dataset.csrf); fd.append('exam', box.dataset.exam); if (box.dataset.folder) fd.append('folder_id', box.dataset.folder);
+                files.forEach(function (f) { fd.append('files[]', f); });
+                var x = new XMLHttpRequest(); x.open('POST', box.dataset.url); x.setRequestHeader('Accept', 'application/json');
+                bar.classList.remove('d-none'); document.getElementById('upGo').disabled = true;
+                x.upload.onprogress = function (e) { if (e.lengthComputable) bar.firstElementChild.style.width = (e.loaded * 100 / e.total) + '%'; };
+                x.onload = function () {
+                    if (x.status === 200) { location.reload(); return; }
+                    document.getElementById('upGo').disabled = false; bar.classList.add('d-none');
+                    try { var j = JSON.parse(x.responseText); err.textContent = Object.values(j.errors || {}).flat().join(' ') || j.message || 'Upload failed.'; } catch (e) { err.textContent = 'Upload failed (' + x.status + ').'; }
+                };
+                x.onerror = function () { document.getElementById('upGo').disabled = false; err.textContent = 'Network error.'; };
+                x.send(fd);
+            };
+        })();
+        </script>
     @endif
 
     <form method="GET" class="row g-2 mb-3">@if (request('folder'))<input type="hidden" name="folder" value="{{ request('folder') }}">@endif
