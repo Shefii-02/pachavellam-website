@@ -118,23 +118,31 @@ class ExamCourse extends Model
         };
     }
 
-    /** Admin sees everything; staff only the courses they were added to. */
+    /** Admin sees everything; staff the courses of the exam types they may view (Staff Access), plus courses they were added to. */
     public function scopeVisibleTo($query, User $user)
     {
         if ($user->type === 'Admin') {
             return $query;
         }
+        $examIds = \App\Support\StaffAccess::can($user, 'Exam courses view') ? (\App\Support\StaffAccess::examIds($user) ?: [0]) : [0];
 
-        return $query->whereIn('exam_courses.id', fn ($q) => $q->select('course_id')->from('exam_course_staff')->where('user_id', $user->id));
+        return $query->where(fn ($q) => $q->whereIn('exam_courses.exam_id', $examIds)
+            ->orWhereIn('exam_courses.id', fn ($m) => $m->select('course_id')->from('exam_course_staff')->where('user_id', $user->id)));
     }
 
+    /** View: the View (or Manage) permission in this course's exam type, or added to the course. */
     public function canBeViewedBy(User $user): bool
     {
-        return $user->type === 'Admin' || $this->members()->where('users.id', $user->id)->exists();
+        return $user->type === 'Admin'
+            || \App\Support\StaffAccess::canIn($user, 'Exam courses view', (int) $this->exam_id)
+            || $this->members()->where('users.id', $user->id)->exists();
     }
 
+    /** Edit: the Manage permission in this course's exam type, or added to the course with edit rights. */
     public function canBeEditedBy(User $user): bool
     {
-        return $user->type === 'Admin' || $this->members()->where('users.id', $user->id)->wherePivot('can_edit', 1)->exists();
+        return $user->type === 'Admin'
+            || \App\Support\StaffAccess::canIn($user, 'Exam courses manage', (int) $this->exam_id)
+            || $this->members()->where('users.id', $user->id)->wherePivot('can_edit', 1)->exists();
     }
 }

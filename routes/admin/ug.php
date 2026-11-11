@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area']], function () {
-    Route::group(['prefix' => 'ug-pg', 'as' => 'ug-pg.'], function () {
+    Route::group(['prefix' => 'ug-pg', 'as' => 'ug-pg.', 'middleware' => ['staff.module']], function () {
         Route::get('/', 'ug_pg\HomeController@dashboard');
         Route::get('university', 'ug_pg\HomeController@university');
         Route::post('university', 'ug_pg\HomeController@university_store');

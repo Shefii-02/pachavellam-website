@@ -406,13 +406,22 @@ class CourseExamController extends Controller
             'end_at' => $request->end_at ?: null,
             'unlock_at' => $request->unlock_at ?: null,
             'max_attempts' => (int) $request->input('max_attempts', 0),
-            'position' => (int) $request->input('position', $item->position ?? 0),
+            'position' => $request->filled('sort_no') ? max(0, (int) $request->sort_no) : (int) ($item->position ?? 0),   // one sort number drives both orderings
             'season_id' => $this->seasonId($request),
             'is_paid' => $request->access === 'paid',
             'free_access' => $request->boolean('free_access'),
             'sort_no' => $request->filled('sort_no') ? max(0, (int) $request->sort_no) : null,
-            'instruction' => $instrType === 'text' || $instrType === null ? (SafeHtml::clean($request->instruction) ?: null) : null,
         ];
+        // exam instructions are picked from the saved templates (admin/kpsc/exam-instructions). Left out of the form (a sectioned exam) or "keep current" = untouched.
+        $pick = $request->input('instruction_id');
+        if ($pick !== null && $pick !== 'keep') {
+            $tpl = is_numeric($pick) ? \App\Models\ExamInstruction::find($pick) : null;
+            $data['instruction_id'] = $tpl?->id;
+            $data['instruction'] = $tpl ? (SafeHtml::clean($tpl->body) ?: null) : null;
+            $request->merge(['instruction_type' => 'none']);   // a picked template replaces any uploaded PDF
+        } elseif ($item === null) {
+            $data['instruction'] = null;
+        }
 
         return [$data, $sections];
     }

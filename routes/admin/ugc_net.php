@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area']], function () {
-    Route::group(['prefix' => 'ugc-net', 'as' => 'ugc_net.'], function () {
+    Route::group(['prefix' => 'ugc-net', 'as' => 'ugc_net.', 'middleware' => ['staff.module']], function () {
         Route::get('/', 'ugc_net\HomeController@dashboard');
 
         Route::get('interested-students', 'student\ExamStudentController@index')->defaults('exam', 'ugc-net');

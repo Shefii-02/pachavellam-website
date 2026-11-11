@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area']], function () {
 
-    Route::group(['prefix' => 'kpsc', 'as' => 'kpsc.', 'middleware' => ['auth']], function () {
+    Route::group(['prefix' => 'kpsc', 'as' => 'kpsc.', 'middleware' => ['auth', 'staff.module']], function () {
 
 
         Route::get('/', 'cms\DashboardController@dashboard');

@@ -20,17 +20,17 @@
 @endif
 
 {!! $heading('Courses &amp; Libraries') !!}
-@if (\App\Support\StaffAccess::can($me, 'Exam courses manage'))
+@if (\App\Support\StaffAccess::can($me, 'Exam courses view'))
 {!! $link(url('admin/exam/' . $slug . '/category'), 'bi-diagram-3', 'Categories', active_exam_menu('category')) !!}
 {!! $link(url('admin/exam/' . $slug . '/courses'), 'bi-mortarboard', 'Courses', active_exam_menu('courses')) !!}
 @endif
-@if (\App\Support\StaffAccess::can($me, 'Question library manage'))
+@if (\App\Support\StaffAccess::can($me, 'Question library view'))
 {!! $link(url('admin/exam/' . $slug . '/question-library'), 'bi-collection', 'Question Library', active_exam_menu('question-library')) !!}
 @endif
-@if (\App\Support\StaffAccess::can($me, 'Class library manage'))
+@if (\App\Support\StaffAccess::can($me, 'Class library view'))
 {!! $link(url('admin/exam/' . $slug . '/class-library'), 'bi-collection-play', 'Class Library', active_exam_menu('class-library')) !!}
 @endif
-@if (\App\Support\StaffAccess::can($me, 'Roaring study manage'))
+@if (\App\Support\StaffAccess::can($me, 'Roaring study view'))
 {!! $link(url('admin/exam/' . $slug . '/roaring-study'), 'bi-lightning-charge', 'Roaring Study', $is('admin/roaring-study*', 'admin/exam/*/roaring-study*')) !!}
 @endif
 
@@ -42,7 +42,7 @@
     {!! $link(url('admin/kpsc/exam-instructions'), 'bi-card-text', 'Exam instructions', request()->is('admin/kpsc/exam-instructions*') ? 'active' : '') !!}
     {!! $link(url('admin/kpsc/exam-reports'), 'bi-flag', 'Reported errors', request()->is('admin/kpsc/exam-reports*') ? 'active' : '') !!}
     {!! $link(url('admin/exam/kpsc/series/ca'), 'bi-calendar2-check', 'CA Exam Series', (request()->is('admin/exam/kpsc/series/ca*') || request()->is('admin/kpsc/ca-daily-exam*')) ? 'active' : '') !!}
-    @if (\App\Support\StaffAccess::can($me, 'Exam courses manage'))
+    @if (\App\Support\StaffAccess::can($me, 'Exam courses view'))
         @php $kpscSeries = $examModel ? \App\Http\Controllers\Exam\ExamSeriesController::seriesCourseId($examModel) : null; @endphp
         {!! $link(url('admin/exam/kpsc/series/gk'), 'bi-globe2', 'GK Exam Series', (request()->is('admin/exam/kpsc/series/gk*') || ($kpscSeries && request()->is('admin/exam/kpsc/courses/' . $kpscSeries . '/exams/gk-exams*'))) ? 'active' : '') !!}
         {!! $link(url('admin/exam/kpsc/series/special'), 'bi-stars', 'Special Exam Series', request()->is('admin/exam/kpsc/series/special*') ? 'active' : '') !!}
@@ -60,14 +60,14 @@
     {!! $heading('Results') !!}
     {!! $link(url('admin/content/results?exam=kpsc'), 'bi-file-earmark-spreadsheet', 'Results', $is('admin/content/results*')) !!}
 @else
-    @if (\App\Support\StaffAccess::can($me, 'Exam courses manage') && $examModel)
+    @if (\App\Support\StaffAccess::can($me, 'Exam courses view') && $examModel)
         @php $seriesCourse = \App\Http\Controllers\Exam\ExamSeriesController::seriesCourseId($examModel); @endphp
         {!! $heading('Exams') !!}
         @foreach (\App\Http\Controllers\Exam\ExamSeriesController::KINDS as $kind => [$featureSlug, $label])
             {!! $link(url('admin/exam/' . $slug . '/series/' . $kind), ['daily' => 'bi-list-task', 'omr' => 'bi-pencil-square', 'ca' => 'bi-calendar2-check', 'gk' => 'bi-globe2', 'special' => 'bi-stars'][$kind], $label, (request()->is('admin/exam/' . $slug . '/series/' . $kind . '*') || ($seriesCourse && request()->is('admin/exam/' . $slug . '/courses/' . $seriesCourse . '/exams/' . $featureSlug . '*'))) ? 'active' : '') !!}
         @endforeach
     @endif
-    @if (\App\Support\StaffAccess::can($me, 'Content manage'))
+    @if (\App\Support\StaffAccess::can($me, 'Content view'))
         {!! $heading('Study Content') !!}
         {!! $link(url('admin/content/syllabus?exam=' . $slug), 'bi-plus-slash-minus', 'Syllabus', $is('admin/content/syllabus*')) !!}
         {!! $link(url('admin/content/materials?exam=' . $slug), 'bi-file-earmark-arrow-down-fill', 'Study Materials', $is('admin/content/materials*')) !!}

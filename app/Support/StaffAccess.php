@@ -50,18 +50,80 @@ class StaffAccess
     /** Permission only (no exam type). */
     public static function can(?User $user, string $permission): bool
     {
-        return self::isAdmin($user) || ($user && $user->can($permission));
+        if (self::isAdmin($user)) {
+            return true;
+        }
+        if (!$user) {
+            return false;
+        }
+        if ($user->can($permission)) {
+            return true;
+        }
+        // Manage includes View
+        $manage = self::manageOf($permission);
+
+        return $manage !== null && $user->can($manage);
     }
 
-    /** Permission, and the exam type when one is given. */
-    public static function canIn(?User $user, string $permission, ?int $examId = null): bool
+    /** "Question library view" -> "Question library manage" (null when the feature has no manage permission). */
+    public static function manageOf(string $viewPermission): ?string
     {
-        return self::can($user, $permission) && self::hasExam($user, $examId);
+        if (!str_ends_with($viewPermission, ' view')) {
+            return null;
+        }
+        foreach ([' manage', ' mark'] as $suffix) {
+            $manage = substr($viewPermission, 0, -5) . $suffix;
+            if (in_array($manage, self::permissionNames(), true)) {
+                return $manage;
+            }
+        }
+
+        return null;
+    }
+
+    /** "Question library manage" -> "Question library view" (null when the feature has no view permission). */
+    public static function viewOf(string $managePermission): ?string
+    {
+        if (!str_ends_with($managePermission, ' manage')) {
+            return null;
+        }
+        $view = substr($managePermission, 0, -7) . ' view';
+
+        return in_array($view, self::permissionNames(), true) ? $view : null;
+    }
+
+    /** Pages that only show a form to change something (opening them needs Manage, not View). */
+    public static function isChangePage(Request $request): bool
+    {
+        $uri = $request->route()?->uri() ?? $request->path();
+        foreach (explode('/', $uri) as $segment) {
+            if (preg_match('/^(create|edit|add|import|bulk|quick|starter|storage|library|build|upload)$|(^|[-_])(edit|create|add|upload)([-_]|$)/', $segment)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** Turns a Manage permission into its View one for pages that only show something; marks the page read-only for a View-only person. */
+    public static function levelFor(Request $request, string $permission): string
+    {
+        if ($request->isMethodSafe() && !self::isChangePage($request) && ($view = self::viewOf($permission))) {
+            if (!self::can($request->user(), $permission)) {
+                $request->attributes->set('staff_read_only', true);
+            }
+
+            return $view;
+        }
+
+        return $permission;
     }
 
     public static function authorize(Request $request, string $permission, ?int $examId = null): void
     {
         $user = $request->user();
+        // a Manage permission guards a whole feature: just looking at a page (GET) only needs View
+        $permission = self::levelFor($request, $permission);
         abort_unless(self::can($user, $permission), 403, 'You do not have permission for this (' . $permission . ').');
         abort_unless(self::hasExam($user, $examId), 403, 'You do not have access to this exam type.');
     }

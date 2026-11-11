@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area']], function () {
-    Route::group(['prefix' => 'ssc', 'as' => 'ssc.'], function () {
+    Route::group(['prefix' => 'ssc', 'as' => 'ssc.', 'middleware' => ['staff.module']], function () {
         Route::get('/', 'ssc\HomeController@dashboard');
 
         Route::get('interested-students', 'student\ExamStudentController@index')->defaults('exam', 'ssc');

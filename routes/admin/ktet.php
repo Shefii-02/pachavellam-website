@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area']], function () {
-    Route::group(['prefix' => 'ktet', 'as' => 'ktet.'], function () {
+    Route::group(['prefix' => 'ktet', 'as' => 'ktet.', 'middleware' => ['staff.module']], function () {
         Route::get('/', 'ktet\HomeController@dashboard');
 
         Route::get('interested-students', 'student\ExamStudentController@index')->defaults('exam', 'ktet');

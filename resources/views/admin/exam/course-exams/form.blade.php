@@ -104,7 +104,7 @@
                 <div class="col-md-3">
                     <label class="form-label">Sort number</label>
                     <input type="number" min="0" class="form-control" name="sort_no" value="{{ old('sort_no', $editing ? $item->sort_no : '') }}" placeholder="optional">
-                    <div class="form-text">Smallest shows first on the exams page.</div>
+                    <div class="form-text">Smallest shows first, here and on the exams page.</div>
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">Free access</label>
@@ -132,32 +132,21 @@
                     <input type="datetime-local" name="unlock_at" class="form-control" value="{{ $dt('unlock_at') }}">
                     <div class="form-text">Students can open it from this time.</div>
                 </div>
-                <div class="col-md-3">
-                    <label class="form-label">Sort order</label>
-                    <input type="number" name="position" min="0" class="form-control" value="{{ $v('position', 0) }}">
-                </div>
 
                 @unless ($isCa)
-                <div class="col-md-3">
+                @php
+                    $pickedId = old('instruction_id', $editing ? $item->instruction_id : '');
+                    $hasCustom = $editing && !$item->instruction_id && ($examPdf || \App\Support\SafeHtml::text($item->instruction) !== '');
+                    if ($pickedId === '' && $hasCustom) { $pickedId = 'keep'; }
+                @endphp
+                <div class="col-md-6" id="examInstrBox">
                     <label class="form-label">Instructions</label>
-                    <select name="instruction_type" id="instrType" class="form-select">
-                        <option value="none" @selected($instrType === 'none')>None</option>
-                        <option value="text" @selected($instrType === 'text')>Write as text</option>
-                        <option value="pdf" @selected($instrType === 'pdf')>Upload a PDF</option>
+                    <select name="instruction_id" id="instrPick" class="form-select">
+                        <option value="">None</option>
+                        @if ($hasCustom)<option value="keep" @selected((string) $pickedId === 'keep')>Keep current instructions ({{ $examPdf ? 'PDF' : 'text' }})</option>@endif
+                        @foreach ($saved as $si)<option value="{{ $si->id }}" @selected((string) $pickedId === (string) $si->id)>{{ $si->name }} ({{ strtoupper($si->kind) }})</option>@endforeach
                     </select>
-                    <div class="form-text">Choose one: text or PDF.</div>
-                </div>
-                <div class="col-md-9" id="instrText" style="display:none">
-                    <label class="form-label">Instructions text</label>
-                    @if ($saved->count())<select class="form-select form-select-sm mb-2 saved-instr" data-target="[name=instruction]"><option value="">Pick a saved instruction…</option>@foreach ($saved as $si)<option value="{{ $si->id }}">{{ $si->name }} ({{ strtoupper($si->kind) }})</option>@endforeach</select>@endif
-                    <textarea name="instruction" rows="3" class="form-control">{{ $instruction }}</textarea>
-                </div>
-                <div class="col-md-9" id="instrPdf" style="display:none">
-                    <label class="form-label">Instructions PDF</label>
-                    <input type="file" name="instruction_pdf" accept="application/pdf" class="form-control">
-                    @if ($examPdf)
-                        <div class="form-text"><a href="{{ asset('storage/' . $examPdf) }}" target="_blank">Current PDF</a> (upload another to replace it)</div>
-                    @endif
+                    <div class="form-text">Pick one from <a href="{{ url('admin/kpsc/exam-instructions') }}" target="_blank">Exam instructions</a>. An exam with sections uses each section's own instructions.</div>
                 </div>
                 @endunless
             </div>
@@ -263,15 +252,16 @@
         var box = sel.parentNode.querySelector(sel.dataset.target); if (box) box.value = savedBodies[sel.value] || '';
         sel.value = '';
     });
-    var et = document.getElementById('instrType');
-    function showExamInstr() {
-        document.getElementById('instrText').style.display = et.value === 'text' ? '' : 'none';
-        document.getElementById('instrPdf').style.display = et.value === 'pdf' ? '' : 'none';
+    var pickBox = document.getElementById('examInstrBox'), pick = document.getElementById('instrPick');
+    function toggleExamInstr() {   // an exam with sections has an instruction for each section: no exam level one (and the field is not sent)
+        var multi = (parseInt(count.value, 10) || 1) > 1;
+        if (pickBox) { pickBox.style.display = multi ? 'none' : ''; pick.disabled = multi; }
     }
-    et.addEventListener('change', showExamInstr); showExamInstr();
+    count.addEventListener('change', toggleExamInstr); toggleExamInstr();
     rows = rows.length ? rows : [{}];
     count.value = rows.length;
     render();
+    toggleExamInstr();
 })();
 </script>
 @endunless

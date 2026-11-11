@@ -22,7 +22,7 @@
                 <ul class="navbar-nav flex-column" id="navbar-sidebar">
                     @php
                         $staffUser = auth()->user();
-                        $canContent = \App\Support\StaffAccess::can($staffUser, 'Content manage');
+                        $canContent = \App\Support\StaffAccess::can($staffUser, 'Content view');
                         $heading = fn ($t) => '<li class="nav-item mt-3 mb-1 px-3 small text-uppercase text-white-50" style="letter-spacing:.06em;font-size:.7rem">' . $t . '</li>';
                         $link = fn ($href, $icon, $label, $active) => '<li class="nav-item"><a class="nav-link ' . ($active ? 'active' : '') . '" href="' . e($href) . '"><i class="bi ' . $icon . ' fa-fw me-2"></i>' . $label . '</a></li>';
                         $kind = \App\Models\ContentItem::KINDS;
@@ -270,6 +270,9 @@
             </div>
         </nav>
         <!-- Top bar END -->
+        @if (request()->attributes->get('staff_read_only'))
+            @include('admin.partials.read-only')
+        @endif
         @yield('main')
         <!-- Top listed Cards START -->
 

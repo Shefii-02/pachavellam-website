@@ -29,17 +29,26 @@
         </div>
 
         <div class="card bg-transparent border rounded-3 mb-3"><div class="card-body">
-            <h6>Permissions <span class="small text-muted fw-normal">tick to give directly; a tick with a lock comes from a role</span></h6>
+            <h6>Permissions <span class="small text-muted fw-normal">View = open and read. Manage = view plus add, edit and delete. A tick with a lock comes from a role</span></h6>
             <div class="row g-3">
                 @foreach ($groups as $group => $perms)
-                    <div class="col-md-4">
-                        <div class="fw-semibold mb-1">{{ $group }}</div>
-                        @foreach ($perms as $name => $cfg)
-                            @php $fromRole = in_array($name, $viaRole); @endphp
-                            <div class="form-check mb-1">
-                                <input class="form-check-input" type="checkbox" name="permissions[]" value="{{ $name }}" id="p{{ md5($name) }}" @checked(in_array($name, $chosenPerms) || $fromRole)>
-                                <label class="form-check-label" for="p{{ md5($name) }}">{{ $cfg['label'] }} @if ($fromRole)<i class="bi bi-lock-fill text-muted" title="from a role"></i>@endif @if ($cfg['exam_scoped'])<span class="badge bg-light text-dark border">exam types</span>@endif</label>
-                                <div class="form-text mt-0">{{ $cfg['hint'] }}</div>
+                    <div class="col-md-6 col-xl-4">
+                        <div class="fw-semibold mb-2">{{ $group }}</div>
+                        @foreach (collect($perms)->groupBy('feature') as $feature => $levels)
+                            @php $scoped = collect($levels)->contains('exam_scoped', true); @endphp
+                            <div class="border rounded-3 p-2 mb-2">
+                                <div class="fw-medium">{{ $feature }} @if ($scoped)<span class="badge bg-light text-dark border">exam types</span>@endif</div>
+                                <div class="d-flex flex-wrap gap-3 mt-1">
+                                    @foreach ($perms as $name => $cfg)
+                                        @continue($cfg['feature'] !== $feature)
+                                        @php $fromRole = in_array($name, $viaRole); @endphp
+                                        <div class="form-check mb-0">
+                                            <input class="form-check-input perm-{{ $cfg['level'] }}" data-feature="{{ md5($feature) }}" type="checkbox" name="permissions[]" value="{{ $name }}" id="p{{ md5($name) }}" @checked(in_array($name, $chosenPerms) || $fromRole)>
+                                            <label class="form-check-label" for="p{{ md5($name) }}">{{ $cfg['level'] === 'view' ? 'View' : ($levels->count() > 1 ? 'Manage' : 'Use') }} @if ($fromRole)<i class="bi bi-lock-fill text-muted" title="from a role"></i>@endif</label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <div class="form-text mt-1">@foreach ($levels as $cfg){{ $cfg['hint'] }} @endforeach</div>
                             </div>
                         @endforeach
                     </div>
@@ -53,5 +62,12 @@
 <script>
 var all = document.getElementById('allExams');
 all.addEventListener('change', function () { document.querySelectorAll('.exam-check').forEach(function (c) { c.checked = all.checked; }); });
+// ticking Manage also ticks View; clearing View also clears Manage
+document.querySelectorAll('.perm-manage').forEach(function (m) {
+    var v = document.querySelector('.perm-view[data-feature="' + m.dataset.feature + '"]');
+    if (!v) { return; }
+    m.addEventListener('change', function () { if (m.checked) { v.checked = true; } });
+    v.addEventListener('change', function () { if (!v.checked && !v.disabled) { m.checked = false; } });
+});
 </script>
 @endsection
