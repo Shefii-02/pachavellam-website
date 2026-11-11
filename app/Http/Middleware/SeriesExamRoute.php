@@ -32,6 +32,7 @@ class SeriesExamRoute
         if (isset($params['season'])) {
             $request->merge(['season' => $params['season']]);
         }
+        $request->attributes->set('series_kind', $params['kind']);   // the pages show the series / season instead of the course
 
         // the builder expects (exam, course, feature, ...the rest) in this order
         $rest = array_diff_key($params, array_flip(['exam', 'kind', 'season']));

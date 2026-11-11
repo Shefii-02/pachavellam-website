@@ -1,6 +1,28 @@
 @extends($layout)
 @section('content2')
 @php
+    // the exams of a series belong to a season, not to a course: no course header or side menu
+    $isSeries = $course->slug === 'series-' . $exam->slug;
+    if ($isSeries) {
+        $seriesKind = request()->attributes->get('series_kind') ?: (array_keys(\App\Http\Controllers\Exam\ExamSeriesController::KINDS)[array_search($feature->slug ?? '', array_column(\App\Http\Controllers\Exam\ExamSeriesController::KINDS, 0), true)] ?? 'daily');
+        $seriesTitle = \App\Http\Controllers\Exam\ExamSeriesController::KINDS[$seriesKind][1] ?? 'Exam Series';
+        $seasonNow = request()->filled('season') && request('season') !== 'none' ? \App\Models\ExamSeason::find((int) request('season')) : null;
+        $seriesBase = $exam->examUrl('series/' . $seriesKind);
+    }
+@endphp
+@if ($isSeries)
+    <div class="mb-3">
+        @if ($seasonNow)
+            <a href="{{ $seriesBase . '/seasons/' . $seasonNow->id }}" class="small"><i class="bi bi-arrow-left"></i> {{ $seasonNow->title }}</a>
+            <div class="text-muted small">{{ $seriesTitle }} · {{ $exam->short_name ?: $exam->name }}</div>
+        @else
+            <a href="{{ $seriesBase }}" class="small"><i class="bi bi-arrow-left"></i> {{ $seriesTitle }}</a>
+            <div class="text-muted small">{{ $exam->short_name ?: $exam->name }}{{ request('season') === 'none' ? ' · exams without a season' : '' }}</div>
+        @endif
+    </div>
+    @yield('course_body')
+@else
+@php
     [$stLabel, $stColor] = \App\Models\ExamCourse::STATUSES[$course->status] ?? [$course->status, 'secondary'];
     $here = request()->path();
     $pathOf = fn ($url) => ltrim((string) parse_url($url, PHP_URL_PATH), '/');
@@ -77,4 +99,5 @@
         @yield('course_body')
     </div>
 </div>
+@endif
 @endsection
