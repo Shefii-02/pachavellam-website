@@ -1,5 +1,8 @@
 @extends('admin.exam.course.workspace')
 @section('course_body')
+@php
+    $placeBase = ($seasons ?? collect())->count() && request()->attributes->get('series_kind') ? $exam->examUrl('series/' . request()->attributes->get('series_kind')) : null;   // exams of a series can be moved or copied into a season
+@endphp
 @include('admin.question-library._alerts')
 <div class="card bg-transparent border rounded-3 mb-4">
     <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
@@ -36,6 +39,7 @@
                     <td class="text-end text-nowrap">
                         <a href="{{ $manageUrl }}/{{ $e->id }}" class="btn btn-sm btn-light mb-0">{{ $canEdit ? 'Questions' : 'View' }}</a>
                         @if ($canEdit)<a href="{{ $manageUrl }}/{{ $e->id }}/edit" class="btn btn-sm btn-light mb-0"><i class="bi bi-pencil"></i></a>@endif
+                        @if ($canEdit && $placeBase)<button type="button" class="btn btn-sm btn-light mb-0" title="Move / copy to a season" onclick="pvPlaceExam({{ $e->id }}, {{ (int) $e->season_id }})"><i class="bi bi-arrow-left-right"></i></button>@endif
                     </td>
                 </tr>
             @empty
@@ -45,4 +49,32 @@
         </table>
     </div>
 </div>
+@if ($canEdit && $placeBase)
+<div class="modal fade" id="placeExamModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog"><div class="modal-content">
+    <form id="placeExamForm" method="POST">@csrf
+        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-arrow-left-right me-1"></i>Move / copy to a season</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+        <div class="modal-body">
+            <label class="form-label">Season</label>
+            <select class="form-select mb-3" id="placeExamTo">@foreach ($seasons as $os)<option value="{{ $os->id }}">{{ $os->title }}</option>@endforeach</select>
+            <label class="me-3"><input type="radio" name="mode" value="move" checked> <b>Move</b></label>
+            <label><input type="radio" name="mode" value="copy"> <b>Copy</b> (the copy is a draft; the original stays)</label>
+        </div>
+        <div class="modal-footer"><button type="button" class="btn btn-light mb-0" data-bs-dismiss="modal">Cancel</button><button class="btn btn-success mb-0">Apply</button></div>
+    </form>
+</div></div></div>
+<script>
+    function pvPlaceExam(id, currentSeason) {
+        var f = document.getElementById('placeExamForm'), to = document.getElementById('placeExamTo');
+        f.querySelectorAll('.pv-id').forEach(function (n) { n.remove(); });
+        var i = document.createElement('input'); i.type = 'hidden'; i.className = 'pv-id'; i.name = 'course_ids[]'; i.value = id; f.appendChild(i);
+        Array.prototype.forEach.call(to.options, function (o) { o.disabled = String(o.value) === String(currentSeason); });   // not into the season it is already in
+        var first = Array.prototype.find.call(to.options, function (o) { return !o.disabled; });
+        if (first) { to.value = first.value; }
+        new bootstrap.Modal(document.getElementById('placeExamModal')).show();
+    }
+    document.getElementById('placeExamForm').addEventListener('submit', function () {
+        this.action = @json($placeBase . '/seasons') + '/' + document.getElementById('placeExamTo').value + '/place';
+    });
+</script>
+@endif
 @endsection
