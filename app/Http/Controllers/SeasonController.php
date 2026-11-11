@@ -34,18 +34,42 @@ class SeasonController extends Controller
     public function showBySlug(Request $request, $examSlug,  $page, $seasonSlug, SeasonAccess $access)
     {
 
-        // the seasons of this exam and series page (a handful): match the saved slug, else the slug of the title (seasons saved before slugs existed)
-        $season = ExamSeason::with('exam')->where('status', 'published')
-            ->whereHas('exam', fn ($q) => $q->where('slug', $examSlug))->get()
-            ->filter(fn ($s) => (self::PAGES[$s->kind] ?? 'daily-exams') === $page)
-            ->first(fn ($s) => $s->slug === $seasonSlug || \Illuminate\Support\Str::slug($s->title) === $seasonSlug);
-
+        $season = $this->seasonBySlug($examSlug, $page, $seasonSlug);
         abort_if(!$season, 404);
         if ($season->slug && $season->slug !== $seasonSlug) {
             return redirect($season->publicUrl(), 301);
         }
 
         return view('kpsc.season', $this->data($request, $season->id, $access));
+    }
+
+    /** The published season of an exam type and series page for the address part (saved slug, else the slug of the title for seasons saved before slugs existed). */
+    private function seasonBySlug($examSlug, $page, $seasonSlug): ?ExamSeason
+    {
+        return ExamSeason::with('exam')->where('status', 'published')
+            ->whereHas('exam', fn ($q) => $q->where('slug', $examSlug))->get()
+            ->filter(fn ($s) => (self::PAGES[$s->kind] ?? 'daily-exams') === $page)
+            ->first(fn ($s) => $s->slug === $seasonSlug || \Illuminate\Support\Str::slug($s->title) === $seasonSlug);
+    }
+
+    /** One exam of a season at its own address: /rrb/daily-exams/ssc-chsl/exam-slug (the instructions page of the test; Back goes to the season). */
+    public function showTest(Request $request, $examSlug, $page, $seasonSlug, $testSlug)
+    {
+        $season = $this->seasonBySlug($examSlug, $page, $seasonSlug);
+        abort_if(!$season, 404);
+        $exam = CourseExam::where('season_id', $season->id)->where('status', 'published')->get()->first(fn ($e) => $e->publicSlug() === $testSlug);
+        abort_if(!$exam, 404);
+
+        return app(TestController::class)->show($request, $exam->id, $season->publicUrl());
+    }
+
+    /** Back from a season: the series page, or the exam type page when this season is the only one (the series page would send the student straight back here). */
+    private function backUrl(ExamSeason $season): string
+    {
+        $page = self::PAGES[$season->kind] ?? 'daily-exams';
+        $sole = PublicCatalogController::soleFreeSeason($season->exam, $page);
+
+        return url($season->exam->slug . ($sole && $sole->id === $season->id ? '' : '/' . $page . '?all=1'));
     }
 
     /** Everything the season page shows (also read by the app API). */
@@ -107,7 +131,7 @@ class SeasonController extends Controller
             $state = $access->state($user, $season, 'course', $e->id);
             $rows[] = (object) ($span($e->start_at, $e->end_at) + ['title' => $e->title, 'date' => $e->start_at ? $e->start_at->format('d M Y, h:i a') : '', 'tag' => $t, 'tagc' => $c, 'state' => $state, 'done' => $attended, 'paid' => false,
                 'attended' => $attended, 'bucket' => $bucket($c, $attended), 'pos' => $e->season_position,
-                'url' => $state === 'locked' ? null : url('courses/' . ($e->course->slug ?? $e->course_id)), 'sort' => $sortKey($e->start_at, $e->start_at, $e->id)]);
+                'url' => $state === 'locked' ? null : $e->setRelation('season', $season)->publicUrl(), 'sort' => $sortKey($e->start_at, $e->start_at, $e->id)]);   // the exam's own address, not the hidden series course
         }
         // the order the admin set by dragging (exams not placed yet first); with none set: newest date and time first
         $manual = collect($rows)->contains(fn ($r) => $r->pos !== null);
@@ -120,7 +144,7 @@ class SeasonController extends Controller
 
         return [
             'season' => $season, 'exam' => $season->exam, 'paid' => $paid, 'owns' => $owns, 'access' => $access, 'rows' => $rows, 'title' => $season->title,
-            'freeCount' => collect($rows)->where('state', 'free')->count(), 'back' => url($season->exam->slug . '/' . (self::PAGES[$season->kind] ?? 'daily-exams')),
+            'freeCount' => collect($rows)->where('state', 'free')->count(), 'back' => $this->backUrl($season),
             'accent' => $season->exam->color ?: '#0a8f5b',
         ];
     }

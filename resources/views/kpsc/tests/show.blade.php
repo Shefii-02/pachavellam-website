@@ -28,7 +28,7 @@
     $sectional = $paper['timing'] === 'sectional';
 @endphp
 <div class="t-top">
-    <a class="t-ibtn" href="{{ url()->previous() !== url()->current() ? url()->previous() : url('my-tests') }}" aria-label="Back"><i class="bi bi-arrow-left"></i></a>
+    <a class="t-ibtn" href="{{ $back ?? (url()->previous() !== url()->current() ? url()->previous() : url('my-tests')) }}" aria-label="Back"><i class="bi bi-arrow-left"></i></a>
     <b style="color:var(--pv-text)">Instructions</b>
 </div>
 <div class="in-wrap">

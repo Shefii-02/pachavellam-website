@@ -39,7 +39,7 @@ class CourseExamBuilder
                 return $new;
             };
 
-            $copy = $source->replicate(['status']);
+            $copy = $source->replicate(['status', 'slug']);   // the copy gets its own slug
             $copy->course_id = $target->id;
             $copy->status = 'draft';
             $copy->instruction_pdf = $copyFile($source->instruction_pdf);

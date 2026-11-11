@@ -32,7 +32,7 @@ class TestController extends Controller
 
     // ================================================================= before the test
 
-    public function show(Request $request, $id)
+    public function show(Request $request, $id, ?string $back = null)
     {
         $exam = $this->exam($id);
         $paper = $this->engine->paper($exam);
@@ -44,14 +44,14 @@ class TestController extends Controller
         return view('kpsc.tests.show', [
             'title' => $exam->title, 'exam' => $exam, 'paper' => $paper, 'access' => $this->engine->access($user, $exam), 'isOpen' => $this->engine->isOpen($exam),
             'summary' => $user ? $this->engine->summary($exam, $user) : null,
-            'open' => $open, 'done' => $done, 'left' => $exam->max_attempts ? max(0, $exam->max_attempts - $done->count()) : null,
+            'back' => $back, 'open' => $open, 'done' => $done, 'left' => $exam->max_attempts ? max(0, $exam->max_attempts - $done->count()) : null,
         ]);
     }
 
     public function start(Request $request, $id)
     {
         $exam = $this->exam($id);
-        $back = url('tests/' . $exam->id);
+        $back = $exam->publicUrl();
         if (!$this->engine->isOpen($exam)) {
             return redirect($back)->with('test_msg', 'This test opens on ' . $exam->start_at->format('d M Y, h:i a') . '.');
         }

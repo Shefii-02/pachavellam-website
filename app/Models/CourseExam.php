@@ -28,6 +28,54 @@ class CourseExam extends Model
         'is_paid' => 'boolean',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function (self $e) {
+            if (!$e->slug && \Illuminate\Support\Facades\Schema::hasColumn('course_exams', 'slug')) {
+                $e->slug = self::freeSlug((string) $e->title);
+            }
+        });
+    }
+
+    /** A slug from the title that no other exam uses (a short random tail when the title is taken or has no letters). */
+    public static function freeSlug(string $title): string
+    {
+        $base = mb_substr(\Illuminate\Support\Str::slug($title), 0, 60) ?: 'exam';
+        $slug = $base;
+        while (self::withTrashed()->where('slug', $slug)->exists()) {
+            $slug = $base . '-' . \Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(4));
+        }
+
+        return $slug;
+    }
+
+    /** The slug; exams made before slugs existed get one now (and keep it). */
+    public function publicSlug(): string
+    {
+        if (!$this->slug) {
+            $this->slug = self::freeSlug((string) $this->title);
+            $this->saveQuietly();
+        }
+
+        return $this->slug;
+    }
+
+    /** Where students open the exam: under its season (/rrb/daily-exams/ssc-chsl/exam-slug), else /tests/{id}. */
+    public function publicUrl(): string
+    {
+        $season = $this->season_id ? ($this->relationLoaded('season') ? $this->season : \App\Models\ExamSeason::with('exam')->find($this->season_id)) : null;
+        if ($season && $season->slug && $season->exam) {
+            return $season->publicUrl() . '/' . $this->publicSlug();
+        }
+
+        return url('tests/' . $this->id);
+    }
+
+    public function season()
+    {
+        return $this->belongsTo(\App\Models\ExamSeason::class, 'season_id');
+    }
+
     public const STATUSES = [
         'draft' => ['Draft', 'secondary'],
         'published' => ['Published', 'success'],

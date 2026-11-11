@@ -74,7 +74,8 @@
             'done' => ['Completed · attended', $groups->get('done', collect())->values(), auth()->check() ? 'You have not attended a completed exam yet.' : 'Sign in to see the exams you attended.'],
             'missed' => ['Completed · not attended', $groups->get('missed', collect())->values(), 'No completed exam left unattended.'],
         ];
-        $firstTab = collect($tabs)->filter(fn ($t) => $t[1]->count())->keys()->first() ?? 'live';
+        $tabs = array_filter($tabs, fn ($t) => $t[1]->count());   // a tab with no exams is not shown
+        $firstTab = array_key_first($tabs);
     @endphp
     <div class="hb-sec"><h2 style="font-size:1.05rem;font-weight:800;color:var(--pv-text)">Exams in this season</h2></div>
     @if (count($rows))

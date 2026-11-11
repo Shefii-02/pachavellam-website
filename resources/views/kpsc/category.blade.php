@@ -70,7 +70,7 @@
                 @elseif ($k === 'prime_tests' || $k === 'free_tests')
                     <div class="row g-3">
                         @foreach ($secData[$k] as $t)
-                            @php $tu = $k === 'free_tests' ? url('tests/' . $t->id) : url('courses/' . ($t->course->slug ?? $t->course_id)); @endphp
+                            @php $tu = $k === 'free_tests' ? url('tests/' . $t->id) : (str_starts_with((string) ($t->course->slug ?? ''), 'series-') ? $t->publicUrl() : url('courses/' . ($t->course->slug ?? $t->course_id))); @endphp
                             <div class="col-12 col-md-6 col-lg-4"><a href="{{ $tu }}" class="cg-card"{!! $tgt !!}>
                                 @include('kpsc.partials.item-actions', ['url' => $tu, 'copy' => $copy])
                                 <div class="bd" style="padding-right:84px"><i class="bi {{ $k === 'free_tests' ? 'bi-ui-checks' : 'bi-stars' }}" style="color:#0a8f5b"></i> <b>{{ $t->title }}</b>

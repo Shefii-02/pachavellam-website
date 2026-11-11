@@ -360,7 +360,40 @@ class PublicCatalogController extends Controller
      */
     public function series(Request $request, $slug, $series)
     {
+        // one free season and no other exams: open it straight away, it lists every exam
+        $exam = CompetitiveExam::where('slug', $slug)->where('status', 1)->first();
+        if ($exam && !$request->boolean('all') && ($sole = self::soleFreeSeason($exam, $series))) {
+            return redirect($sole->publicUrl());
+        }
+
         return view('kpsc.series', $this->seriesData($request, $slug, $series));
+    }
+
+    /**
+     * The only running season of a series when it is free and nothing else is in the series; null otherwise
+     * (several seasons, a paid season, or exams outside any season: the series page lists them).
+     */
+    public static function soleFreeSeason(CompetitiveExam $exam, string $series): ?\App\Models\ExamSeason
+    {
+        $cfg = ['daily-exams' => ['daily', 'daily-exams', 'Daily Exam'], 'omr-exams' => ['omr', 'omr-exams', 'Model Exam'], 'gk-exams' => ['gk', 'gk-exams', null],
+            'ca-exams' => ['ca', 'premium-daily-ca', 'CA-Daily-Exam'], 'special-exams' => ['special', 'special-exams', null]][$series] ?? null;
+        if (!$cfg || !\Illuminate\Support\Facades\Schema::hasTable('exam_seasons')) {
+            return null;
+        }
+        [$kind, $featureSlug, $legacy] = $cfg;
+        $today = today();
+        $seasons = \App\Models\ExamSeason::with('exam')->where('exam_id', $exam->id)->where('kind', $kind)->where('status', 'published')->get()
+            ->filter(fn ($se) => (!$se->starts_on || $se->starts_on->lte($today)) && (!$se->ends_on || $se->ends_on->gte($today)));
+        if ($seasons->count() !== 1 || app(\App\Services\SeasonAccess::class)->isPaid($seasons->first())) {
+            return null;
+        }
+        $loose = \App\Models\CourseExam::where('exam_id', $exam->id)->where('status', 'published')->whereNull('season_id')
+            ->whereHas('feature', fn ($q) => $q->where('slug', $featureSlug))->exists();
+        if (!$loose && $exam->slug === 'kpsc' && $legacy && \Illuminate\Support\Facades\Schema::hasTable('kpsc_daily_exams')) {
+            $loose = \App\Models\DailyExam::where('section', $legacy)->where('status', 1)->whereNull('series_season_id')->exists();
+        }
+
+        return $loose ? null : $seasons->first();
     }
 
     /** JSON for the two drawers of an OMR exam card: the student's own attempts (latest first) and the leaderboard (top 10, once the exam has ended). */
@@ -504,7 +537,7 @@ class PublicCatalogController extends Controller
             $legacyRow = $e instanceof \App\Models\DailyExam;
             [$t, $c] = $legacyRow ? $tag($e->started_at, $e->ended_at) : $tag($e->start_at, $e->end_at);
             $state = $access->state($user, $se, $legacyRow ? 'legacy' : 'course', $e->id);
-            $examUrl = $legacyRow ? url(($e->section === 'Model Exam' ? 'kpsc/model-exam' : 'kpsc/daily-exam') . '/' . $e->exam_date . '/' . $e->id) : url('tests/' . $e->id);   // builder exams open the web test (instructions first)
+            $examUrl = $legacyRow ? url(($e->section === 'Model Exam' ? 'kpsc/model-exam' : 'kpsc/daily-exam') . '/' . $e->exam_date . '/' . $e->id) : ($se ? $e->setRelation('season', $se)->publicUrl() : url('tests/' . $e->id));   // builder exams open the web test (instructions first)
 
             return (object) [
                 'title' => $legacyRow ? ($e->exam_title ?: ($e->examtitle ?: 'Exam')) : $e->title,
