@@ -234,7 +234,7 @@ class PublicCatalogController extends Controller
         $stories = \App\Models\Banner::forExam($exam->slug)->where('status', 1)->orderBy('position')->get();
         $liveClasses = ContentItem::ofKind('promo_class')->live($exam->slug)->where('mode', 'live')->where('scheduled_at', '>=', now())->orderBy('scheduled_at')->limit(8)->get();
         $recorded = ContentItem::ofKind('promo_class')->live($exam->slug)->where(fn ($q) => $q->where('mode', 'recorded')->orWhere('scheduled_at', '<', now()))->orderByDesc('id')->limit(8)->get();
-        $tests = \App\Models\CourseExam::with('course:id,slug,title,course_type')->where('exam_id', $exam->id)->where('status', 'published')
+        $tests = \App\Models\CourseExam::with('course:id,slug,title,course_type', 'season.exam:id,slug')->where('exam_id', $exam->id)->where('status', 'published')
             ->where(fn ($q) => $q->whereNull('end_at')->orWhere('end_at', '>=', now()))
             ->orderByRaw('start_at is null')->orderBy('start_at')->limit(16)->get();
         $announcements = ContentItem::ofKind('announcement')->live($exam->slug)->with('exams:id,short_name,name,color')->orderByDesc('is_pinned')->orderByDesc('published_at')->orderByDesc('id')->limit(8)->get();

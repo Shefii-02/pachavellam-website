@@ -95,9 +95,12 @@
             <div class="pg-chips mb-0" data-for="#lpTests"><span class="pg-chip on" data-x="all">All</span><span class="pg-chip" data-x="free">Free</span><span class="pg-chip" data-x="paid">Paid</span></div></div>
         <div class="lp-strip" id="lpTests">
             @foreach ($tests as $t)
-                @php $paid = (bool) $t->is_paid; $public = $t->course && !str_starts_with((string) $t->course->slug, 'series-'); $owned = $t->course_id && in_array($t->course_id, $mine, true); @endphp
-                <a class="lp-card lp-test" data-x="{{ $paid ? 'paid' : 'free' }}" href="{{ $public ? url('courses/' . ($t->course->slug ?: $t->course_id)) : url('/') . '#getapp' }}">
-                    <div class="ic"><i class="bi bi-pencil-square"></i></div>
+                @php
+                    $paid = (bool) $t->is_paid; $public = $t->course && !str_starts_with((string) $t->course->slug, 'series-'); $owned = $t->course_id && in_array($t->course_id, $mine, true);
+                    // a test of a course opens the course; a test of an exam series opens the test itself (under its season)
+                    $testUrl = $public ? url('courses/' . ($t->course->slug ?: $t->course_id)) : $t->publicUrl();
+                @endphp
+                <a class="lp-card lp-test" data-x="{{ $paid ? 'paid' : 'free' }}" href="{{ $testUrl }}">
                     <span class="lp-tag {{ $owned ? 'mine' : ($paid ? 'paid' : 'free') }}" style="position:static;display:inline-block;margin-bottom:6px">{{ $owned ? 'PURCHASED' : ($paid ? 'PAID' : 'FREE') }}</span>
                     <div class="tt">{{ $t->title }}</div>
                     <div class="mt">{{ $t->start_at ? $t->start_at->format('d M Y, h:i a') : 'Available now' }}@if ($t->duration_minutes) · {{ $t->duration_minutes }} min @endif</div>
