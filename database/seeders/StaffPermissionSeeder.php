@@ -17,10 +17,11 @@ class StaffPermissionSeeder extends Seeder
         $guard = config('auth.defaults.guard', 'web');
         $now = now();
         $roleIds = DB::table('roles')->pluck('id', 'name');
+        $hasCategory = \Illuminate\Support\Facades\Schema::hasColumn('permissions', 'category');   // the Permission page groups by it
 
-        foreach (config('staff_access.groups') as $perms) {
+        foreach (config('staff_access.groups') as $group => $perms) {
             foreach ($perms as $name => $cfg) {
-                DB::table('permissions')->updateOrInsert(['name' => $name, 'guard_name' => $guard], ['updated_at' => $now]);
+                DB::table('permissions')->updateOrInsert(['name' => $name, 'guard_name' => $guard], ['updated_at' => $now] + ($hasCategory ? ['category' => $group] : []));
                 DB::table('permissions')->where('name', $name)->where('guard_name', $guard)->whereNull('created_at')->update(['created_at' => $now]);
                 $pid = DB::table('permissions')->where('name', $name)->where('guard_name', $guard)->value('id');
                 foreach (array_unique(array_merge(['Admin'], $cfg['roles'])) as $roleName) {

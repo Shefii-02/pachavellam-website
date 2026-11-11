@@ -123,6 +123,12 @@ class StaffAccess
         return $permission;
     }
 
+    /** Permission, and the exam type when one is given. */
+    public static function canIn(?User $user, string $permission, ?int $examId = null): bool
+    {
+        return self::can($user, $permission) && self::hasExam($user, $examId);
+    }
+
     public static function authorize(Request $request, string $permission, ?int $examId = null): void
     {
         $user = $request->user();
