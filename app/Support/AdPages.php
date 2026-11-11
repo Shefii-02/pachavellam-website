@@ -18,6 +18,7 @@ class AdPages
         'series' => 'Exam series list (daily / OMR / GK / CA / special)',
         'bulletin' => 'PSC Bulletin list',
         'exam_intro' => 'Exam instructions page (small ad, never while answering)',
+        'exam_result' => 'Test result page (small ad, after the test)',
         'my_courses' => 'My courses (bought)',
     ];
 

@@ -78,8 +78,12 @@
         @if (!empty($summary))
             @include('kpsc.partials.exam-summary', ['summary' => $summary])
         @endif
+
+        {{-- one small ad below the instructions (admin/ads: "Exam instructions page"); nothing moves, nothing pops up --}}
+        @include('partials.ad-slot', ['type' => 'web_banner', 'page' => 'exam_intro', 'compact' => true])
     </div>
 </div>
+@include('partials.adsense')
 
 <div class="in-foot"><form class="row" method="POST" action="{{ url('tests/' . $exam->id . '/start') }}">
     @csrf

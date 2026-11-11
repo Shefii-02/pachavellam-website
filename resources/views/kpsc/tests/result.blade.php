@@ -130,6 +130,9 @@
         <div class="r-dist"><div><b style="background:#2f80ed" id="dC">0</b>Correct</div><div><b style="background:#e5484d" id="dW">0</b>Wrong</div><div><b style="background:var(--pv-surface-2);color:var(--pv-text)" id="dU">0</b>Unattempted</div></div>
     </section>
 
+    {{-- one small ad between the result and the leaderboard (admin/ads: "Test result page") --}}
+    @include('partials.ad-slot', ['type' => 'web_banner', 'page' => 'exam_result', 'compact' => true])
+
     @if ($leaders->count())
         <section class="r-card">
             <h2>Leaderboard</h2>
@@ -141,6 +144,7 @@
     @endif
 </div>
 
+@include('partials.adsense')
 <div class="r-foot"><a class="t-btn pri" href="{{ url('tests/attempt/' . $a->id . '/solutions') }}"><i class="bi bi-eye"></i> View Solutions</a></div>
 <script type="application/json" id="chartData">@json($chart)</script>
 @endsection
