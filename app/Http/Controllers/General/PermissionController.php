@@ -11,7 +11,20 @@ class PermissionController extends Controller
     //
     public function permission_index(){
         $list = Permission::get();
-        return view('admin.general.permission',compact('list'));
+        $exams = \App\Models\CompetitiveExam::orderBy('position')->get();
+
+        // permission name => names of the roles that have it
+        $holders = \Illuminate\Support\Facades\DB::table('role_has_permissions')
+            ->join('permissions', 'permissions.id', '=', 'role_has_permissions.permission_id')
+            ->join('roles', 'roles.id', '=', 'role_has_permissions.role_id')
+            ->select('permissions.name as permission', 'roles.name as role')->get()
+            ->groupBy('permission')->map(fn ($rows) => $rows->pluck('role')->sort()->values()->all())->all();
+
+        return view('admin.general.permission', [
+            'list' => $list, 'exams' => $exams, 'holders' => $holders,
+            'catalogs' => $exams->mapWithKeys(fn ($e) => [$e->id => \App\Support\ExamFeatures::catalog($e)])->all(),
+            'categories' => array_values(array_unique(array_merge(['General', 'Common', 'UG-PG'], $exams->map(fn ($e) => $e->short_name ?: $e->name)->all(), $list->pluck('category')->filter()->all()))),
+        ]);
     }
 
     public function permission_store(Request $request){

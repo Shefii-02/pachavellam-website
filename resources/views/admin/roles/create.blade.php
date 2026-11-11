@@ -34,23 +34,7 @@
                         <input type="text" name="name" placeholder="Role Name" class="form-control">
                     </div>
                 </div>
-                <div class="col-xs-12 col-sm-12 col-md-12">
-                    <div class="form-group mb-3">
-                        <label class="mb-2">Permission:</label>
-                        <div class="form-group mt-2 row ">
-                        @foreach($permission as $value)
-
-                            <div class="col-md-4 mb-3">
-                                <label>
-                                <input type="checkbox" name="permission[]" value="{{$value->id}}"  class=" name">
-
-                                {{ $value->name }}</label>
-                            </div>
-                            
-                        <br/>
-                        @endforeach
-                    </div>
-                </div>
+                <div class="col-12">@include('admin.roles._fields')</div>
                 <div class="col-xs-12 col-sm-12 col-md-12 text-left">
                     <button type="submit" class="btn btn-primary"><i class="fas fa-paper-plane"></i> Submit</button>
                 </div>

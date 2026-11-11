@@ -17,7 +17,7 @@ class CompetitiveExam extends Model
 
     protected $guarded = ['id'];
 
-    protected $casts = ['status' => 'boolean'];
+    protected $casts = ['status' => 'boolean', 'features' => 'array'];
 
     /** Exams that already have their own admin module with a sidebar (banners, notifications, ...). */
     public const MODULES = [

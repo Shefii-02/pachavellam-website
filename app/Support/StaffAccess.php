@@ -32,7 +32,11 @@ class StaffAccess
             return null;
         }
 
-        return self::$cache[$user->id] ??= DB::table('staff_exam_access')->where('user_id', $user->id)->pluck('exam_id')->map(fn ($v) => (int) $v)->all();
+        return self::$cache[$user->id] ??= DB::table('staff_exam_access')->where('user_id', $user->id)->pluck('exam_id')
+            // plus the exam types of the person's roles (General > Roles)
+            ->merge(DB::table('role_exam_access')->join('model_has_roles', 'model_has_roles.role_id', '=', 'role_exam_access.role_id')
+                ->where('model_has_roles.model_id', $user->id)->where('model_has_roles.model_type', $user->getMorphClass())->pluck('role_exam_access.exam_id'))
+            ->map(fn ($v) => (int) $v)->unique()->values()->all();
     }
 
     public static function forget(?int $userId = null): void

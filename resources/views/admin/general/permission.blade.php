@@ -1,5 +1,51 @@
 @extends('admin.general.layout')
     @section('general')
+<ul class="nav nav-tabs mb-3" role="tablist">
+    @foreach ($exams as $e)
+        <li class="nav-item"><button class="nav-link {{ $loop->first ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#pe{{ $e->id }}" type="button">{{ $e->short_name ?: $e->name }}</button></li>
+    @endforeach
+    <li class="nav-item"><button class="nav-link {{ $exams->isEmpty() ? 'active' : '' }}" data-bs-toggle="tab" data-bs-target="#pall" type="button">All permissions</button></li>
+</ul>
+<div class="tab-content">
+    @foreach ($exams as $e)
+        <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="pe{{ $e->id }}">
+            <div class="card bg-transparent border rounded-3 mb-3"><div class="card-body">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                    <div><h4 class="mb-0">{{ $e->name }}</h4><div class="small text-muted">What each part of this exam type needs, section by section, and which roles have it. Features are chosen in <a href="{{ admin_general('exam-types/' . $e->id . '/edit') }}">General &gt; Exam Types</a>.</div></div>
+                    <a class="btn btn-sm btn-light mb-0" href="{{ url('admin/general/role') }}"><i class="bi bi-person-gear me-1"></i>Edit roles</a>
+                </div>
+                <div class="row g-3">
+                    @foreach ($catalogs[$e->id] as $group => $items)
+                        <div class="col-xl-6">
+                            <div class="fw-semibold mb-1">{{ $group }}</div>
+                            <table class="table table-sm align-middle mb-0">
+                                <thead><tr class="small text-muted"><th>Feature</th><th>View</th><th>Manage</th></tr></thead>
+                                <tbody>
+                                @foreach ($items as $key => $item)
+                                    @php $on = \App\Support\ExamFeatures::enabled($e, $key); @endphp
+                                    <tr class="{{ $on ? '' : 'text-muted' }}">
+                                        <td>{{ $item['label'] }} @unless ($on)<span class="badge bg-light text-dark border">off</span>@endunless</td>
+                                        @if ($item['permission'])
+                                            @foreach (['view' => $item['permission'] . ' view', 'manage' => ($item['permission'] === 'New joins' ? 'New joins mark' : $item['permission'] . ' manage')] as $level => $perm)
+                                                <td class="small">
+                                                    <div class="text-nowrap">{{ $perm }}</div>
+                                                    @forelse (($holders[$perm] ?? []) as $role)<span class="badge bg-primary bg-opacity-10 text-primary">{{ $role }}</span> @empty<span class="text-muted">no role</span>@endforelse
+                                                </td>
+                                            @endforeach
+                                        @else
+                                            <td colspan="2" class="small text-muted">everyone with access to the exam type</td>
+                                        @endif
+                                    </tr>
+                                @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endforeach
+                </div>
+            </div></div>
+        </div>
+    @endforeach
+    <div class="tab-pane fade {{ $exams->isEmpty() ? 'show active' : '' }}" id="pall">
     <div class="card bg-transparent border rounded-3">
         <!-- Card header START -->
         <div class="card-header bg-transparent border-bottom">
@@ -43,10 +89,7 @@
                                 <label class="form-label">Category Name</label>
                                 <select class="form-control category" required  name="category">
 
-                                    <option>General</option>
-                                    <option>UG-PG</option>
-                                    <option>KPSC</option>
-                                    <option>Common</option>
+                                    @foreach ($categories as $cat)<option>{{ $cat }}</option>@endforeach
                                 </select>
                             </div>
                              <div class="col-lg-5 align-self-end col-md-2 mb-2">
@@ -78,7 +121,7 @@
 
                     <!-- Table body START -->
                     <tbody>
-                   @foreach ($list as $list)
+                   @foreach ($list->sortBy(fn ($p) => ($p->category ?? '') . $p->name) as $list)
                             
                         <!-- Table item -->
                             <tr>
@@ -105,6 +148,8 @@
         </div>
         <!-- Card body START -->
     </div>
+    </div>
+</div>
 <!-- Main content END -->
 
 <!-- Modal -->
@@ -133,10 +178,7 @@
                         <label class="form-label">Category Name</label>
                         <select class="form-control category" required  name="category">
                             
-                            <option>General</option>
-                            <option>UG-PG</option>
-                            <option>KPSC</option>
-                            <option>Common</option>
+                            @foreach ($categories as $cat)<option>{{ $cat }}</option>@endforeach
                         </select>
                     </div>
                     

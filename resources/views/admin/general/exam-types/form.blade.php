@@ -48,6 +48,29 @@
                     <label class="form-label">Description</label>
                     <textarea class="form-control" rows="3" name="description">{{ old('description', $exam->description ?? '') }}</textarea>
                 </div>
+                <div class="col-12">
+                    <label class="form-label mb-0">Features of this exam type</label>
+                    <div class="form-text mb-2">Choose what this exam type has in the admin sidebar. Staff see only the ticked ones, and only if they also have the View permission (Roles / Staff Access). {{ $editing ? '' : 'You can change this later.' }}</div>
+                    <div class="row g-3">
+                        @foreach ($catalog as $group => $items)
+                            <div class="col-md-4">
+                                <div class="border rounded-3 p-3 h-100">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div class="fw-semibold">{{ $group }}</div>
+                                        <label class="small mb-0"><input type="checkbox" class="form-check-input feature-group"> all</label>
+                                    </div>
+                                    @foreach ($items as $key => $item)
+                                        <div class="form-check">
+                                            <input class="form-check-input feature-check" type="checkbox" name="features[]" value="{{ $key }}" id="f{{ md5($key) }}" @checked($item['locked'] || in_array($key, old('features', $chosen))) @disabled($item['locked'])>
+                                            @if ($item['locked'])<input type="hidden" name="features[]" value="{{ $key }}">@endif
+                                            <label class="form-check-label" for="f{{ md5($key) }}">{{ $item['label'] }}@if ($item['permission']) <span class="text-muted small">· {{ $item['permission'] }}</span>@endif</label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
                 <div class="col-md-6">
                     <label class="form-label">Image <span class="text-muted">(home page tab, "What are you preparing for?")</span></label>
                     <input class="form-control" type="file" name="image" accept="image/*">
@@ -76,4 +99,11 @@
         </form>
     </div>
 </div>
+<script>
+document.querySelectorAll('.feature-group').forEach(function (g) {
+    var boxes = g.closest('.border').querySelectorAll('.feature-check:not(:disabled)');
+    g.checked = Array.prototype.every.call(boxes, function (b) { return b.checked; });
+    g.addEventListener('change', function () { boxes.forEach(function (b) { b.checked = g.checked; }); });
+});
+</script>
 @endsection

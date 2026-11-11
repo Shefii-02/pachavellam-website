@@ -8,6 +8,9 @@ use App\Http\Controllers\Controller;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
 use DB;
+use App\Models\CompetitiveExam;
+use App\Support\ExamFeatures;
+use App\Support\StaffAccess;
 
 class RoleController extends Controller
 {
@@ -43,8 +46,7 @@ class RoleController extends Controller
      */
     public function create()
     {
-        $permission = Permission::get();
-        return view('admin.roles.create', compact('permission'));
+        return view('admin.roles.create', $this->formData(null));
     }
 
     /**
@@ -62,6 +64,7 @@ class RoleController extends Controller
 
         $role = Role::create(['name' => $request->input('name')]);
         $role->syncPermissions($request->input('permission'));
+        $this->saveExams($role->id, $request);
 
         return redirect()->route('admingeneralrole.index')
             ->with('success', 'Role created successfully');
@@ -90,13 +93,9 @@ class RoleController extends Controller
      */
     public function edit($id)
     {
-        $role = Role::find($id);
-        $permission = Permission::get();
-        $rolePermissions = DB::table("role_has_permissions")->where("role_has_permissions.role_id", $id)
-            ->pluck('role_has_permissions.permission_id', 'role_has_permissions.permission_id')
-            ->all();
+        $role = Role::findOrFail($id);
 
-        return view('admin.roles.edit', compact('role', 'permission', 'rolePermissions'));
+        return view('admin.roles.edit', $this->formData($role) + ['role' => $role]);
     }
 
     /**
@@ -122,6 +121,8 @@ class RoleController extends Controller
 
         // Sync permissions using names, not IDs
         $role->syncPermissions($permissions);
+        $this->saveExams($role->id, $request);
+        StaffAccess::forget();
 
         return redirect()->route('admingeneralrole.index')
             ->with('success', 'Role updated successfully');
@@ -137,5 +138,35 @@ class RoleController extends Controller
         DB::table("roles")->where('id', $id)->delete();
         return redirect()->route('admingeneralrole.index')
             ->with('success', 'Role deleted successfully');
+    }
+
+    /** Everything the role form needs: permissions by section, the exam types and what each exam type shows. */
+    private function formData(?Role $role): array
+    {
+        $permission = Permission::get();
+        $groups = config('staff_access.groups');
+        $inGroups = StaffAccess::permissionNames();
+        $exams = CompetitiveExam::orderBy('position')->get();
+
+        return [
+            'permission' => $permission,
+            'groups' => $groups,
+            'other' => $permission->reject(fn ($p) => in_array($p->name, $inGroups, true)),
+            'rolePermissions' => $role ? DB::table('role_has_permissions')->where('role_id', $role->id)->pluck('permission_id', 'permission_id')->all() : [],
+            'exams' => $exams,
+            'roleExams' => $role ? DB::table('role_exam_access')->where('role_id', $role->id)->pluck('exam_id')->map(fn ($v) => (int) $v)->all() : [],
+            'examFeatures' => $exams->mapWithKeys(fn ($e) => [$e->id => ExamFeatures::catalog($e)])->all(),
+            'enabled' => $exams->mapWithKeys(fn ($e) => [$e->id => collect(ExamFeatures::keys($e))->filter(fn ($k) => ExamFeatures::enabled($e, $k))->values()->all()])->all(),
+        ];
+    }
+
+    private function saveExams(int $roleId, Request $request): void
+    {
+        DB::table('role_exam_access')->where('role_id', $roleId)->delete();
+        foreach (array_unique(array_map('intval', (array) $request->input('exam_ids', []))) as $eid) {
+            if (CompetitiveExam::whereKey($eid)->exists()) {
+                DB::table('role_exam_access')->insert(['role_id' => $roleId, 'exam_id' => $eid]);
+            }
+        }
     }
 }

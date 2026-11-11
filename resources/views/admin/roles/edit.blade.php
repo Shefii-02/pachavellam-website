@@ -38,23 +38,7 @@
                     <input type="text" name="name" value="{{ old('name', $role->name) }}" placeholder="Name" class="form-control">
                 </div>
             </div>
-            <div class="col-xs-12 col-sm-12 col-md-12">
-                <div class="form-group mb-3">
-                    <strong class="mb-3">Permission:</strong>
-                    <br/><input type="checkbox" id="checkAll"> Check All
-                    <div class="row">
-                        @foreach($permission as $value)
-                            <div class="col-6">
-                                <label>
-                                    <input type="checkbox" name="permission[]" value="{{ $value->id }}"
-                                        {{ in_array($value->id, $rolePermissions) ? 'checked' : '' }} class="name">
-                                    {{ $value->name }}
-                                </label>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
+            <div class="col-12">@include('admin.roles._fields')</div>
             <div class="col-xs-12 col-sm-12 col-md-12 text-left">
                 <button type="submit" class="btn btn-primary">
                     <i class="fas fa-paper-plane"></i> Update
@@ -64,10 +48,4 @@
     </form>
 @endsection
 
-@section('scripts')
-<script>
-    $("#checkAll").click(function () {
-        $('input:checkbox').not(this).prop('checked', this.checked);
-    });
-</script>
-@endsection
+

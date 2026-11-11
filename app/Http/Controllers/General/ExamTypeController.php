@@ -5,6 +5,7 @@ namespace App\Http\Controllers\General;
 use App\Http\Controllers\Controller;
 use App\Models\CompetitiveExam;
 use App\Services\StudentPerformance;
+use App\Support\ExamFeatures;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -42,7 +43,7 @@ class ExamTypeController extends Controller
 
     public function create()
     {
-        return view('admin.general.exam-types.form', ['exam' => null, 'sources' => $this->sources()]);
+        return view('admin.general.exam-types.form', ['exam' => null, 'sources' => $this->sources(), 'catalog' => ExamFeatures::catalog(null), 'chosen' => ExamFeatures::keys(null)]);
     }
 
     public function store(Request $request)
@@ -51,6 +52,8 @@ class ExamTypeController extends Controller
         $data['slug'] = $this->uniqueSlug(($data['slug'] ?? null) ?: $data['name']);
         $data['image'] = $request->hasFile('image') ? $request->file('image')->store('exam-types', 'public') : null;
 
+        $data['features'] = ExamFeatures::forStorage(null, (array) $request->input('features', []));
+
         CompetitiveExam::create($data);
 
         return redirect(admin_general('exam-types'))->with('message', 'Exam type added. It now has its own tab in the main sidebar and students can pick it as an interest.');
@@ -58,7 +61,12 @@ class ExamTypeController extends Controller
 
     public function edit($id)
     {
-        return view('admin.general.exam-types.form', ['exam' => CompetitiveExam::findOrFail($id), 'sources' => $this->sources()]);
+        $exam = CompetitiveExam::findOrFail($id);
+
+        return view('admin.general.exam-types.form', [
+            'exam' => $exam, 'sources' => $this->sources(), 'catalog' => ExamFeatures::catalog($exam),
+            'chosen' => $exam->features === null ? ExamFeatures::keys($exam) : $exam->features,
+        ]);
     }
 
     public function update(Request $request, $id)
@@ -72,6 +80,8 @@ class ExamTypeController extends Controller
             }
             $data['image'] = $request->hasFile('image') ? $request->file('image')->store('exam-types', 'public') : null;
         }
+
+        $data['features'] = ExamFeatures::forStorage($exam, (array) $request->input('features', []));
 
         $exam->update($data);
 
@@ -112,7 +122,9 @@ class ExamTypeController extends Controller
             'performance_source' => 'nullable|in:' . implode(',', array_keys(StudentPerformance::SOURCES)),
             'position' => 'nullable|integer|min:0',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'features' => 'nullable|array', 'features.*' => 'string|max:80',
         ]);
+        unset($data['features']); // stored by store() / update()
         unset($data['image']); // the file is stored by store() / update()
 
         $data['short_name'] = $data['short_name'] ?? null;
