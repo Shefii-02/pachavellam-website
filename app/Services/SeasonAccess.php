@@ -127,12 +127,19 @@ class SeasonAccess
             // published = can be bought; hidden from the course lists by its series-* slug
             'status' => $paid && $s->status === 'published' ? 'published' : 'archived',
         ];
-        $course = $s->course_id ? ExamCourse::find($s->course_id) : null;
+        $course = $s->course_id ? ExamCourse::withTrashed()->find($s->course_id) : null;
+        $course ??= ExamCourse::withTrashed()->where('slug', $attrs['slug'])->first();   // the slug is unique, trashed courses included
+        if ($course && $course->trashed()) {
+            $course->restore();
+        }
         if (!$course && !$paid) {
             return;                                   // free season: nothing to buy
         }
         if ($course) {
             $course->update($attrs);
+            if ((int) $s->course_id !== (int) $course->id) {
+                $s->forceFill(['course_id' => $course->id])->saveQuietly();
+            }
         } else {
             $course = ExamCourse::create($attrs + ['created_by' => $userId]);
             $s->forceFill(['course_id' => $course->id])->saveQuietly();

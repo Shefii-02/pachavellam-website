@@ -167,6 +167,7 @@ class CourseController extends Controller
         $exam = $this->exam($examSlug);
         $this->adminOnly($request, $exam);
         $course = $this->course($exam, $id);
+        abort_if(str_starts_with((string) $course->slug, 'series-'), 403, 'This is an internal course that holds the exam series. It cannot be deleted.');
 
         $course->delete();   // goes to Trash with its content and files; Trash removes them for good
 

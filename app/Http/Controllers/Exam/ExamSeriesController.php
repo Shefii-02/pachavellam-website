@@ -464,17 +464,27 @@ class ExamSeriesController extends Controller
         }
     }
 
-    /** The internal course that holds this exam type's series (made on first use). */
+    /** The internal course that holds this exam type's series (made on first use; a trashed one is brought back, the slug is unique across trashed courses too). */
     public static function seriesCourse($exam, int $userId): ExamCourse
     {
         $slug = 'series-' . $exam->slug;
+        $course = ExamCourse::withTrashed()->where('slug', $slug)->first();
+        if ($course) {
+            if ($course->trashed()) {
+                $course->restore();
+            }
+            if ((int) $course->exam_id !== (int) $exam->id) {
+                $course->update(['exam_id' => $exam->id]);
+            }
 
-        return ExamCourse::where('exam_id', $exam->id)->where('slug', $slug)->first()
-            ?? ExamCourse::create([
-                'exam_id' => $exam->id, 'title' => ($exam->short_name ?: $exam->name) . ' exam series', 'slug' => $slug,
-                'course_type' => 'free', 'status' => 'archived', 'price' => 0, 'created_by' => $userId,
-                'short_description' => 'Internal: holds the daily, OMR, CA and GK exam series of this exam type.',
-            ]);
+            return $course;
+        }
+
+        return ExamCourse::create([
+            'exam_id' => $exam->id, 'title' => ($exam->short_name ?: $exam->name) . ' exam series', 'slug' => $slug,
+            'course_type' => 'free', 'status' => 'archived', 'price' => 0, 'created_by' => $userId,
+            'short_description' => 'Internal: holds the daily, OMR, CA and GK exam series of this exam type.',
+        ]);
     }
 
     /** id of the internal series course if it exists (for the sidebar highlight). */
