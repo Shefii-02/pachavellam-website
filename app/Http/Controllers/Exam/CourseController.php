@@ -10,6 +10,7 @@ use App\Models\ExamCourse;
 use App\Models\ExamFeature;
 use App\Models\User;
 use App\Services\CourseWorkspace;
+use App\Support\StaffAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -46,21 +47,22 @@ class CourseController extends Controller
             'base' => $exam->examUrl('courses'),
             'courses' => $courses,
             'categories' => ExamCategory::optionsFor($exam->id),
-            'isAdmin' => $user->type === 'Admin',
+            'isAdmin' => StaffAccess::canIn($user, 'Exam courses manage', $exam->id),   // may add / edit / delete courses of this exam type
         ]);
     }
 
     public function create(Request $request, $examSlug)
     {
-        $this->adminOnly($request);
+        $exam = $this->exam($examSlug);
+        $this->adminOnly($request, $exam);
 
-        return view('admin.exam.course.form', $this->formData($this->exam($examSlug), null));
+        return view('admin.exam.course.form', $this->formData($exam, null));
     }
 
     public function store(Request $request, $examSlug)
     {
-        $this->adminOnly($request);
         $exam = $this->exam($examSlug);
+        $this->adminOnly($request, $exam);
 
         $data = $this->validated($request, $exam);
         $data['exam_id'] = $exam->id;
@@ -159,8 +161,8 @@ class CourseController extends Controller
 
     public function destroy(Request $request, $examSlug, $id)
     {
-        $this->adminOnly($request);
         $exam = $this->exam($examSlug);
+        $this->adminOnly($request, $exam);
         $course = $this->course($exam, $id);
 
         $course->delete();   // goes to Trash with its content and files; Trash removes them for good
@@ -342,9 +344,10 @@ class CourseController extends Controller
         $course->members()->sync($sync);
     }
 
-    private function adminOnly(Request $request): void
+    /** Adding and deleting courses: the Manage permission of Categories and courses in this exam type (an Admin always can). */
+    private function adminOnly(Request $request, $exam): void
     {
-        abort_unless($request->user()->type === 'Admin', 403, 'Only an Admin can do this.');
+        abort_unless(StaffAccess::canIn($request->user(), 'Exam courses manage', $exam->id), 403, 'You do not have permission to add or delete courses here (Categories and courses: Manage).');
     }
 
     private function authorizeEdit(Request $request, ExamCourse $course): void

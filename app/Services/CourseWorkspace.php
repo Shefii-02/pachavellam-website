@@ -63,7 +63,7 @@ class CourseWorkspace
             'courseUrl' => $course->exam->examUrl('courses/' . $course->id),
             'listUrl' => $course->exam->examUrl('courses'),
             'canEdit' => $course->canBeEditedBy($user),
-            'isAdmin' => $user->type === 'Admin',
+            'isAdmin' => \App\Support\StaffAccess::canIn($user, 'Exam courses manage', (int) $course->exam_id),
         ];
     }
 }
