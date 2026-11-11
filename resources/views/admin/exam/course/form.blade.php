@@ -7,15 +7,17 @@
     $examName = $exam->short_name ?: $exam->name;
     $back = $editing ? $base . '/' . $course->id : $base;
 
-    // the steps; features and staff are an Admin decision, so other editors do not see those two
+    // the steps; features need the Manage permission, staff & teachers are an Admin decision
     $steps = [
         ['basics', 'Basics', 'Title, description, level'],
         ['pricing', 'Pricing & validity', 'Free or paid, dates'],
         ['learn', 'Learning & media', 'Outcomes, cover, video'],
         ['categories', 'Categories', 'Where students find it'],
     ];
-    if ($isAdmin) {
+    if ($canFeatures) {
         $steps[] = ['features', 'Features', 'Content, exams, related'];
+    }
+    if ($isAdmin) {
         $steps[] = ['staff', 'Staff & teachers', 'Who looks after it'];
     }
     $steps[] = ['seo', 'Search & order', 'Meta text, position'];
@@ -221,7 +223,7 @@
                 </div>
             </div>
 
-            @if ($isAdmin)
+            @if ($canFeatures)
             {{-- 5 features --}}
             <div class="card bg-transparent border rounded-3 step-panel" data-key="features" style="display:none">
                 <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
@@ -274,6 +276,8 @@
                 </div></div>
             </div>
 
+            @endif
+            @if ($isAdmin)
             {{-- 6 staff --}}
             <div class="card bg-transparent border rounded-3 step-panel" data-key="staff" style="display:none">
                 <div class="card-header bg-transparent border-bottom">

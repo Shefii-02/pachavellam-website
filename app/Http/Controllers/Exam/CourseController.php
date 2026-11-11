@@ -125,7 +125,7 @@ class CourseController extends Controller
         $course = $this->course($exam, $id);
         $this->authorizeEdit($request, $course);
 
-        return view('admin.exam.course.form', array_merge($this->formData($exam, $course), ['isAdmin' => $request->user()->type === 'Admin']));
+        return view('admin.exam.course.form', array_merge($this->formData($exam, $course), ['isAdmin' => $request->user()->type === 'Admin', 'canFeatures' => StaffAccess::canIn($request->user(), 'Exam courses manage', $exam->id)]));
     }
 
     public function update(Request $request, $examSlug, $id)
@@ -134,6 +134,7 @@ class CourseController extends Controller
         $course = $this->course($exam, $id);
         $this->authorizeEdit($request, $course);
         $isAdmin = $request->user()->type === 'Admin';
+        $canFeatures = StaffAccess::canIn($request->user(), 'Exam courses manage', $exam->id);
 
         $data = $this->validated($request, $exam);
 
@@ -145,13 +146,15 @@ class CourseController extends Controller
             $data['cover_image'] = null;
         }
 
-        DB::transaction(function () use ($course, $data, $request, $isAdmin, $exam) {
+        DB::transaction(function () use ($course, $data, $request, $isAdmin, $canFeatures, $exam) {
             $course->update($data);
             $this->syncCategories($course, $request, $exam);
 
-            // features and the people with access are an Admin decision
-            if ($isAdmin) {
+            // features need the Manage permission; the people with access are an Admin decision
+            if ($canFeatures) {
                 $this->syncFeatures($course, $request, $exam);
+            }
+            if ($isAdmin) {
                 $this->syncMembers($course, $request);
             }
         });
@@ -213,6 +216,7 @@ class CourseController extends Controller
             'teacherIds' => $teacherIds,
             'assigned' => $course ? $course->members()->get()->keyBy('id') : collect(),
             'isAdmin' => true,
+            'canFeatures' => true,
         ];
     }
 

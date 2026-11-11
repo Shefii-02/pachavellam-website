@@ -80,6 +80,12 @@
                     @if ($isAdmin || $c->canBeEditedBy(auth()->user()))
                         <a href="{{ $url($c->id . '/edit') }}" class="btn btn-sm btn-light mb-0">Edit</a>
                     @endif
+                    @if ($isAdmin)
+                        <form action="{{ $url($c->id) }}" method="POST" class="ms-auto" onsubmit="return confirm('Delete this course with ALL its content and files? It goes to Trash.')">
+                            @csrf @method('DELETE')
+                            <button class="btn btn-sm btn-outline-danger mb-0" title="Delete course"><i class="bi bi-trash"></i></button>
+                        </form>
+                    @endif
                 </div>
             </div>
         </div>
