@@ -146,7 +146,7 @@
                         @if ($hasCustom)<option value="keep" @selected((string) $pickedId === 'keep')>Keep current instructions ({{ $examPdf ? 'PDF' : 'text' }})</option>@endif
                         @foreach ($saved as $si)<option value="{{ $si->id }}" @selected((string) $pickedId === (string) $si->id)>{{ $si->name }} ({{ strtoupper($si->kind) }})</option>@endforeach
                     </select>
-                    <div class="form-text">Pick one from <a href="{{ url('admin/kpsc/exam-instructions') }}" target="_blank">Exam instructions</a>. An exam with sections uses each section's own instructions.</div>
+                    <div class="form-text">Pick a saved instruction template{!! ($exam->slug ?? null) === 'kpsc' ? ' (made in <a href="' . url('admin/kpsc/exam-instructions') . '" target="_blank">Exam instructions</a>)' : '' !!}. An exam with sections uses each section's own instructions.</div>
                 </div>
                 @endunless
             </div>

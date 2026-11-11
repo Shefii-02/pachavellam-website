@@ -7,7 +7,8 @@
     [$stL, $stC] = \App\Models\ExamSeason::STATUSES[$season->status];
     $addUrl = $exam->examUrl('series/' . $kind . '/seasons/' . $season->id . '/exams/create');   // the exam is made inside this season
     $back = urlencode($exam->examUrl('series/' . $kind . '/seasons/' . $season->id));
-    $legacyAdd = ['daily' => url('admin/kpsc/daily-exam') . '?session=' . $season->id, 'omr' => url('admin/kpsc/model-exam') . '?session=' . $season->id][$kind] ?? null;
+    // the old KPSC exam form only exists for KPSC; every other exam type adds exams with the common form
+    $legacyAdd = $exam->slug === 'kpsc' ? (['daily' => url('admin/kpsc/daily-exam') . '?session=' . $season->id, 'omr' => url('admin/kpsc/model-exam') . '?session=' . $season->id][$kind] ?? null) : null;
 @endphp
 <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
     <div>
@@ -132,7 +133,7 @@
     </form>
 </div></div></div>
 
-@if ($kind === 'omr')
+@if ($kind === 'omr' && $exam->slug === 'kpsc')
 {{-- Edit an OMR exam here (saves and comes back to this season, no redirect to the old OMR list) --}}
 <div class="modal fade modal-drawer" id="editOmrExam" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
     <form action="{{ url('admin/kpsc/model-exam/edit-details') }}" method="POST" enctype="multipart/form-data">@csrf

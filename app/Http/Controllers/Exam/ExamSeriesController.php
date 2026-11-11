@@ -165,7 +165,8 @@ class ExamSeriesController extends Controller
         }
         $otherCourse = CourseExam::where('course_id', $course->id)->where('feature_id', $feature->id)->whereNull('season_id')->orderByDesc('id')->limit(150)->get();
         $otherSeasons = ExamSeason::where('exam_id', $exam->id)->where('kind', $kind)->where('id', '!=', $season->id)->orderByDesc('starts_on')->orderByDesc('id')->get();
-        $legacyBase = ['daily' => 'admin/kpsc/daily-exam', 'omr' => 'admin/kpsc/model-exam', 'ca' => 'admin/kpsc/ca-daily-exam'][$kind] ?? null;
+        // the old KPSC exam screens exist for KPSC only
+        $legacyBase = $exam->slug === 'kpsc' ? (['daily' => 'admin/kpsc/daily-exam', 'omr' => 'admin/kpsc/model-exam', 'ca' => 'admin/kpsc/ca-daily-exam'][$kind] ?? null) : null;
 
         // how many attempts each exam has (the leaderboard of an exam is built from them)
         $DB = \Illuminate\Support\Facades\DB::class;
