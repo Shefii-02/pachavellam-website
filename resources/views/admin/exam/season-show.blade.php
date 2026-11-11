@@ -5,7 +5,7 @@
     $label = $exam->short_name ?: $exam->name;
     $paid = $access->isPaid($season);
     [$stL, $stC] = \App\Models\ExamSeason::STATUSES[$season->status];
-    $addUrl = $builder . '/create?season=' . $season->id;
+    $addUrl = $exam->examUrl('series/' . $kind . '/seasons/' . $season->id . '/exams/create');   // the exam is made inside this season
     $back = urlencode($exam->examUrl('series/' . $kind . '/seasons/' . $season->id));
     $legacyAdd = ['daily' => url('admin/kpsc/daily-exam') . '?session=' . $season->id, 'omr' => url('admin/kpsc/model-exam') . '?session=' . $season->id][$kind] ?? null;
 @endphp

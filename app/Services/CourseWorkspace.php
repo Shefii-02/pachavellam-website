@@ -16,6 +16,14 @@ class CourseWorkspace
     /** Where one feature of a course is managed: content (tree), exams, or related items. */
     public static function featureUrl(ExamCourse $course, ExamFeature $feature): string
     {
+        // the exams of the internal series course are managed per series / season, not as a course
+        if ($feature->content_kind === 'exam' && $course->slug === 'series-' . $course->exam->slug) {
+            $kinds = array_keys(\App\Http\Controllers\Exam\ExamSeriesController::KINDS);
+            $at = array_search($feature->slug, array_column(\App\Http\Controllers\Exam\ExamSeriesController::KINDS, 0), true);
+            if ($at !== false) {
+                return $course->exam->examUrl('series/' . $kinds[$at] . '/exams');
+            }
+        }
         $base = $course->exam->examUrl('courses/' . $course->id);
 
         return match ($feature->content_kind) {

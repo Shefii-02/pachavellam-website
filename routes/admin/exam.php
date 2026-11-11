@@ -36,6 +36,26 @@ Route::group(['prefix' => 'admin', 'middleware' => ['admin.area']], function () 
             Route::put('seasons/{id}', 'Exam\ExamSeriesController@update')->whereNumber('id');
             Route::delete('seasons/{id}', 'Exam\ExamSeriesController@destroy')->whereNumber('id');
         });
+        // the exams of a series, made season by season (no course involved): same builder as course exams
+        $seriesExams = function () {
+            Route::get('/', 'Exam\CourseExamController@index');
+            Route::get('create', 'Exam\CourseExamController@create');
+            Route::post('/', 'Exam\CourseExamController@store');
+            Route::get('{id}', 'Exam\CourseExamController@show');
+            Route::get('{id}/edit', 'Exam\CourseExamController@edit');
+            Route::put('{id}', 'Exam\CourseExamController@update');
+            Route::delete('{id}', 'Exam\CourseExamController@destroy');
+            Route::post('{id}/status', 'Exam\CourseExamController@status');
+            Route::post('{id}/copy', 'Exam\CourseExamController@copy');
+            Route::get('{id}/library', 'Exam\CourseExamController@library');
+            Route::post('{id}/questions', 'Exam\CourseExamController@addQuestions');
+            Route::delete('{id}/questions/{link}', 'Exam\CourseExamController@removeQuestion');
+            Route::post('{id}/questions/{link}/move', 'Exam\CourseExamController@moveQuestion');
+        };
+        $seriesExamWhere = ['season' => '[0-9]+', 'id' => '[0-9]+', 'link' => '[0-9]+', 'kind' => 'daily|omr|ca|gk|special'];
+        Route::group(['prefix' => 'series/{kind}/exams', 'where' => $seriesExamWhere, 'middleware' => ['series.exam']], $seriesExams);
+        Route::group(['prefix' => 'series/{kind}/seasons/{season}/exams', 'where' => $seriesExamWhere, 'middleware' => ['series.exam']], $seriesExams);
+
         Route::get('subjects', 'Exam\ExamSubjectController@index');
         Route::post('subjects', 'Exam\ExamSubjectController@store');
         Route::put('subjects/{id}', 'Exam\ExamSubjectController@update')->whereNumber('id');

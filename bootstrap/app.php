@@ -44,6 +44,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'admin.area' => \App\Http\Middleware\EnsureAdminArea::class,
             'staff.can' => \App\Http\Middleware\StaffCan::class,
+            'series.exam' => \App\Http\Middleware\SeriesExamRoute::class,
             'staff.module' => \App\Http\Middleware\StaffModule::class,
             'season.access' => \App\Http\Middleware\EnsureSeasonAccess::class,
             'captcha' => \App\Http\Middleware\RequireCaptcha::class,
