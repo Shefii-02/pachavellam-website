@@ -20,7 +20,8 @@
                 @forelse ($rows as $p)
                     <tr>
                         <td class="fw-bold">{{ $p->title }}<div class="small text-muted">key: {{ $p->slug }}@if ($p->kind === 'html') · {{ $p->exam->name ?? 'All exams' }}@endif</div></td>
-                        <td><a href="{{ $p->url() }}" target="_blank" rel="noopener">{{ $isCustom ? '/p/' . $p->slug : $p->path }}</a></td>
+                        <td class="text-nowrap"><a href="{{ $p->url() }}" target="_blank" rel="noopener">{{ $isCustom ? '/p/' . $p->slug : $p->path }}</a>
+                            <button type="button" class="btn btn-sm btn-light mb-0 ms-1 pv-copy" data-url="{{ $p->url() }}" title="Copy page link"><i class="bi bi-clipboard"></i> Copy</button></td>
                         <td><form method="POST" action="{{ url('admin/pages/' . $p->id . '/toggle') }}">@csrf<button class="btn btn-sm mb-0 {{ $p->status ? 'btn-success-soft' : 'btn-light' }}">{{ $p->status ? 'Shown' : 'Hidden' }}</button></form></td>
                         <td class="text-end text-nowrap">
                             <a href="{{ url('admin/pages/' . $p->id . '/edit') }}" class="btn btn-sm btn-light mb-0"><i class="bi bi-pencil"></i></a>
@@ -34,4 +35,12 @@
         </table></div>
     @endforeach
 </div>
+<script>
+document.addEventListener('click', function (e) {
+    var b = e.target.closest('.pv-copy'); if (!b) return;
+    var url = b.dataset.url, done = function () { var h = b.innerHTML; b.innerHTML = '<i class="bi bi-check2"></i> Copied'; setTimeout(function () { b.innerHTML = h; }, 1500); };
+    if (navigator.clipboard && window.isSecureContext) { navigator.clipboard.writeText(url).then(done); return; }
+    var t = document.createElement('textarea'); t.value = url; document.body.appendChild(t); t.select(); try { document.execCommand('copy'); done(); } catch (x) {} document.body.removeChild(t);
+});
+</script>
 @endsection
