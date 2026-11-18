@@ -14,7 +14,7 @@ return [
         'image' => ['jpg', 'jpeg', 'png', 'webp', 'gif', 'avif'],
         'video' => ['mp4', 'webm', 'mov', 'm4v', 'mkv'],
         'audio' => ['mp3', 'wav', 'm4a', 'aac', 'ogg', 'opus', 'amr'],
-        'document' => ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv', 'zip', 'rar', 'epub'],
+        'document' => ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv', 'zip', 'rar', 'epub', 'html', 'htm'],
     ],
 
     'specs' => [
