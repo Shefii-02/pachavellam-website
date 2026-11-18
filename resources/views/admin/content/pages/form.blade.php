@@ -1,20 +1,26 @@
 @extends('admin.main-layout')
 @section('main')
-@php $editing = (bool) $page; $isCustom = $kind === 'custom'; $v = fn ($f, $d = '') => old($f, $page->{$f} ?? $d); @endphp
+@php $editing = (bool) $page; $isCustom = $kind === 'custom'; $isHtml = $kind === 'html'; $exams = \App\Models\CompetitiveExam::orderBy('name')->get(); $v = fn ($f, $d = '') => old($f, $page->{$f} ?? $d); @endphp
 <div class="page-content-wrapper border">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="mb-0">{{ $editing ? 'Edit' : 'New' }} {{ $isCustom ? 'custom' : 'prebuilt' }} page</h3>
+        <h3 class="mb-0">{{ $editing ? 'Edit' : 'New' }} {{ $kind }} page</h3>
         <a href="{{ url('admin/pages') }}" class="btn btn-sm btn-light mb-0"><i class="bi bi-arrow-left me-1"></i>Back</a>
     </div>
     <div class="card bg-transparent border rounded-3"><div class="card-body">
-        <form method="POST" action="{{ $editing ? url('admin/pages/' . $page->id) : url('admin/pages') }}">
+        <form method="POST" enctype="multipart/form-data" action="{{ $editing ? url('admin/pages/' . $page->id) : url('admin/pages') }}">
             @csrf @if ($editing) @method('PUT') @endif
             <input type="hidden" name="kind" value="{{ $kind }}">
             <div class="row g-3">
                 <div class="col-md-7"><label class="form-label">Title <span class="text-danger">*</span></label><input class="form-control" name="title" maxlength="150" required value="{{ $v('title') }}">@error('title')<div class="text-danger small">{{ $message }}</div>@enderror</div>
                 <div class="col-md-5"><label class="form-label">Key / slug</label><input class="form-control" name="slug" maxlength="80" value="{{ $v('slug') }}" placeholder="made from the title">@error('slug')<div class="text-danger small">{{ $message }}</div>@enderror
-                    <div class="form-text">{{ $isCustom ? 'The page opens at /p/<slug>.' : 'Short name used in the page pickers.' }}</div></div>
-                @if ($isCustom)
+                    <div class="form-text">{{ $isCustom || $isHtml ? 'The page opens at /p/<slug>.' : 'Short name used in the page pickers.' }}</div></div>
+                @if ($isHtml)
+                    <div class="col-md-7"><label class="form-label">HTML file {!! $editing ? '<span class="text-muted">(leave empty to keep the current one)</span>' : '<span class="text-danger">*</span>' !!}</label><input type="file" class="form-control" name="html" accept=".html,.htm,text/html">@error('html')<div class="text-danger small">{{ $message }}</div>@enderror
+                        <div class="form-text">A complete .html file (up to 8 MB), for example one made with Claude. It is shown as it is, with ads added.</div></div>
+                    <div class="col-md-5"><label class="form-label">Exam type</label><select class="form-select" name="exam_id"><option value="">All / none</option>@foreach ($exams as $e)<option value="{{ $e->id }}" {{ (string) $v('exam_id') === (string) $e->id ? 'selected' : '' }}>{{ $e->name }}</option>@endforeach</select></div>
+                    <div class="col-md-6"><label class="form-label">SEO title</label><input class="form-control" name="meta_title" maxlength="150" value="{{ $v('meta_title') }}"></div>
+                    <div class="col-md-6"><label class="form-label">SEO description</label><input class="form-control" name="meta_description" maxlength="300" value="{{ $v('meta_description') }}"></div>
+                @elseif ($isCustom)
                     <div class="col-12"><label class="form-label">Content <span class="text-danger">*</span></label><textarea class="form-control" name="body" rows="14" required>{{ $v('body') }}</textarea>@error('body')<div class="text-danger small">{{ $message }}</div>@enderror
                         <div class="form-text">HTML is allowed (headings, lists, links, images, tables, YouTube embeds). Scripts are removed.</div></div>
                     <div class="col-md-6"><label class="form-label">SEO title</label><input class="form-control" name="meta_title" maxlength="150" value="{{ $v('meta_title') }}"></div>

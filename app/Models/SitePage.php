@@ -19,9 +19,19 @@ class SitePage extends Model
         return $this->kind === 'custom';
     }
 
+    public function exam()
+    {
+        return $this->belongsTo(CompetitiveExam::class, 'exam_id');
+    }
+
+    public function isHtml(): bool
+    {
+        return $this->kind === 'html';
+    }
+
     public function url(): string
     {
-        return $this->isCustom() ? url('p/' . $this->slug) : url($this->path ?: '/');
+        return $this->isCustom() || $this->isHtml() ? url('p/' . $this->slug) : url($this->path ?: '/');
     }
 
     public function scopeActive($q)
@@ -39,5 +49,24 @@ class SitePage extends Model
         $t = preg_replace_callback('/<iframe[^>]*>(\s*<\/iframe>)?/i', fn ($m) => preg_match('/src\s*=\s*["\']https:\/\/(www\.)?youtube(-nocookie)?\.com\//i', $m[0]) ? $m[0] : '', $t);
 
         return $t;
+    }
+
+    /** The uploaded HTML file as a full page: AdSense script in the head, ad slots under the first block and above the end (set in admin/ads, page "Uploaded HTML pages"). */
+    public function renderHtml(): string
+    {
+        $path = 'html-pages/' . basename((string) $this->html_file);
+        $html = \Illuminate\Support\Facades\Storage::disk('local')->exists($path) ? \Illuminate\Support\Facades\Storage::disk('local')->get($path) : '';
+        if ($html === '') {
+            abort(404);
+        }
+        $ad = fn () => view('partials.ad-slot', ['type' => 'web_banner', 'page' => 'html_page'])->render();
+        $html = preg_replace('/<\/head>/i', view('partials.adsense')->render() . '</head>', $html, 1, $n);
+        if (!$n) {
+            $html = view('partials.adsense')->render() . $html;
+        }
+        $html = preg_replace('/(<body[^>]*>)/i', '$1' . addcslashes($ad(), '\\$'), $html, 1);
+        $html = preg_replace('/<\/body>/i', addcslashes($ad(), '\\$') . '</body>', $html, 1);
+
+        return $html;
     }
 }

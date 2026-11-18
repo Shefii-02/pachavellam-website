@@ -20,6 +20,7 @@ class AdPages
         'exam_intro' => 'Exam instructions page (small ad, never while answering)',
         'exam_result' => 'Test result page (small ad, after the test)',
         'my_courses' => 'My courses (bought)',
+        'html_page' => 'Uploaded HTML pages (/p/...)',
     ];
 
     /** Pages that are long paged lists (in-list ads and "every N items" make sense there). */

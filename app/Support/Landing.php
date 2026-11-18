@@ -89,7 +89,7 @@ class Landing
             'courses' => ExamCourse::with('exam:id,short_name,name')->where('status', 'published')->where('slug', 'not like', 'series-%')->orderBy('title')->get(['id', 'title', 'exam_id', 'course_type', 'price', 'discount_price']),
             'exams' => CompetitiveExam::orderBy('position')->get(['id', 'slug', 'short_name', 'name']),
             'pages' => \Illuminate\Support\Facades\Schema::hasTable('site_pages')
-                ? \App\Models\SitePage::active()->orderBy('kind')->orderBy('title')->get()->mapWithKeys(fn ($p) => [$p->slug => $p->title . ($p->isCustom() ? ' (custom page)' : '')])->all()
+                ? \App\Models\SitePage::active()->orderBy('kind')->orderBy('title')->get()->mapWithKeys(fn ($p) => [$p->slug => $p->title . ($p->isHtml() ? ' (HTML page)' : ($p->isCustom() ? ' (custom page)' : ''))])->all()
                 : collect(self::PAGES)->map(fn ($p) => $p[0])->all(),
         ];
     }
