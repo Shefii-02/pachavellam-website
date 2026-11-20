@@ -20,7 +20,7 @@
                         <td style="max-width:340px;white-space:pre-line">{{ $r->message }}</td>
                         <td>{{ $r->user->name ?? '-' }}<br><small class="text-muted">{{ $r->user->mobile ?? '' }}</small></td>
                         <td class="small">{{ $r->created_at->format('d M, h:i a') }}</td>
-                        <td><a class="btn btn-sm btn-success" href="{{ url('admin/kpsc/exam-reports/toggle/' . $r->id) }}">{{ $r->status === 'open' ? 'Resolve' : 'Reopen' }}</a></td>
+                        <td><form class="d-inline" method="POST" action="{{ url('admin/kpsc/exam-reports/toggle/' . $r->id) }}">@csrf<button class="btn btn-sm btn-success">{{ $r->status === 'open' ? 'Resolve' : 'Reopen' }}</button></form></td>
                     </tr>
                 @empty
                     <tr><td colspan="7" class="text-muted">Nothing here.</td></tr>

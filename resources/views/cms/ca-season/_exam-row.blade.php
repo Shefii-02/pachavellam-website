@@ -27,7 +27,7 @@
             <a title="Add more questions from daily exams" href="{{ $base }}/build?kind={{ $e->exam_kind }}&exam_id={{ $e->id }}" class="btn btn-sm btn-circle btn-success"><i class="bi bi-magic"></i></a>
         @endif
         <a title="Edit / questions" href="{{ kpsc_cms('ca-daily-exam/edit/' . $e->id) }}" class="btn btn-sm btn-circle btn-info"><i class="bi bi-pencil"></i></a>
-        <a title="Clear leaderboard" href="{{ kpsc_cms('ca-daily-exam/clear-leaderboard/' . $e->id) }}" onclick="return confirm('Clear all attempts and the leaderboard of this exam?')" class="btn btn-sm btn-circle btn-warning"><i class="bi bi-eraser"></i></a>
-        <a title="Delete exam" href="{{ kpsc_cms('ca-daily-exam/delete-all/' . $e->id) }}" onclick="return confirm('Delete this exam, its questions and attempts?')" class="btn btn-sm btn-circle btn-danger"><i class="bi bi-trash"></i></a>
+        <form class="d-inline" method="POST" action="{{ kpsc_cms('ca-daily-exam/clear-leaderboard/' . $e->id) }}" onsubmit="return confirm('Clear all attempts and the leaderboard of this exam?')">@csrf<button title="Clear leaderboard" class="btn btn-sm btn-circle btn-warning"><i class="bi bi-eraser"></i></button></form>
+        <form class="d-inline" method="POST" action="{{ kpsc_cms('ca-daily-exam/delete-all/' . $e->id) }}" onsubmit="return confirm('Delete this exam, its questions and attempts?')">@csrf<button title="Delete exam" class="btn btn-sm btn-circle btn-danger"><i class="bi bi-trash"></i></button></form>
     </td>
 </tr>

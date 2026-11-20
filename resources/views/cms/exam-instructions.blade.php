@@ -35,7 +35,7 @@
                         <td class="text-uppercase">{{ $i->kind }}</td>
                         <td>{{ $used[$i->id] ?? 0 }}</td>
                         <td class="text-end"><a class="btn btn-sm btn-info" href="{{ url('admin/kpsc/exam-instructions?edit=' . $i->id) }}">Edit</a>
-                            <a class="btn btn-sm btn-danger" onclick="return confirm('Delete? Exams using it fall back to the default.')" href="{{ url('admin/kpsc/exam-instructions/delete/' . $i->id) }}">Delete</a></td>
+                            <form class="d-inline" method="POST" action="{{ url('admin/kpsc/exam-instructions/delete/' . $i->id) }}" onsubmit="return confirm('Delete? Exams using it fall back to the default.')">@csrf<button class="btn btn-sm btn-danger">Delete</button></form></td>
                     </tr>
                 @empty
                     <tr><td colspan="4" class="text-muted">No instructions yet.</td></tr>

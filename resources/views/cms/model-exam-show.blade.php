@@ -92,11 +92,9 @@
                                                 Edit Exam Details
                                             </a>
                                             <a href="{{ url('admin/kpsc/exam-tools/' . $date_list->id) }}" class="btn btn-sm btn-success mb-2 float-left"><i class="bi bi-sliders"></i> Settings &amp; courses</a>
-                                            <a href="{{ url('admin/kpsc/model-exam/delete/' . $date_list->id) }}"
-                                                class="btn btn-sm btn-danger mb-2 float-left">
-                                                <i class="bi bi-x"></i>
-                                                Delete
-                                            </a>
+                                            <form method="POST" action="{{ url('admin/kpsc/model-exam/delete/' . $date_list->id) }}" class="d-inline float-left" onsubmit="return confirm('Delete this exam and its files? This cannot be undone.')">@csrf
+                                                <button class="btn btn-sm btn-danger mb-2"><i class="bi bi-x"></i> Delete</button>
+                                            </form>
                                             <a target="_new"
                                                 href="{{ url('kpsc/model-exam/' . $date_list->exam_date . '/' . $date_list->id . '/leaderboard') }}"
                                                 class="btn btn-sm btn-dark mb-2 float-left">

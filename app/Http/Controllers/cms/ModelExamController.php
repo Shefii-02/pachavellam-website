@@ -232,6 +232,9 @@ class ModelExamController extends Controller
     public function model_exams_delete($id)
     {
         $date_based = DailyExam::where('id', $id)->first();
+        if (!$date_based) {   // already deleted (second click, reload)
+            return redirect()->back()->with('message', 'Data deleted Successfully');
+        }
         $new_two = ModelExamDetails::where('exam_id', $date_based->id)->first();
         if ($new_two) {
 

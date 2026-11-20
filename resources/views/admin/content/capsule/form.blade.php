@@ -12,7 +12,7 @@
 
     <div class="card bg-transparent border rounded-3">
         <div class="card-body">
-            <form action="{{ $editing ? url('admin/capsule/' . $capsule->id) : url('admin/daily-current-affairs') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ $editing ? url('admin/daily-current-affairs/' . $capsule->id) : url('admin/daily-current-affairs') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @if ($editing) @method('PUT') @endif
                 <div class="row g-3">
