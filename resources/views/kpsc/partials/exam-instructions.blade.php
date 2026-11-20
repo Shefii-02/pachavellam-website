@@ -7,6 +7,7 @@
     .xi-agree { display:flex; gap:10px; align-items:flex-start; margin:14px 0; font-size:.85rem; }
     .xi-go { display:inline-block; border:0; border-radius:24px; padding:10px 30px; font-weight:800; background:#0a8f5b; color:#fff !important; text-decoration:none !important; }
     .xi-cd { border-radius:12px; padding:10px 14px; margin-bottom:12px; background:#fff1d6; color:#8a5500; font-size:.9rem; } .xi-cd .xi-left { font-variant-numeric:tabular-nums; }
+    .xi-big { text-align:center; margin:10px 0; } .xi-big small { display:block; font-size:.78rem; letter-spacing:.04em; text-transform:uppercase; } .xi-big .xi-left { display:block; font-size:2rem; line-height:1.2; font-weight:800; } .xi-big .xi-min { display:block; font-size:.85rem; font-weight:700; }
     .xi-close { display:inline-block; margin-left:10px; padding:10px 22px; border-radius:24px; font-weight:700; border:1px solid var(--pv-border,#e5e7eb); color:var(--pv-text,#111) !important; text-decoration:none !important; }
     .xi-go[disabled], .xi-go.off { opacity:.45; pointer-events:none; }
 </style>
@@ -14,7 +15,7 @@
     <h3>{{ $exam->examtitle ?: ($exam->exam_title ?: 'Exam') }}</h3>
     <div class="xi-meta">@foreach ($meta as $label => $value)<span>{{ $label }}: {{ $value }}</span>@endforeach</div>
     @if (!empty($startsAt))
-        <div class="xi-cd" data-start="{{ $startsAt }}"><i class="bi bi-hourglass-split"></i> This exam opens on <b>{{ \Illuminate\Support\Carbon::parse($startsAt)->format('d M Y, h:i a') }}</b>@if ($exam->ended_at) and closes on <b>{{ \Illuminate\Support\Carbon::parse($exam->ended_at)->format('d M Y, h:i a') }}</b>@endif.<br>Starts in <b class="xi-left">--</b>. The question paper, answer key and marks open when it starts.</div>
+        <div class="xi-cd" data-start="{{ $startsAt }}"><i class="bi bi-hourglass-split"></i> This exam opens on <b>{{ \Illuminate\Support\Carbon::parse($startsAt)->format('d M Y, h:i a') }}</b>@if ($exam->ended_at) and closes on <b>{{ \Illuminate\Support\Carbon::parse($exam->ended_at)->format('d M Y, h:i a') }}</b>@endif.<div class="xi-big"><small>Starts in</small><b class="xi-left">--</b><span class="xi-min"></span></div>The exam opens automatically when the timer reaches zero; this page refreshes by itself.</div>
     @endif
     @if (empty($startsAt) && $exam->ended_at && \Illuminate\Support\Carbon::parse($exam->ended_at)->isFuture())
         <div class="xi-cd" data-end="{{ \Illuminate\Support\Carbon::parse($exam->ended_at)->toIso8601String() }}"><i class="bi bi-alarm"></i> Exam closes in <b class="xi-endleft"></b>@if ($exam->duration_min) · your {{ $exam->duration_min }} min timer starts when you press Start @endif</div>
@@ -38,10 +39,12 @@
     }
     var cb = document.getElementById('xiAgree'), go = document.getElementById('xiStart'), cd = document.querySelector('.xi-cd[data-start]');
     if (cd) {   // not started: the countdown, and the page reloads itself when the time comes
-        var at = new Date(cd.dataset.start).getTime(), left = cd.querySelector('.xi-left');
+        var at = new Date(cd.dataset.start).getTime(), left = cd.querySelector('.xi-left'), mins = cd.querySelector('.xi-min');
         var p = function (n) { return (n < 10 ? '0' : '') + n; };
         (function tick() { var ms = at - Date.now(); if (ms <= 0) { location.reload(); return; } var s = Math.floor(ms / 1000), d = Math.floor(s / 86400);
-            left.textContent = (d ? d + 'd ' : '') + p(Math.floor(s / 3600) % 24) + 'h ' + p(Math.floor(s / 60) % 60) + 'm ' + p(s % 60) + 's'; setTimeout(tick, 1000); })();
+            left.textContent = (d ? d + 'd ' : '') + p(Math.floor(s / 3600) % 24) + 'h ' + p(Math.floor(s / 60) % 60) + 'm ' + p(s % 60) + 's';
+            if (mins) { var m = Math.ceil(ms / 60000); mins.textContent = m < 60 ? (m <= 1 ? 'less than 1 minute left' : m + ' minutes left') : ''; }
+            setTimeout(tick, 1000); })();
         cb.disabled = true; cb.closest('label').style.display = 'none'; go.style.display = 'none'; return;
     }
     cb.addEventListener('change', function () { if (go.tagName === 'A') go.classList.toggle('off', !cb.checked); else go.disabled = !cb.checked; });
