@@ -54,11 +54,13 @@ class ExamSeriesController extends Controller
         $counts = CourseExam::where('course_id', $course->id)->where('feature_id', $feature->id)->selectRaw('season_id, count(*) c, sum(status = "published") p')->groupBy('season_id')->get()->keyBy('season_id');
 
         // old KPSC exams placed in a season
-        $legacyCounts = ($exam->slug === 'kpsc' && (self::LEGACY[$kind] ?? null) && \Illuminate\Support\Facades\Schema::hasTable('kpsc_daily_exams'))
-            ? \App\Models\DailyExam::where('section', self::LEGACY[$kind])->whereNotNull('series_season_id')->selectRaw('series_season_id, count(*) c')->groupBy('series_season_id')->pluck('c', 'series_season_id') : collect();
+        $legacyRows = ($exam->slug === 'kpsc' && (self::LEGACY[$kind] ?? null) && \Illuminate\Support\Facades\Schema::hasTable('kpsc_daily_exams'))
+            ? \App\Models\DailyExam::where('section', self::LEGACY[$kind])->whereNotNull('series_season_id')->selectRaw('series_season_id, count(*) c, sum(status = 1) p')->groupBy('series_season_id')->get()->keyBy('series_season_id') : collect();
+        $legacyCounts = $legacyRows->map(fn ($r) => (int) $r->c);
+        $legacyPublished = $legacyRows->map(fn ($r) => (int) $r->p);   // old exams are published with status 1
 
         return view('admin.exam.seasons', [
-            'legacyCounts' => $legacyCounts,
+            'legacyCounts' => $legacyCounts, 'legacyPublished' => $legacyPublished,
             'exam' => $exam, 'layout' => $exam->layout(), 'kind' => $kind, 'title' => self::KINDS[$kind][1], 'seasons' => $seasons, 'counts' => $counts,
             'builder' => CourseWorkspace::featureUrl($course, $feature), 'base' => $exam->examUrl('series/' . $kind),
         ]);

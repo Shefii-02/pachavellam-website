@@ -21,7 +21,7 @@
 
 <div class="row g-3">
     @forelse ($seasons as $s)
-        @php [$stL, $stC] = \App\Models\ExamSeason::STATUSES[$s->status]; $c = $counts[$s->id] ?? null; $paid = $acc->isPaid($s); $legacyN = (int) ($legacyCounts[$s->id] ?? 0); @endphp
+        @php [$stL, $stC] = \App\Models\ExamSeason::STATUSES[$s->status]; $c = $counts[$s->id] ?? null; $paid = $acc->isPaid($s); $legacyN = (int) ($legacyCounts[$s->id] ?? 0); $legacyP = (int) ($legacyPublished[$s->id] ?? 0); @endphp
         <div class="col-md-6 col-xl-4">
             <div class="card h-100 border rounded-3 overflow-hidden">
                 <a href="{{ $base }}/seasons/{{ $s->id }}" style="display:block;height:110px;background:#10243e center/cover {{ $s->cover_image ? "url('" . Storage::url($s->cover_image) . "')" : '' }}"></a>
@@ -40,7 +40,7 @@
                             @if ($s->free_exams)<span class="badge bg-success">first {{ $s->free_exams }} free</span>@endif
                         @else<span class="badge bg-success">Free</span>@endif
                     </div>
-                    <div class="mt-2"><b>{{ (int) ($c->c ?? 0) + $legacyN }}</b> exam(s) · {{ (int) ($c->p ?? 0) }} published</div>
+                    <div class="mt-2"><b>{{ (int) ($c->c ?? 0) + $legacyN }}</b> exam(s) · {{ (int) ($c->p ?? 0) + $legacyP }} published</div>
                 </div>
                 <div class="card-footer bg-transparent d-flex gap-2">
                     <button type="button" class="btn btn-sm btn-outline-success mb-0 js-share" title="{{ $s->status === 'published' ? 'Share' : 'Publish the season to share it' }}" @disabled($s->status !== 'published')
