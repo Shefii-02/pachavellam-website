@@ -37,7 +37,7 @@ class SecurityGate
         }
 
         $auth = $request->isMethod('POST') && $request->is('sign-in', 'sign-up', 'send-otp', 'verify-otp', 'counselling', 'api/auth/*', 'api/captcha*', 'captcha*', 'devices/limit/*');
-        [$bucket, $max] = $auth ? ['auth', (int) SiteSetting::get('rl_auth', '20')] : ($request->is('api/*') ? ['api', (int) SiteSetting::get('rl_api', '300')] : ['web', (int) SiteSetting::get('rl_web', '240')]);
+        [$bucket, $max] = $auth ? ['auth', (int) SiteSetting::get('rl_auth', '60')] : ($request->is('api/*') ? ['api', (int) SiteSetting::get('rl_api', '1500')] : ['web', (int) SiteSetting::get('rl_web', '1200')]);
         $key = 'rl:' . $bucket . ':' . $ip;
         if ($max > 0 && RateLimiter::tooManyAttempts($key, $max)) {
             $this->strike($ip);
@@ -61,13 +61,13 @@ class SecurityGate
 
     private function strike(string $ip): void
     {
-        $after = (int) SiteSetting::get('rl_autoblock_after', '5');
+        $after = (int) SiteSetting::get('rl_autoblock_after', '10');
         if ($after <= 0) {
             return;
         }
         Cache::add('security:s:' . $ip, 0, 600);
         if (Cache::increment('security:s:' . $ip) >= $after) {
-            BlockedIp::updateOrCreate(['ip' => $ip], ['kind' => 'block', 'reason' => 'Automatic: kept exceeding the request limit', 'until' => now()->addMinutes(max(1, (int) SiteSetting::get('rl_autoblock_minutes', '30')))]);
+            BlockedIp::updateOrCreate(['ip' => $ip], ['kind' => 'block', 'reason' => 'Automatic: kept exceeding the request limit', 'until' => now()->addMinutes(max(1, (int) SiteSetting::get('rl_autoblock_minutes', '10')))]);
             Cache::forget('security:ips');
             Cache::forget('security:s:' . $ip);
         }

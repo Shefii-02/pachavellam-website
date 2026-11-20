@@ -29,6 +29,10 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // behind Cloudflare / the web server: use the visitor's address from X-Forwarded-For, not the proxy's. Without this every visitor of a
+        // Cloudflare node shares one IP, so the flood gate (SecurityGate) rate-limits and auto-blocks all of them together.
+        $middleware->trustProxies(at: '*', headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR | \Illuminate\Http\Request::HEADER_X_FORWARDED_HOST | \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT | \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO);
+
         // request log for Dev Tools (api logs + daily analytics)
         // flood / DoS gate runs before everything else
         $middleware->prependToGroup('web', \App\Http\Middleware\SecurityGate::class);
@@ -52,7 +56,15 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // an expired / missing CSRF token (old page kept by an in-app browser, session cookie not stored yet): back to the form with a fresh token and a message, not a 419 page
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Your session expired. Please refresh the page and try again.'], 419);
+            }
+            $to = $request->is('sign-in', 'sign-up') ? url('sign-in') : url()->previous(url('/'));
+
+            return redirect($to)->withInput($request->except('password', 'password_confirmation', '_token'))->with('message', 'Your session expired. Please try again.');
+        });
         $exceptions->report(function (Throwable $exception) {
             $content['message'] = $exception->getMessage();
             $content['file'] = $exception->getFile();

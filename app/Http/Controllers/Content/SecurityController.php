@@ -25,7 +25,7 @@ class SecurityController extends Controller
 
         return view('admin.content.security', [
             'forms' => Captcha::FORMS, 'on' => Captcha::enabled(), 'chosen' => Captcha::forms(), 'mode' => $g('captcha_mode', 'always'), 'failures' => $g('captcha_failures', '3'),
-            'rl' => ['on' => $g('rl_on', '1'), 'web' => $g('rl_web', '240'), 'api' => $g('rl_api', '300'), 'auth' => $g('rl_auth', '20'), 'after' => $g('rl_autoblock_after', '5'), 'minutes' => $g('rl_autoblock_minutes', '30')],
+            'rl' => ['on' => $g('rl_on', '1'), 'web' => $g('rl_web', '1200'), 'api' => $g('rl_api', '1500'), 'auth' => $g('rl_auth', '60'), 'after' => $g('rl_autoblock_after', '10'), 'minutes' => $g('rl_autoblock_minutes', '10')],
             'ips' => BlockedIp::orderByDesc('id')->limit(200)->get(), 'myIp' => $request->ip(),
         ]);
     }
