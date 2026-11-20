@@ -287,15 +287,15 @@ class DailyexamController extends Controller
     public function daily_exams_delete($id)
     {
 
-        $date_based = DailyExamdetails::where('id', $id)->first();
-        $date_based->delete();
+        // already deleted (second click, reload): nothing to do, not an error
+        DailyExamdetails::where('id', $id)->delete();
 
         return redirect()->back()->with('message', 'Data deleted Successfully');
     }
 
     public function daily_exams_delete_all($id)
     {
-        $exam = DailyExam::where('id', $id)->first();  
+        DailyExam::where('id', $id)->update(['series_season_id' => null]);   // out of its season first (same as "take out of the season"), then gone for good
         DailyExamdetails::where('exam_id', $id)->delete();
         DailyExamattempt::where('exam_id', $id)->delete();
         DailyExam::where('id', $id)->delete();

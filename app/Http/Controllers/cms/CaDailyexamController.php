@@ -285,7 +285,7 @@ class CaDailyexamController extends Controller
 
     public function daily_exams_delete_all($id)
     {
-        $exam = DailyExam::where('id', $id)->first();  
+        DailyExam::where('id', $id)->update(['series_season_id' => null]);   // out of its season first, then gone for good
         DailyExamdetails::where('exam_id', $id)->delete();
         CaDailyExamAttempt::where('exam_id', $id)->delete();
         \Illuminate\Support\Facades\DB::table('kpsc_ca_exam_sources')->where('exam_id', $id)->orWhere('source_exam_id', $id)->delete();

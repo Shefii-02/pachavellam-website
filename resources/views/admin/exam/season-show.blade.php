@@ -111,7 +111,8 @@
                         @if ($otherSeasons->count())<button type="button" class="btn btn-sm btn-light mb-0" title="Move / copy to another season" onclick="pvPlace('legacy',{{ $d->id }})"><i class="bi bi-arrow-left-right"></i></button>@endif
                         <form class="d-inline" action="{{ $base }}/seasons/{{ $season->id }}/legacy-status/{{ $d->id }}" method="POST">@csrf<button class="btn btn-sm btn-light mb-0" title="{{ $d->status ? 'Unpublish' : 'Publish' }}"><i class="bi {{ $d->status ? 'bi-eye-slash' : 'bi-eye' }}"></i></button></form>
                         <form class="d-inline" action="{{ $base }}/seasons/{{ $season->id }}/detach/{{ $d->id }}" method="POST" onsubmit="return confirm('Take this exam out of the season? The exam itself is kept.')">@csrf<button class="btn btn-sm btn-light mb-0" title="Take out of the season"><i class="bi bi-box-arrow-right"></i></button></form>
-                        @if ($legacyBase)<a href="{{ url($legacyBase . '/delete/' . $d->id) }}" class="btn btn-sm btn-outline-danger mb-0" title="Delete the exam" onclick="return confirm('Delete this exam and its questions?')"><i class="bi bi-trash"></i></a>@endif
+                        {{-- delete-all removes the exam with its questions and attempts; plain "delete/{id}" removes ONE QUESTION by id, and both routes are POST only --}}
+                        @if ($legacyBase)<form class="d-inline" action="{{ url($legacyBase . '/delete-all/' . $d->id) }}" method="POST" onsubmit="return confirm('Delete this exam, its questions and attempts? This cannot be undone.')">@csrf<button class="btn btn-sm btn-outline-danger mb-0" title="Delete the exam"><i class="bi bi-trash"></i></button></form>@endif
                     </td>
                 </tr>
               @endif

@@ -44,16 +44,14 @@
                                  View Exam Page
                              </a>
 
-                             <a onclick="return confirm('Are you sure can`t retrive data?')"
-                                 href="{{ kpsc_cms('daily-exam/delete-all/' . $item->id) }}"
-                                 class="btn btn-danger btn-sm mb-2 float-left"><i class="fa fa-trash"></i> Delete Exam
-                                 With
-                                 All Questions</a>
+                             {{-- these routes are POST only: a link (GET) answered 405 and nothing was deleted --}}
+                             <form method="POST" action="{{ kpsc_cms('daily-exam/delete-all/' . $item->id) }}" class="d-inline float-left" onsubmit="return confirm('Are you sure can`t retrive data?')">@csrf
+                                 <button class="btn btn-danger btn-sm mb-2"><i class="fa fa-trash"></i> Delete Exam With All Questions</button>
+                             </form>
 
-                             <a onclick="return confirm('Are you sure can`t retrive data?')"
-                                 href="{{ kpsc_cms('daily-exam/clear-leaderboard/' . $item->id) }}"
-                                 class="btn btn-danger btn-sm mb-2 float-left"><i class="fa fa-trash"></i> Clear
-                                 Leaderboard</a>
+                             <form method="POST" action="{{ kpsc_cms('daily-exam/clear-leaderboard/' . $item->id) }}" class="d-inline float-left" onsubmit="return confirm('Are you sure can`t retrive data?')">@csrf
+                                 <button class="btn btn-danger btn-sm mb-2"><i class="fa fa-trash"></i> Clear Leaderboard</button>
+                             </form>
                          </th>
 
                      </tr>

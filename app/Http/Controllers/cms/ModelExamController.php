@@ -253,7 +253,12 @@ class ModelExamController extends Controller
 
     public function model_exams_delete_all($id)
     {
-        DailyExam::leftJoin('kpsc_daily_exams_details', 'kpsc_daily_exams_details.exam_id', 'kpsc_daily_exams.id')->where('kpsc_daily_exams_details.exam_id', $id)->where('kpsc_daily_exams.id', $id)->delete();
+        // the old join-delete only matched exams that had question rows, so an OMR exam without any stayed while the page said "deleted"
+        DailyExam::where('id', $id)->update(['series_season_id' => null]);   // out of its season first, then gone for good
+        ModelExamAttempt::where('exam_id', $id)->delete();
+        \Illuminate\Support\Facades\DB::table('omr_exam_times')->where('exam_id', $id)->delete();
+        \Illuminate\Support\Facades\DB::table('kpsc_daily_exams_details')->where('exam_id', $id)->delete();
+        DailyExam::where('id', $id)->delete();
         return redirect()->back()->with('message', 'Data deleted Successfully');
     }
 
