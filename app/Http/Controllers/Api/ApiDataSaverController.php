@@ -126,9 +126,9 @@ class ApiDataSaverController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            'post_id' => 'required',
-            'user_id' => 'required',
-            'comment' => 'required'
+            'post_id' => 'required|integer|exists:capsule,id',
+            'user_id' => 'required|integer',
+            'comment' => 'required|string|max:255'
         ]);
 
         if ($validator->fails()) {
@@ -159,8 +159,8 @@ class ApiDataSaverController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            'post_id' => 'required',
-            'user_id' => 'required',
+            'post_id' => 'required|integer|exists:capsule,id',
+            'user_id' => 'required|integer',
         ]);
 
         if ($validator->fails()) {

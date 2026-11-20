@@ -40,6 +40,12 @@
                         <a href="{{ $manageUrl }}/{{ $e->id }}" class="btn btn-sm btn-light mb-0">{{ $canEdit ? 'Questions' : 'View' }}</a>
                         @if ($canEdit)<a href="{{ $manageUrl }}/{{ $e->id }}/edit" class="btn btn-sm btn-light mb-0"><i class="bi bi-pencil"></i></a>@endif
                         @if ($canEdit && $placeBase)<button type="button" class="btn btn-sm btn-light mb-0" title="Move / copy to a season" onclick="pvPlaceExam({{ $e->id }}, {{ (int) $e->season_id }})"><i class="bi bi-arrow-left-right"></i></button>@endif
+                        @if ($canEdit)
+                            <form action="{{ $manageUrl }}/{{ $e->id }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this exam? The questions stay in the question library.')">@csrf @method('DELETE')
+                                <input type="hidden" name="back" value="{{ request()->fullUrl() }}">
+                                <button class="btn btn-sm btn-outline-danger mb-0" title="Delete"><i class="bi bi-trash"></i></button>
+                            </form>
+                        @endif
                     </td>
                 </tr>
             @empty

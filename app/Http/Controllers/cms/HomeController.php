@@ -602,7 +602,7 @@ class HomeController extends Controller
             $data  .=    '<div class="comment col-12 mt-1 text-justify bg-dark float-left">
                             <span  class="text-light  float-right">- '.date('d-M, Y',strtotime($list->created_at)).'</span>
                             <br>
-                            <p class="text-light">'.$list->comment.'</p>
+                            <p class="text-light">'.e($list->comment).'</p>
                           </div>';
         }
 
@@ -610,7 +610,8 @@ class HomeController extends Controller
     }
     
     public function feed_like(Request $request){
-        
+        $request->validate(['id' => 'required|integer|exists:capsule,id']);
+
         $check_liked_or_not = CapsuleLike::where('cap_id',$request->id)->where('ip_adress',$request->ip())->first();
         if(!$check_liked_or_not){
             $feed_like = new CapsuleLike;
@@ -622,6 +623,7 @@ class HomeController extends Controller
         return count(CapsuleLike::where('cap_id',$request->id)->get());
     }
     public function feed_comments_store(Request $request){
+        $request->validate(['post_id' => 'required|integer|exists:capsule,id', 'comments' => 'required|string|max:255']);
         $comments_store = new CapsuleComment;
         $comments_store->comment  =  $request->comments;
         $comments_store->cap_id = $request->post_id;
@@ -637,7 +639,7 @@ class HomeController extends Controller
             $data[0]  .=    '<div class="col-12 comment mt-1 text-justify bg-dark float-left">
                             <span  class="text-light float-right">- '.date('d-M, Y',strtotime($list->created_at)).'</span>
                             <br>
-                            <p class="text-light">'.$list->comment.'</p>
+                            <p class="text-light">'.e($list->comment).'</p>
                         </div>';
         }
         $data[1] = "";

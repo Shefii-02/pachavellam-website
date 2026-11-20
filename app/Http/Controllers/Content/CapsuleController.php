@@ -98,8 +98,9 @@ class CapsuleController extends Controller
         $capsule = Capsule::findOrFail($id);
 
         $this->deleteImage($capsule->image);
-        CapsuleComment::where('cap_id', $capsule->id)->delete();
-        CapsuleLike::where('cap_id', $capsule->id)->delete();
+        // cap_id is a string column: compare as a string so a stray non-numeric row cannot make MySQL fail the delete (error 1292)
+        CapsuleComment::where('cap_id', (string) $capsule->id)->delete();
+        CapsuleLike::where('cap_id', (string) $capsule->id)->delete();
         $capsule->exams()->detach();
         $capsule->delete();
 
