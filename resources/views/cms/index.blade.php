@@ -186,9 +186,9 @@
         @php $links = ['Study material' => 'material', 'PYQ' => 'prev-qstn', 'PSC bulletins' => 'psc-bulletin', 'Daily CA' => 'daily-ca', 'PSC news' => 'psc-news', 'PSC results' => 'psc-results', 'Syllabus' => 'syllabus', 'Subjects' => 'subjects', 'Notifications' => 'notifications']; @endphp
         @foreach ($ct as $label => $count)
             <div class="col-6 col-md-3 col-xl-2">
-                @if (isset($links[$label]))<a href="{{ url('admin/kpsc/' . $links[$label]) }}" class="text-reset text-decoration-none">@elseif ($label === 'Capsules')<a href="{{ url('admin/capsule?exam=kpsc') }}" class="text-reset text-decoration-none">@elseif ($label === 'Stories')<a href="{{ url('admin/stories?exam=kpsc') }}" class="text-reset text-decoration-none">@else<span>@endif
+                @if (isset($links[$label]))<a href="{{ url('admin/kpsc/' . $links[$label]) }}" class="text-reset text-decoration-none">@elseif ($label === 'Daily Current Affairs')<a href="{{ url('admin/daily-current-affairs?exam=kpsc') }}" class="text-reset text-decoration-none">@elseif ($label === 'Stories')<a href="{{ url('admin/stories?exam=kpsc') }}" class="text-reset text-decoration-none">@else<span>@endif
                 <div class="border rounded px-3 py-2 h-100"><div class="small text-muted">{{ $label }}</div><div class="h5 mb-0">{{ $n($count) }}</div></div>
-                @if (isset($links[$label]) || in_array($label, ['Capsules', 'Stories']))</a>@else</span>@endif
+                @if (isset($links[$label]) || in_array($label, ['Daily Current Affairs', 'Stories']))</a>@else</span>@endif
             </div>
         @endforeach
     </div>

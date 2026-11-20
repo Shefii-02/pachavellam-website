@@ -3,11 +3,11 @@
 <div class="page-content-wrapper border">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
         <div>
-            <h3 class="mb-0">Capsule</h3>
+            <h3 class="mb-0">Daily Current Affairs</h3>
             <div class="small text-muted">Picture or text cards in the app feed. Each one appears only for the exam types you tick.</div>
         </div>
         @can('Capsule add')
-            <a href="{{ url('admin/capsule/create') }}{{ request('exam') ? '?exam=' . request('exam') : '' }}" class="btn btn-sm btn-primary mb-0"><i class="bi bi-plus me-1"></i>New Capsule</a>
+            <a href="{{ url('admin/daily-current-affairs/create') }}{{ request('exam') ? '?exam=' . request('exam') : '' }}" class="btn btn-sm btn-primary mb-0"><i class="bi bi-plus me-1"></i>New Capsule</a>
         @endcan
     </div>
 
@@ -25,7 +25,7 @@
         <div class="col-6 col-md-2">
             <select name="status" class="form-select form-select-sm"><option value="">Shown + hidden</option><option value="1" @selected(request('status') === '1')>Shown</option><option value="0" @selected(request('status') === '0')>Hidden</option></select>
         </div>
-        <div class="col-auto d-flex gap-2"><button class="btn btn-sm btn-light mb-0">Filter</button><a href="{{ url('admin/capsule') }}" class="btn btn-sm btn-light mb-0">Reset</a></div>
+        <div class="col-auto d-flex gap-2"><button class="btn btn-sm btn-light mb-0">Filter</button><a href="{{ url('admin/daily-current-affairs') }}" class="btn btn-sm btn-light mb-0">Reset</a></div>
     </form>
 
     <div class="card bg-transparent border rounded-3">
@@ -53,7 +53,7 @@
                                 <td class="text-nowrap small">{{ $c->updated_at ? $c->updated_at->format('d M Y') : '—' }}</td>
                                 <td>
                                     @can('Capsule edit')
-                                        <form action="{{ url('admin/capsule/' . $c->id . '/toggle') }}" method="POST">@csrf
+                                        <form action="{{ url('admin/daily-current-affairs/' . $c->id . '/toggle') }}" method="POST">@csrf
                                             <button class="badge border-0 bg-{{ $c->status ? 'success' : 'secondary' }}" title="Click to {{ $c->status ? 'hide' : 'show' }}">{{ $c->status ? 'Shown' : 'Hidden' }}</button>
                                         </form>
                                     @else
@@ -62,16 +62,16 @@
                                 </td>
                                 <td class="text-capitalize small">{{ optional($c->author)->name ?: '—' }}</td>
                                 <td class="text-end text-nowrap">
-                                    @can('Capsule edit')<a href="{{ url('admin/capsule/' . $c->id . '/edit') }}" class="btn btn-sm btn-circle btn-info" title="Edit"><i class="bi bi-pencil"></i></a>@endcan
+                                    @can('Capsule edit')<a href="{{ url('admin/daily-current-affairs/' . $c->id . '/edit') }}" class="btn btn-sm btn-circle btn-info" title="Edit"><i class="bi bi-pencil"></i></a>@endcan
                                     @can('Capsule delete')
-                                        <form action="{{ url('admin/capsule/' . $c->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this capsule with its likes and comments?')">@csrf @method('DELETE')
+                                        <form action="{{ url('admin/daily-current-affairs/' . $c->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this capsule with its likes and comments?')">@csrf @method('DELETE')
                                             <button class="btn btn-sm btn-circle btn-danger" title="Delete"><i class="bi bi-trash"></i></button>
                                         </form>
                                     @endcan
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="9" class="text-center text-muted py-5">No capsules found.</td></tr>
+                            <tr><td colspan="9" class="text-center text-muted py-5">No Daily Current Affairs found.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

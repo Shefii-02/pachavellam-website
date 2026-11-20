@@ -149,7 +149,7 @@ class KpscDashboard
             'Syllabus' => $count('syllabus'),
             'Subjects' => $count('kpsc_subjects'),
             'Notifications' => $count('notification'),
-            'Capsules' => $kpscTagged('capsule_exams', 'capsule_id'),
+            'Daily Current Affairs' => $kpscTagged('capsule_exams', 'capsule_id'),
             'Stories' => $kpscTagged('story_exams', 'story_id'),
         ];
     }

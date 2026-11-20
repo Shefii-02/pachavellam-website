@@ -179,13 +179,15 @@ Route::group(['prefix' => 'admin', 'middleware' => ['admin.area']], function () 
     Route::post('coupons/redemptions/{id}/reverse', 'General\CouponController@reverse')->whereNumber('id');
 
     // Capsule and Stories: each is shown for the exam types ticked on it (permissions are checked in the controllers)
-    Route::get('capsule', 'Content\CapsuleController@index');
-    Route::get('capsule/create', 'Content\CapsuleController@create');
-    Route::post('capsule', 'Content\CapsuleController@store');
-    Route::get('capsule/{id}/edit', 'Content\CapsuleController@edit')->whereNumber('id');
-    Route::put('capsule/{id}', 'Content\CapsuleController@update')->whereNumber('id');
-    Route::delete('capsule/{id}', 'Content\CapsuleController@destroy')->whereNumber('id');
-    Route::post('capsule/{id}/toggle', 'Content\CapsuleController@toggle')->whereNumber('id');
+    // old /admin/capsule address still works
+    Route::get('capsule', fn () => redirect(url('admin/daily-current-affairs')));
+    Route::get('daily-current-affairs', 'Content\CapsuleController@index');
+    Route::get('daily-current-affairs/create', 'Content\CapsuleController@create');
+    Route::post('daily-current-affairs', 'Content\CapsuleController@store');
+    Route::get('daily-current-affairs/{id}/edit', 'Content\CapsuleController@edit')->whereNumber('id');
+    Route::put('daily-current-affairs/{id}', 'Content\CapsuleController@update')->whereNumber('id');
+    Route::delete('daily-current-affairs/{id}', 'Content\CapsuleController@destroy')->whereNumber('id');
+    Route::post('daily-current-affairs/{id}/toggle', 'Content\CapsuleController@toggle')->whereNumber('id');
 
     Route::get('stories', 'Content\StoryController@index');
     Route::get('stories/create', 'Content\StoryController@create');

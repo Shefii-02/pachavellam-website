@@ -83,8 +83,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin', 'middleware' => ['admin.area
         Route::resource('material', 'cms\MaterialController')->except(['index']);
 
 
-        // Capsule moved to the main sidebar (admin/capsule)
-        Route::get('capsule', fn () => redirect(url('admin/capsule')));
+        // Capsule moved to the main sidebar (admin/daily-current-affairs)
+        Route::get('capsule', fn () => redirect(url('admin/daily-current-affairs')));
 
         Route::post('psc-results/delete/{id}', 'cms\PscresultsController@delete')->name('psc-results.delete');
         Route::post('psc-results/update-pscresults', 'cms\PscresultsController@update_pscresults');

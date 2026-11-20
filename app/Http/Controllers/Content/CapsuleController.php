@@ -13,7 +13,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 /**
- * Capsule (admin/capsule): picture or text cards shown in the app feed.
+ * Capsule (admin/daily-current-affairs): picture or text cards shown in the app feed.
  * Each capsule is shown for the exam types ticked on it.
  */
 class CapsuleController extends Controller
@@ -60,7 +60,7 @@ class CapsuleController extends Controller
         $capsule->save();
         $capsule->exams()->sync($data['exam_ids']);
 
-        return redirect(url('admin/capsule'))->with('message', 'Capsule added');
+        return redirect(url('admin/daily-current-affairs'))->with('message', 'Daily Current Affairs added');
     }
 
     public function edit(Request $request, $id)
@@ -89,7 +89,7 @@ class CapsuleController extends Controller
         $capsule->save();
         $capsule->exams()->sync($data['exam_ids']);
 
-        return redirect(url('admin/capsule'))->with('message', 'Capsule updated');
+        return redirect(url('admin/daily-current-affairs'))->with('message', 'Daily Current Affairs updated');
     }
 
     public function destroy(Request $request, $id)
@@ -103,7 +103,7 @@ class CapsuleController extends Controller
         $capsule->exams()->detach();
         $capsule->delete();
 
-        return redirect(url('admin/capsule'))->with('message', 'Capsule deleted');
+        return redirect(url('admin/daily-current-affairs'))->with('message', 'Daily Current Affairs deleted');
     }
 
     public function toggle(Request $request, $id)
@@ -144,7 +144,7 @@ class CapsuleController extends Controller
             'position' => 'nullable|integer|min:0',
             'exam_ids' => 'required|array|min:1',
             'exam_ids.*' => 'integer|exists:competitive_exams,id',
-        ], ['exam_ids.required' => 'Tick at least one exam type this capsule is for.', 'exam_ids.min' => 'Tick at least one exam type this capsule is for.']);
+        ], ['exam_ids.required' => 'Tick at least one exam type this Daily Current Affairs item is for.', 'exam_ids.min' => 'Tick at least one exam type this Daily Current Affairs item is for.']);
 
         $data['type'] = $type;
         $data['exam_ids'] = array_values(array_unique(array_map('intval', $data['exam_ids'])));

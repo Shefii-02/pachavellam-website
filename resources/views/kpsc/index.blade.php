@@ -406,7 +406,7 @@
         @if ($capsules->count())
             @php $capsuleExams = $examTypes->whereIn('id', $capsules->flatMap(fn ($c) => $c->exams->pluck('id'))->unique()); @endphp
             <section class="hm-sec" aria-labelledby="cpTitle">
-                <div class="hm-head"><h4 id="cpTitle">Daily <em>capsules</em></h4><small>Quick facts to revise in a minute</small></div>
+                <div class="hm-head"><h4 id="cpTitle">Daily <em>Current Affairs</em></h4><small>Quick facts to revise in a minute</small></div>
                 @if ($capsuleExams->count() > 1)
                     <div class="hm-chips" data-for="#hmCaps"><span class="hm-chip on" data-x="all">All</span>@foreach ($capsuleExams as $e)<span class="hm-chip" data-x="{{ $e->id }}">{{ $e->short_name ?: $e->name }}</span>@endforeach</div>
                 @endif
@@ -428,10 +428,10 @@
                     @endforeach
                 </div>
             </section>
-            <div class="cp-view" id="cpView" role="dialog" aria-modal="true" aria-label="Capsule" hidden>
+            <div class="cp-view" id="cpView" role="dialog" aria-modal="true" aria-label="Daily Current Affairs" hidden>
                 <div class="box"><button type="button" class="x" aria-label="Close"><i class="bi bi-x-lg"></i></button><div id="cpBody"></div></div>
-                <button type="button" class="nav p" aria-label="Previous capsule"><i class="bi bi-chevron-left"></i></button>
-                <button type="button" class="nav n" aria-label="Next capsule"><i class="bi bi-chevron-right"></i></button>
+                <button type="button" class="nav p" aria-label="Previous"><i class="bi bi-chevron-left"></i></button>
+                <button type="button" class="nav n" aria-label="Next"><i class="bi bi-chevron-right"></i></button>
             </div>
         @endif
 

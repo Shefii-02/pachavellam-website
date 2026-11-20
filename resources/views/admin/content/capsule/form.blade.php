@@ -6,13 +6,13 @@
 @endphp
 <div class="page-content-wrapper border">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="mb-0">{{ $editing ? 'Edit' : 'New' }} Capsule</h3>
-        <a href="{{ url('admin/capsule') }}" class="btn btn-sm btn-light mb-0"><i class="bi bi-arrow-left me-1"></i>Back</a>
+        <h3 class="mb-0">{{ $editing ? 'Edit' : 'New' }} Daily Current Affairs</h3>
+        <a href="{{ url('admin/daily-current-affairs') }}" class="btn btn-sm btn-light mb-0"><i class="bi bi-arrow-left me-1"></i>Back</a>
     </div>
 
     <div class="card bg-transparent border rounded-3">
         <div class="card-body">
-            <form action="{{ $editing ? url('admin/capsule/' . $capsule->id) : url('admin/capsule') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ $editing ? url('admin/capsule/' . $capsule->id) : url('admin/daily-current-affairs') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @if ($editing) @method('PUT') @endif
                 <div class="row g-3">
@@ -55,12 +55,12 @@
                     </div>
 
                     <div class="col-12">
-                        @include('admin.content._exam-picker', ['exams' => $exams, 'chosen' => $chosen, 'what' => 'capsule'])
+                        @include('admin.content._exam-picker', ['exams' => $exams, 'chosen' => $chosen, 'what' => 'Daily Current Affairs'])
                     </div>
                 </div>
                 <div class="mt-4">
                     <button class="btn btn-success mb-0"><i class="bi bi-check me-1"></i>Save</button>
-                    <a href="{{ url('admin/capsule') }}" class="btn btn-light mb-0">Cancel</a>
+                    <a href="{{ url('admin/daily-current-affairs') }}" class="btn btn-light mb-0">Cancel</a>
                 </div>
             </form>
         </div>

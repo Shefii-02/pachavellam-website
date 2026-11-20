@@ -60,7 +60,7 @@
                     @php $showHome = $canContent || auth()->user()->can('Capsule list') || auth()->user()->can('Banner Slider list'); @endphp
                     @if ($showHome)
                         {!! $heading('Home page content') !!}
-                        @can('Capsule list'){!! $link(url('admin/capsule'), 'bi-file-image-fill', 'Capsule', request()->is('admin/capsule*')) !!}@endcan
+                        @can('Capsule list'){!! $link(url('admin/daily-current-affairs'), 'bi-file-image-fill', 'Daily Current Affairs', request()->is('admin/daily-current-affairs*')) !!}@endcan
                         @can('Banner Slider list'){!! $link(url('admin/stories'), 'bi-card-image', 'Stories', request()->is('admin/stories*')) !!}@endcan
                         @if ($canContent)
                             @foreach (['banners', 'whats-new', 'announcements', 'notifications'] as $seg)
