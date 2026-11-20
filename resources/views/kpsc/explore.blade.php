@@ -151,8 +151,8 @@
                         <button class="dropdown-item" type="button"><i class="mr-1 lni lni-cog"></i>Settings</button>
                       </div>
                     </div>
-                    <div class="post-thumbnail"><a href="{{url('kpsc/class')}}"><img src="https://www.pachavellam.com/assets/images/category/image/Science-1.jpg" alt=""></a></div>
-                    <div class="post-content"><a class="post-catagory" href="{{url('kpsc/class')}}">Health</a></div>
+                    <div class="post-thumbnail"><a href="{{url('kpsc/live-class')}}"><img src="https://www.pachavellam.com/assets/images/category/image/Science-1.jpg" alt=""></a></div>
+                    <div class="post-content"><a class="post-catagory" href="{{url('kpsc/live-class')}}">Health</a></div>
                   </div>
                 </div>
               

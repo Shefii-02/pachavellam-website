@@ -17,7 +17,7 @@
 			
 				<!-- Counter item -->
 				<div class="col-md-3 col-xxl-3">
-					<a href="{{url('kpsc/cms')}}">
+					<a href="{{url('admin/kpsc')}}">
 						<div class="card card-body bg-warning bg-opacity-15 p-4 h-100">
 							<div class="d-flex justify-content-between align-items-center">
 								<!-- Digit -->

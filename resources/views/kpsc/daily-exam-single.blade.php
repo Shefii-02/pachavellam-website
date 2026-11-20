@@ -23,7 +23,7 @@
 <div class="page-content-wrapper">
     <!-- Trending News Wrapper-->
     <div class="trending-news-wrapper">
-      <form action="{{url('kpsc/daily-exam/'.$exam_date.'/'.$exam_id)}}" id="daily_exam" method="POST" >
+      <form action="{{url('kpsc/daily-exam-store-result/'.$exam_date.'/'.$exam_id)}}" id="daily_exam" method="POST" >
           @csrf()
           <input type="hidden" name="attempt" id="attempt" value="{{$attempt_id}}">
       </form>

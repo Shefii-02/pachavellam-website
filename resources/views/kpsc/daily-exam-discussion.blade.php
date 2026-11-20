@@ -108,7 +108,7 @@
                                 rows="3" name="comment"></textarea>
                    </div>
                    <div class="float-right mt-2 mb-2">
-                      <a href="{{url('kpsc/daily-exam/login')}}" class="btn btn-sm btn-primary text-uppercase">Login</a>
+                      <a href="{{url('sign-in')}}" class="btn btn-sm btn-primary text-uppercase">Login</a>
                    </div> 
                 
                 @endauth
