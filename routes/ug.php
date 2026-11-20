@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'ug-pg', 'as' => 'ug-pg'], function () {
     Route::get('/', 'ug_pg\FrontviewController@index');
     Route::get('news-all', 'ug_pg\FrontviewController@news_all');
-    Route::get('news/{id}', 'ug_pg\FrontviewController@news_view');
+    Route::get('news/{id}', 'ug_pg\FrontviewController@news_view')->whereNumber('id');
     Route::get('notify', 'ug_pg\FrontviewController@notify');
     Route::get('request-class', 'ug_pg\FrontviewController@request_class');
     Route::post('request-class', 'ug_pg\FrontviewController@request_class_store');

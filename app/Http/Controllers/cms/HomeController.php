@@ -206,7 +206,7 @@ class HomeController extends Controller
         $title = "Kerala PSC ".$category_name ;
         $redirection = url('kpsc');
         
-        $subject_dtls      = KpscSubject::where('slug_name',$category_name)->first();
+        $subject_dtls      = KpscSubject::where('slug_name',$category_name)->firstOrFail();
         $subcategory_check  = KpscSubject::where('parent_id',$subject_dtls->id)->orderby('position')->get();
         // $category_name      = $subject_dtls->category_name;
         if(count($subcategory_check)>0){
@@ -234,9 +234,9 @@ class HomeController extends Controller
         $redirection = url('kpsc/subject/'.$category_name);
         $kpsc_activity = KpscActivities::where('kpsc_activities.status','show')->get();
         
-        $subject_dtls      = KpscSubject::where('slug_name',$category_name)->where('type','parent')->first();
+        $subject_dtls      = KpscSubject::where('slug_name',$category_name)->where('type','parent')->firstOrFail();
      
-        $sub_subject_dtls    = KpscSubject::where('parent_id',$subject_dtls->id)->where('slug_name',$sub_category)->orderby('position')->first();
+        $sub_subject_dtls    = KpscSubject::where('parent_id',$subject_dtls->id)->where('slug_name',$sub_category)->orderby('position')->firstOrFail();
            
         $kpsc_subject_activity = KpscSubjectActivities::leftJoin('kpsc_activities','kpsc_activities.id','kpsc_subject_activities.activity_id')
                                 ->where('kpsc_subject_activities.subject_id',$sub_subject_dtls->id)

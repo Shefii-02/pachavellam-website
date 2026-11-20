@@ -218,7 +218,7 @@ class FrontviewController extends Controller
     
     public function  news_view($id){
      
-        $news_list       = News::where('id',$id)->first();
+        $news_list       = News::where('id',$id)->firstOrFail();
         $title = 'Latest News';
         $redirection = url('ug-pg/news-all');
         
