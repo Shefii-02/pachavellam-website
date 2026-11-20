@@ -10,10 +10,10 @@
     <div><h3 class="mb-0">{{ $label }} - {{ $title }}</h3><div class="small text-muted">Create a season first (free or paid), then open it to add and manage its exams.</div></div>
     <div class="d-flex gap-2">
         <a href="{{ $builder }}?season=none" class="btn btn-sm btn-light mb-0"><i class="bi bi-list-ul me-1"></i>Exams without a season ({{ (int) optional($counts->get(''))->c }})</a>
-        @if ($exam->slug === 'kpsc' && in_array($kind, ['daily', 'omr']))
-            <a href="{{ url($kind === 'daily' ? 'admin/kpsc/daily-exam/view' : 'admin/kpsc/model-exam/view') }}" class="btn btn-sm btn-light mb-0"><i class="bi bi-archive me-1"></i>All old exams</a>
-        @endif
         <button type="button" class="btn btn-sm btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#newSession"><i class="bi bi-plus-lg me-1"></i>New season</button>
+        @if ($exam->slug === 'kpsc' && in_array($kind, ['daily', 'omr']))
+            <a href="{{ url($kind === 'daily' ? 'admin/kpsc/daily-exam/view' : 'admin/kpsc/model-exam/view') }}" class="btn btn-sm btn-light mb-0"><i class="bi bi-archive me-1"></i>View old {{ $kind === 'daily' ? 'daily' : 'OMR' }} exams</a>
+        @endif
     </div>
 </div>
 @if (session('success'))<div class="alert alert-success py-2">{{ session('success') }}</div>@endif
