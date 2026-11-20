@@ -1072,19 +1072,14 @@ class HomeController extends Controller
            
         date_default_timezone_set('Asia/Kolkata');
             
+        // an exam that has not started is not hidden: hasStarted() below shows its instructions with a countdown
         $date_list = DailyExam::where('exam_date',$date)
-                            ->where('id',$id);
-        if (Auth::check()){
-               if(auth()->user()->id == 1){
-                $date_list = $date_list->where ('started_at','<=',date('Y-m-d H:i:s'));   
-               }
-        }
-        
-        $date_list = $date_list->first() ?? abort(404);
+                            ->where('id',$id)
+                            ->first() ?? abort(404);
         $date_based = DailyExamdetails::where('exam_id',$date_list->id)->get() ?? abort(404);
-        
- 
-        
+
+
+
         // the instructions come first (once per attempt: an unfinished attempt goes straight back into the exam)
         if (!$date_list->hasStarted()) {   // not open yet: the instructions and a countdown, no questions and no attempt row
             return view('kpsc.exam-instructions', [

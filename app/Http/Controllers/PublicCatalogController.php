@@ -360,12 +360,7 @@ class PublicCatalogController extends Controller
      */
     public function series(Request $request, $slug, $series)
     {
-        // one free season and no other exams: open it straight away, it lists every exam
-        $exam = CompetitiveExam::where('slug', $slug)->where('status', 1)->first();
-        if ($exam && !$request->boolean('all') && ($sole = self::soleFreeSeason($exam, $series))) {
-            return redirect($sole->publicUrl());
-        }
-
+        // always the series page (active seasons, then other exams), same for every exam type; no jump into a lone season
         return view('kpsc.series', $this->seriesData($request, $slug, $series));
     }
 

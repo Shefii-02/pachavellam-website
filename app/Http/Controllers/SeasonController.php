@@ -67,9 +67,8 @@ class SeasonController extends Controller
     private function backUrl(ExamSeason $season): string
     {
         $page = self::PAGES[$season->kind] ?? 'daily-exams';
-        $sole = PublicCatalogController::soleFreeSeason($season->exam, $page);
 
-        return url($season->exam->slug . ($sole && $sole->id === $season->id ? '' : '/' . $page . '?all=1'));
+        return url($season->exam->slug . '/' . $page);
     }
 
     /** Everything the season page shows (also read by the app API). */
