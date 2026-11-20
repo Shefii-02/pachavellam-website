@@ -13,8 +13,8 @@
                 <div class="col-md-6">
                     <!--<a class="btn btn-sm btn-primary me-1 float-end" href="{{ kpsc_cms('daily-exam/add-weekly-monthly-exam') }}"><i class="bi bi-plus me-1"></i>Add Weekly/Monthly Exam</a>-->
 
-                    <a class="btn btn-sm btn-primary me-1 float-end" href="{{ kpsc_cms('daily-exam/view') }}"><i
-                            class="bi bi-plus me-1"></i>View Daily Exam</a>
+                    <a class="btn btn-sm btn-primary me-1 float-end" href="{{ url('admin/exam/kpsc/series/daily' . (request('session') ? '/seasons/' . (int) request('session') : '')) }}"><i
+                            class="bi bi-arrow-left me-1"></i>Back</a>
                     <span class="js-choice "></span>
                 </div>
             </div>

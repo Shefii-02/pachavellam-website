@@ -12,7 +12,7 @@
                 <!-- Select option -->
                 <div class="col-md-6">
                     <a class="btn btn-sm btn-primary me-1 float-end" href="{{ kpsc_cms('daily-exam') }}"><i
-                            class="bi bi-plus me-1"></i>Add New</a>
+                            class="bi bi-arrow-left me-1"></i>Back</a>
                     <span class="js-choice "></span>
                 </div>
             </div>
@@ -40,7 +40,7 @@
                         <select class="form-control" id="subject_sec" name="subject">
                             <option value="">Select Subject</option> --}}
                     {{-- @foreach ($exam_subjects as $list)
-                                
+
                                     <option value="{{$list->id}}">
                                         {{$list->subject_title}}
                                     </option>

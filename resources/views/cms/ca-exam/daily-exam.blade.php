@@ -10,13 +10,15 @@
                 </div>
 
                 <!-- Select option -->
-                <div class="col-md-6">
+                {{-- <div class="col-md-6">
                     <a class="btn btn-sm btn-primary me-1 float-end" href="{{ kpsc_cms('ca-daily-exam/view') }}"><i
                             class="bi bi-plus me-1"></i>View CA Exams</a>
                     <span class="js-choice "></span>
-                </div>
+                </div> --}}
             </div>
         </div>
+
+
 
         <!-- Card body START -->
         <div class="card-body row">
@@ -33,7 +35,7 @@
                                     <label class="form-label">Exam Day</label>
                                     <select name="level" class="form-control" required
                                         autocomplete="off">
-                                        @for ($i = 1; $i <= 100; $i++) 
+                                        @for ($i = 1; $i <= 100; $i++)
                                             @if(!$examDays->contains($i))
                                                 <option value="{{ $i }}">Day {{$i}}</option>
                                             @endif

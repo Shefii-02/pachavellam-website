@@ -10,10 +10,10 @@
     <div><h3 class="mb-0">{{ $label }} - {{ $title }}</h3><div class="small text-muted">Create a season first (free or paid), then open it to add and manage its exams.</div></div>
     <div class="d-flex gap-2">
         <a href="{{ $builder }}?season=none" class="btn btn-sm btn-light mb-0"><i class="bi bi-list-ul me-1"></i>Exams without a season ({{ (int) optional($counts->get(''))->c }})</a>
-        @if ($exam->slug === 'kpsc' && in_array($kind, ['daily', 'omr']))
-            <a href="{{ url($kind === 'daily' ? 'admin/kpsc/daily-exam/view' : 'admin/kpsc/model-exam/view') }}" class="btn btn-sm btn-light mb-0"><i class="bi bi-archive me-1"></i>All old exams</a>
-        @endif
         <button type="button" class="btn btn-sm btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#newSession"><i class="bi bi-plus-lg me-1"></i>New season</button>
+        @if ($exam->slug === 'kpsc' && in_array($kind, ['daily', 'omr']))
+            <a href="{{ url($kind === 'daily' ? 'admin/kpsc/daily-exam/view' : 'admin/kpsc/model-exam/view') }}" class="btn btn-sm btn-light mb-0"><i class="bi bi-archive me-1"></i>View old {{ $kind === 'daily' ? 'daily' : 'OMR' }} exams</a>
+        @endif
     </div>
 </div>
 @if (session('success'))<div class="alert alert-success py-2">{{ session('success') }}</div>@endif
@@ -21,7 +21,7 @@
 
 <div class="row g-3">
     @forelse ($seasons as $s)
-        @php [$stL, $stC] = \App\Models\ExamSeason::STATUSES[$s->status]; $c = $counts[$s->id] ?? null; $paid = $acc->isPaid($s); $legacyN = (int) ($legacyCounts[$s->id] ?? 0); @endphp
+        @php [$stL, $stC] = \App\Models\ExamSeason::STATUSES[$s->status]; $c = $counts[$s->id] ?? null; $paid = $acc->isPaid($s); $legacyN = (int) ($legacyCounts[$s->id] ?? 0); $legacyP = (int) ($legacyPublished[$s->id] ?? 0); @endphp
         <div class="col-md-6 col-xl-4">
             <div class="card h-100 border rounded-3 overflow-hidden">
                 <a href="{{ $base }}/seasons/{{ $s->id }}" style="display:block;height:110px;background:#10243e center/cover {{ $s->cover_image ? "url('" . Storage::url($s->cover_image) . "')" : '' }}"></a>
@@ -40,7 +40,7 @@
                             @if ($s->free_exams)<span class="badge bg-success">first {{ $s->free_exams }} free</span>@endif
                         @else<span class="badge bg-success">Free</span>@endif
                     </div>
-                    <div class="mt-2"><b>{{ (int) ($c->c ?? 0) + $legacyN }}</b> exam(s) · {{ (int) ($c->p ?? 0) }} published</div>
+                    <div class="mt-2"><b>{{ (int) ($c->c ?? 0) + $legacyN }}</b> exam(s) · {{ (int) ($c->p ?? 0) + $legacyP }} published</div>
                 </div>
                 <div class="card-footer bg-transparent d-flex gap-2">
                     <button type="button" class="btn btn-sm btn-outline-success mb-0 js-share" title="{{ $s->status === 'published' ? 'Share' : 'Publish the season to share it' }}" @disabled($s->status !== 'published')

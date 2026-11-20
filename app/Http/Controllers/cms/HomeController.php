@@ -714,8 +714,25 @@ class HomeController extends Controller
     }
     
     
+    /** An exam of a season has a readable address (season slug + exam title slug): the old date / id address sends the browser there (temporary redirect, the query such as ?start=1 is kept). */
+    private function toSlugAddress($id)
+    {
+        $request = request();
+        if (!$request->isMethod('GET') || $request->attributes->get('slug_address')) {
+            return null;
+        }
+        $exam = DailyExam::find($id);
+        if (!$exam || !$exam->series_season_id || $exam->publicUrl() === $exam->legacyUrl()) {
+            return null;
+        }
+
+        return redirect($exam->publicUrl() . ($request->getQueryString() ? '?' . $request->getQueryString() : ''));
+    }
+
     public function get_model_date_based_questions($date,$id){
-         
+        if ($to = $this->toSlugAddress($id)) {
+            return $to;
+        }
         $examdetails = DailyExam::leftJoin('kpsc_model_exams_details','kpsc_model_exams_details.exam_id','kpsc_daily_exams.id')
                                 ->where('kpsc_daily_exams.id',$id)
                                 ->select('kpsc_daily_exams.*','kpsc_model_exams_details.qp_file','kpsc_model_exams_details.answer_file')
@@ -1069,7 +1086,10 @@ class HomeController extends Controller
     
     
     public function get_date_based_questions_new($date,$id){
-           
+        if ($to = $this->toSlugAddress($id)) {
+            return $to;
+        }
+
         date_default_timezone_set('Asia/Kolkata');
             
         // an exam that has not started is not hidden: hasStarted() below shows its instructions with a countdown

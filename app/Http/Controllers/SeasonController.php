@@ -58,9 +58,32 @@ class SeasonController extends Controller
         $season = $this->seasonBySlug($examSlug, $page, $seasonSlug);
         abort_if(!$season, 404);
         $exam = CourseExam::where('season_id', $season->id)->where('status', 'published')->get()->first(fn ($e) => $e->publicSlug() === $testSlug);
-        abort_if(!$exam, 404);
+        if (!$exam) {
+            $old = DailyExam::findBySlug($season->id, $testSlug);   // an old KPSC exam (daily / OMR / CA) placed in the season
+            abort_if(!$old, 404);
+
+            return $this->showOldExam($request, $season, $old);
+        }
 
         return app(TestController::class)->show($request, $exam->id, $season->publicUrl());
+    }
+
+    /** An old KPSC exam at its season address: the same pages and rules as /kpsc/daily-exam/{date}/{id} (sign in first, paid seasons locked), under the readable address. */
+    private function showOldExam(Request $request, ExamSeason $season, DailyExam $exam)
+    {
+        if (!$request->user()) {
+            return redirect()->guest(route('login'));
+        }
+        $access = app(SeasonAccess::class);
+        if ($access->state($request->user(), $season, 'legacy', $exam->id) === 'locked') {
+            return redirect($access->buyUrl($season))->with('season_msg', 'This exam is part of the paid season "' . $season->title . '". Buy the season to attempt it.');
+        }
+        $request->attributes->set('slug_address', true);   // the old handlers redirect their date / id address here; this one is already it
+        $home = app(\App\Http\Controllers\cms\HomeController::class);
+
+        return $exam->section === 'Model Exam'
+            ? $home->get_model_date_based_questions($exam->exam_date, $exam->id)
+            : $home->get_date_based_questions_new($exam->exam_date, $exam->id);
     }
 
     /** Back from a season: the series page, or the exam type page when this season is the only one (the series page would send the student straight back here). */

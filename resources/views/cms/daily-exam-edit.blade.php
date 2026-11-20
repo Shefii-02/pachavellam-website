@@ -11,7 +11,7 @@
                 <!-- Select option -->
                 <div class="col-md-6">
                     <a class="btn btn-sm btn-success me-1 float-end" href="{{ url('admin/kpsc/exam-tools/' . $exam_detail->id) }}"><i class="bi bi-sliders me-1"></i>Settings, courses &amp; library</a>
-                    <a class="btn btn-sm btn-primary me-1 float-end" href="{{ kpsc_cms('daily-exam/view') }}"><i
+                    <a class="btn btn-sm btn-primary me-1 float-end" href="{{ url('admin/exam/kpsc/series/daily' . ($exam_detail->series_season_id ? '/seasons/' . (int) $exam_detail->series_season_id : '')) }}"><i
                             class="bi bi-plus me-1"></i>Back</a>
                     <span class="js-choice "></span>
                 </div>

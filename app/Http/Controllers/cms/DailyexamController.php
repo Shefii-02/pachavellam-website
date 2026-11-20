@@ -268,7 +268,8 @@ class DailyexamController extends Controller
         $new_two->status    = $request->has('status') ? 1 : 0;
         $new_two->save();
 
-        return redirect('admin/kpsc/daily-exam/view')->with('message', 'Data Updated Successfully');
+        // back to where exams are managed: the exam's season, or the series page
+        return redirect('admin/exam/kpsc/series/daily' . ($new_two->series_season_id ? '/seasons/' . $new_two->series_season_id : ''))->with('message', 'Data Updated Successfully');
     }
 
 
