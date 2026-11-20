@@ -86,8 +86,12 @@ Route::get("sign-in", function () {
     if (\auth()->check()) {
         return redirect('/');
     }
-    return view("kpsc.sample-login-page");
+    // never cached: an old copy of the page carries an old CSRF token (in-app browsers of Instagram / WhatsApp keep pages)
+    return response()->view("kpsc.sample-login-page")->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')->header('Pragma', 'no-cache');
 })->name('login');
+
+// a fresh CSRF token for pages that were cached or restored by a browser
+Route::get('csrf-token', fn () => response()->json(['token' => csrf_token()])->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0'))->middleware('throttle:60,1');
 
 
 Route::get("sign-out", function () {

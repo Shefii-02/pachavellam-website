@@ -107,8 +107,16 @@
     function show(el, msg) { el.textContent = msg; el.style.display = msg ? 'block' : 'none'; }
     function notify(kind, msg) { show($('otpError'), kind === 'error' ? msg : ''); show($('otpInfo'), kind === 'info' ? msg : ''); }
 
-    async function post(url, payload) {
+    // Instagram / Facebook / WhatsApp in-app browsers keep old pages and can store the session cookie late: take a fresh token when the page is shown again and retry once on 419
+    async function freshToken() {
+        try { var r = await fetch('{{ url('csrf-token') }}', { headers: {'Accept': 'application/json'}, credentials: 'same-origin', cache: 'no-store' }); csrf = (await r.json()).token || csrf; } catch (e) {}
+    }
+    window.addEventListener('pageshow', function (e) { if (e.persisted) freshToken(); });
+    freshToken();
+
+    async function post(url, payload, retried) {
         var res = await fetch(url, { method: 'POST', headers: {'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf}, body: JSON.stringify(payload), credentials: 'same-origin' });
+        if (res.status === 419 && !retried) { await freshToken(); return post(url, payload, true); }
         var data = {};
         try { data = await res.json(); } catch (e) {}
         if (!res.ok && !data.message) { data.message = res.status === 422 ? 'Please check the details and try again.' : 'Something went wrong. Please try again.'; }
